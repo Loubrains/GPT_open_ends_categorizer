@@ -10,12 +10,11 @@ client = OpenAI()
 
 
 def preprocess_text(text) -> str:
-    # Lowercase, removing special characters and numbers
     text = str(text).lower()
-    text = re.sub(
-        r"\s+", " ", text
-    )  # Convert one or more of any kind of space to single space
-    text = re.sub(r"[^a-z0-9\s]", "", text)  # Remove special characters
+    # Convert one or more of any kind of space to single space
+    text = re.sub(r"\s+", " ", text)
+    # Remove special characters
+    text = re.sub(r"[^a-z0-9\s]", "", text)
     text = text.strip()
     return text
 
@@ -52,11 +51,10 @@ def generate_categories_GPT(
         {
             "role": "user",
             "content": f"""Generate a list of {number_of_categories} distinct thematic categories
-                            for the following responses. Return the category names in the following format,
-                            `["name1", "name2", ...]`\n\n
-                            Question:\n`{question}`\n\n
-                            Responses:\n`{responses_sample}`
-                            """,
+                        for the following responses. Return the category names in the following format,
+                        `["name1", "name2", ...]`\n\n
+                        Question:\n`{question}`\n\n
+                        Responses:\n`{responses_sample}`""",
         }
     ]
     try:
@@ -80,7 +78,7 @@ with open(file_name, "rb") as file:
 df = pd.read_csv(file_name, encoding=encoding)
 
 print("Cleaning responses...")
-processed_responses = df["B3_OPEN"].map(preprocess_text).dropna()  # Process data
+processed_responses = df["B3_OPEN"].map(preprocess_text).dropna()
 print("\nResponses:\n", processed_responses.head(10))
 
 print("\nFetching sample...")
