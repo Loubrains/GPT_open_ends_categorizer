@@ -5,7 +5,7 @@ import re
 import chardet
 import random
 
-### Make sure OpenAI_API_KEY is set up in your system environment variables ###
+### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = OpenAI()
 
 
@@ -38,7 +38,7 @@ def write_list_to_csv(my_list: list, file_name: str):
 
 def generate_categories_GPT(
     client: OpenAI,
-    questionnaire_question: str,
+    question: str,
     responses_sample: pd.Series,
     number_of_categories: int = 20,
 ):
@@ -54,7 +54,7 @@ def generate_categories_GPT(
             "content": f"""Generate a list of {number_of_categories} distinct thematic categories
                             for the following responses. Return the category names in the following format,
                             `["name1", "name2", ...]`\n\n
-                            Question:\n`{questionnaire_question}`\n\n
+                            Question:\n`{question}`\n\n
                             Responses:\n`{responses_sample}`
                             """,
         }
