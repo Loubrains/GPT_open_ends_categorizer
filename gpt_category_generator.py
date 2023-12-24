@@ -5,6 +5,7 @@ import re
 import chardet
 import random
 
+### Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = OpenAI()
 
 
