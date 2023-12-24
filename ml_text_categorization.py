@@ -23,9 +23,7 @@ nltk.download("wordnet")
 def preprocess_text(text):
     # Lowercase, removing special characters and numbers
     text = str(text).lower()
-    text = re.sub(
-        r"\s+", " ", text
-    )  # Convert one or more of any kind of space to single space
+    text = re.sub(r"\s+", " ", text)  # Convert one or more of any kind of space to single space
     text = re.sub(r"[^a-z0-9\s]", "", text)  # Remove special characters
     text = text.strip()
 
@@ -46,11 +44,7 @@ def display_lda_topics(model, feature_names, no_top_words):
     print("# LDA Topics #")
     for topic_idx, topic in enumerate(model.components_):
         print("Topic %d:" % (topic_idx))
-        print(
-            " ".join(
-                [feature_names[i] for i in topic.argsort()[: -no_top_words - 1 : -1]]
-            )
-        )
+        print(" ".join([feature_names[i] for i in topic.argsort()[: -no_top_words - 1 : -1]]))
     print("\n")
 
 
@@ -77,9 +71,7 @@ df_processed = df["B3_OPEN"].apply(preprocess_text)  # Process data
 
 # Word2vec Vectorization
 print("Vectorizing with Word2Vec...")
-word2vec_model = Word2Vec(
-    df_processed, vector_size=100, window=5, min_count=1, workers=4
-)
+word2vec_model = Word2Vec(df_processed, vector_size=100, window=5, min_count=1, workers=4)
 X_w2v = np.array(
     [
         np.mean(

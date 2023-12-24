@@ -21,9 +21,7 @@ def preprocess_text(text) -> str:
 
 def get_random_sample_from_series(series: pd.Series, sample_size: int) -> pd.Series:
     if sample_size > len(series):
-        raise ValueError(
-            "Sample size n cannot be greater than the length of the series"
-        )
+        raise ValueError("Sample size n cannot be greater than the length of the series")
     return series.sample(sample_size, random_state=random.randint(1, 10000))
 
 
@@ -58,9 +56,7 @@ def generate_categories_GPT(
         }
     ]
     try:
-        completion = client.chat.completions.create(
-            messages=system + user, model="gpt-4"
-        )
+        completion = client.chat.completions.create(messages=system + user, model="gpt-4")
         categories = json.loads(completion.choices[0].message.content)
 
     except Exception as e:
