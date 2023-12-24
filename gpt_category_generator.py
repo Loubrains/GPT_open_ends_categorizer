@@ -25,10 +25,11 @@ def get_random_sample_from_series(series: pd.Series, sample_size: int) -> pd.Ser
     return series.sample(sample_size, random_state=random.randint(1, 10000))
 
 
-def write_list_to_csv(my_list: list, file_name: str):
+def export_dataframe_to_csv(file_path: str, export_df: pd.DataFrame) -> None:
     try:
-        df = pd.DataFrame(my_list)
-        df.to_csv(file_name, index=False, header=False)
+        if export_df.empty:
+            return
+        export_df.to_csv(file_path, index=False, header=False)
     except Exception as e:
         print(f"Error while writing to CSV: {e}")
 
@@ -74,7 +75,7 @@ with open(file_name, "rb") as file:
 df = pd.read_csv(file_name, encoding=encoding)
 
 print("Cleaning responses...")
-processed_responses = df["B3_OPEN"].map(preprocess_text).dropna()
+processed_responses = df[1].map(preprocess_text).dropna()
 print("\nResponses:\n", processed_responses.head(10))
 
 print("\nFetching sample...")
@@ -85,10 +86,11 @@ questionnaire_question = "Why were you or your child consuming media at this tim
 categories = generate_categories_GPT(
     client, questionnaire_question, responses_sample, number_of_categories=20
 )
+categories_df = pd.DataFrame(categories)
 print(f"\nCategories:\n{categories}")
 
-output_file_name = "categories_output.csv"
-print(f"\nSaving to {output_file_name} ...")
-write_list_to_csv(categories, output_file_name)
+file_path = "categories_output.csv"
+print(f"\nSaving to {file_path} ...")
+export_dataframe_to_csv(file_path, categories_df)
 
 print("\nDone")
