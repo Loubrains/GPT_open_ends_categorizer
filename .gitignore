@@ -1,5 +1,6 @@
 *
 !fuzzy_matching_text_categorization.ipynb
 !gpt_category_generator.py
+!gpt_categorizer.py
 !ml_text_categorization.py
 !.gitignore
