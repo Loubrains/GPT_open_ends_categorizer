@@ -40,26 +40,16 @@ def generate_categories_GPT(
     responses_sample: pd.Series,
     number_of_categories: int = 20,
 ):
-    system = [
-        {
-            "role": "system",
-            "content": """You are a data analyst specialized in categorizing open-ended responses from questionnaires. 
-            Your task is to assign a list of the most appropriate distinct thematic categories to the sample of responses
-            based on the provided question and response content.""",
-        }
-    ]
-    user = [
-        {
-            "role": "user",
-            "content": f"""Generate a list of the {number_of_categories} most appropriate distinct thematic categories
-                        for the following responses. Return ONLY the category names, in the format `["name1", "name2", ...]`\n\n
-                        Question:\n`{question}`\n\n
-                        Responses:\n`{responses_sample}`""",
-        }
-    ]
+    responses_sample = responses_sample.to_string(index=False)
+
+    user_prompt = f"""List the {number_of_categories} most relevant thematic categories for this sample of survey responses.
+    Return ONLY the category names, in the format `["name1", "name2", ...]`\n\n
+    Question:\n `{question}`\n\n
+    Responses:\n ```\n{responses_sample}\n```"""
+
     try:
         completion = client.chat.completions.create(
-            messages=system + user, model="gpt-4-1106-preview"
+            messages=[{"role": "user", "content": user_prompt}], model="gpt-4-1106-preview"
         )
         categories = json.loads(completion.choices[0].message.content)
 
@@ -71,7 +61,7 @@ def generate_categories_GPT(
     return categories
 
 
-file_name = "BBC Need States - B3_OPEN open ends.csv"
+file_name = "A2 export.csv"
 print("Loading data...")
 with open(file_name, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
@@ -86,7 +76,7 @@ print("\nFetching sample...")
 responses_sample = get_random_sample_from_series(unique_responses, 200)
 
 print("Generating categories with GPT-4...")
-questionnaire_question = "Why were you or your child consuming media at this time?"
+questionnaire_question = "What are your new year resolutions?"
 categories = generate_categories_GPT(
     client, questionnaire_question, responses_sample, number_of_categories=20
 )

@@ -63,7 +63,7 @@ def parallel_gpt_calls(responses, client, question, categories_list):
     def categorize_single_response(response):
         return response, categorize_response_GPT(client, question, response, categories_list)
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:
         future_to_response = {
             executor.submit(categorize_single_response, response): response
             for response in responses
@@ -84,7 +84,7 @@ def categorize_response_in_dataframe(
     category: str,
     categorized_data: pd.DataFrame,
     response_columns: list[str],
-) -> pd.DataFrame:
+):
     # Boolean mask for rows in categorized_data containing selected responses
     mask = pd.Series([False] * len(categorized_data))
 
