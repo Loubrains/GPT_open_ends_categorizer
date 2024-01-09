@@ -37,21 +37,19 @@ def export_dataframe_to_csv(file_path: str, export_df: pd.DataFrame, header: boo
 def generate_categories_GPT(
     client: OpenAI,
     question: str,
-    responses_sample: pd.Series,
+    responses_sample: list[str],
     number_of_categories: int = 20,
 ):
-    responses_sample = responses_sample.to_string(index=False)
-
     user_prompt = f"""List the {number_of_categories} most relevant thematic categories for this sample of survey responses.
-    Return ONLY the category names, in the format `["name1", "name2", ...]`\n\n
-    Question:\n `{question}`\n\n
-    Responses:\n ```\n{responses_sample}\n```"""
+    Return only the category names, in the format: `["name1", "name2", ...]`\n\n
+    Question:\n`{question}`\n\n
+    Responses:\n```\n{responses_sample}\n```"""
 
     try:
         completion = client.chat.completions.create(
             messages=[{"role": "user", "content": user_prompt}], model="gpt-4-1106-preview"
         )
-        categories = json.loads(completion.choices[0].message.content)
+        categories = json.loads(completion.choices[0].message.content)  # type: ignore
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -61,7 +59,7 @@ def generate_categories_GPT(
     return categories
 
 
-file_name = "A2 export.csv"
+file_name = "New Year Resolution - A2 open ends.csv"
 print("Loading data...")
 with open(file_name, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
@@ -73,7 +71,7 @@ unique_responses = processed_responses.stack().drop_duplicates().dropna().reset_
 print("\nResponses:\n", unique_responses.head(10))
 
 print("\nFetching sample...")
-responses_sample = get_random_sample_from_series(unique_responses, 200)
+responses_sample = get_random_sample_from_series(unique_responses, 200).to_list()  # type: ignore
 
 print("Generating categories with GPT-4...")
 questionnaire_question = "What are your new year resolutions?"

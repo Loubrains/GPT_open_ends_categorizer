@@ -1,8 +1,9 @@
 from openai import OpenAI
+import asyncio
 import pandas as pd
+import json
 import re
 import chardet
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = OpenAI()
@@ -18,64 +19,69 @@ def preprocess_text(text) -> str:
     return text
 
 
-def categorize_response_GPT(
+def create_batches(data, batch_size):
+    for i in range(0, len(data), batch_size):
+        yield data[i : i + batch_size]
+
+
+async def categorize_response__batch_GPT(
     client: OpenAI,
     question: str,
-    response: str,
+    responses_batch: list[str],
     categories: list[str],
 ):
-    system = [
-        {
-            "role": "system",
-            "content": """You are a data analyst specialized in categorizing open-ended responses from questionnaires. 
-            Your task is to assign the most appropriate category to each response based on the provided question and response content.""",
-        }
-    ]
+    combined_responses = "\n".join(
+        [f"{i+1}: {response}" for i, response in enumerate(responses_batch)]
+    )
 
-    user = [
-        {
-            "role": "user",
-            "content": f"""Please categorize the following questionnaire response. 
-            Use only one of the provided categories for your classification.
-            Don't use "Other" unless the provided categories do not suffice.\n\n
-            Question:\n{question}\n\n
-            Response:\n{response}\n\n
-            Categories:\n{categories}\n\n
-            Return ONLY the category name, in the format: "name" """,
-        }
-    ]
+    user_prompt = f"""Categorize these responses to the following survey question using one of the provided categories.
+    Return only the category names, in the format: `["name 1", "name 2", ...]`.\n\n
+    Question:\n`{question}`\n\n
+    Response:\n`{combined_responses}`\n\n
+    Categories:\n```\n{categories}\n```"""
+
     try:
-        completion = client.chat.completions.create(
-            messages=system + user, model="gpt-4-1106-preview"
+        loop = asyncio.get_event_loop()
+        completion = await loop.run_in_executor(
+            None,  # Executor
+            lambda: client.chat.completions.create(
+                messages=[{"role": "user", "content": user_prompt}], model="gpt-4-1106-preview"
+            ),
         )
-        category = completion.choices[0].message.content.strip('" ')
+        output_categories = completion.choices[0].message.content
+        return json.loads(output_categories)  # type: ignore
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        category = "Error"
+        output_categories = ["Error"] * len(responses_batch)
+    return output_categories
 
-    return category
 
-
-def parallel_gpt_calls(responses, client, question, categories_list):
+async def process_batches(client, question, categories_list, responses, batch_size=3):
     categorized_responses = {}
+    batches = list(create_batches(list(responses), batch_size))
+    tasks = []
 
-    def categorize_single_response(response):
-        return response, categorize_response_GPT(client, question, response, categories_list)
+    for batch in batches:
+        task = asyncio.create_task(
+            categorize_response__batch_GPT(client, question, batch, categories_list)
+        )
+        tasks.append(task)
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        future_to_response = {
-            executor.submit(categorize_single_response, response): response
-            for response in responses
-        }
-        for future in as_completed(future_to_response):
-            response = future_to_response[future]
-            try:
-                category = future.result()[1]
-                categorized_responses[response] = category
-            except Exception as e:
-                print(f"Error processing response '{response}': {e}")
+    for i, task in enumerate(tasks):
+        categories_output = await task
+        for response, category in zip(batches[i], categories_output):
+            categorized_responses[response] = category
 
+    return categorized_responses
+
+
+async def categorize_responses_main(
+    client, question, categories_list, unique_responses, batch_size
+):
+    categorized_responses = await process_batches(
+        client, question, categories_list, unique_responses, batch_size
+    )
     return categorized_responses
 
 
@@ -116,7 +122,7 @@ def export_dataframe_to_csv(file_path: str, export_df: pd.DataFrame, header: boo
 
 
 # Load data
-data_file_path = "BBC Need States - B3_OPEN open ends.csv"
+data_file_path = "New Year Resolution - A2 open ends.csv"
 print("Loading data...")
 with open(data_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
@@ -152,7 +158,9 @@ categorize_missing_data(categorized_data)
 question = "Why were you or your child consuming media at this time?"
 print("Categorizing data with GPT-4...")
 # unique_responses_sample = list(unique_responses)[:20]
-categorized_responses = parallel_gpt_calls(unique_responses, client, question, categories_list)
+categorized_responses = asyncio.run(
+    categorize_responses_main(client, question, categories_list, unique_responses, batch_size=3)
+)
 print("Finished categorizing with GPT-4...")
 
 print("Preparing data...")
