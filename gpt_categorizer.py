@@ -24,7 +24,7 @@ def create_batches(data, batch_size):
         yield data[i : i + batch_size]
 
 
-async def categorize_response__batch_GPT(
+async def categorize_response_batch_GPT(
     client: OpenAI,
     question: str,
     responses_batch: list[str],
@@ -64,19 +64,19 @@ async def process_batches(client, question, categories_list, responses, batch_si
 
     for batch in batches:
         task = asyncio.create_task(
-            categorize_response__batch_GPT(client, question, batch, categories_list)
+            categorize_response_batch_GPT(client, question, batch, categories_list)
         )
         tasks.append(task)
 
     for i, task in enumerate(tasks):
-        categories_output = await task
-        for response, category in zip(batches[i], categories_output):
+        output_categories = await task
+        for response, category in zip(batches[i], output_categories):
             categorized_responses[response] = category
 
     return categorized_responses
 
 
-async def categorize_responses_main(
+async def categorize_responses_gpt_main(
     client, question, categories_list, unique_responses, batch_size
 ):
     categorized_responses = await process_batches(
@@ -115,8 +115,10 @@ def categorize_missing_data(categorized_data: pd.DataFrame) -> pd.DataFrame:
 def export_dataframe_to_csv(file_path: str, export_df: pd.DataFrame, header: bool = False) -> None:
     try:
         if export_df.empty:
-            return
+            raise pd.errors.EmptyDataError
+
         export_df.to_csv(file_path, index=False, header=header)
+
     except Exception as e:
         print(f"Error while writing to CSV: {e}")
 
@@ -159,7 +161,7 @@ question = "Why were you or your child consuming media at this time?"
 print("Categorizing data with GPT-4...")
 # unique_responses_sample = list(unique_responses)[:20]
 categorized_responses = asyncio.run(
-    categorize_responses_main(client, question, categories_list, unique_responses, batch_size=3)
+    categorize_responses_gpt_main(client, question, categories_list, unique_responses, batch_size=3)
 )
 print("Finished categorizing with GPT-4...")
 
