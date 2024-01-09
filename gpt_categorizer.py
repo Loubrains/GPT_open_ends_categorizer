@@ -1,3 +1,7 @@
+# TODO: Need to stop it from adding new categories
+# TODO: Fix bug where every row is categorized as "Bad response"
+# TODO: Get it to retry any cases where errors occur (including above errors)
+
 from openai import OpenAI
 import asyncio
 import pandas as pd
@@ -19,16 +23,13 @@ def preprocess_text(text) -> str:
     return text
 
 
-def create_batches(data, batch_size):
+def create_batches(data, batch_size=3):
     for i in range(0, len(data), batch_size):
         yield data[i : i + batch_size]
 
 
-async def categorize_response_batch_GPT(
-    client: OpenAI,
-    question: str,
-    responses_batch: list[str],
-    categories: list[str],
+async def GPT_categorize_response_batch(
+    client: OpenAI, question: str, responses_batch: list[str], categories: list[str], max_retries=3
 ):
     combined_responses = "\n".join(
         [f"{i+1}: {response}" for i, response in enumerate(responses_batch)]
@@ -40,31 +41,43 @@ async def categorize_response_batch_GPT(
     Response:\n`{combined_responses}`\n\n
     Categories:\n```\n{categories}\n```"""
 
-    try:
-        loop = asyncio.get_event_loop()
-        completion = await loop.run_in_executor(
-            None,  # Executor
-            lambda: client.chat.completions.create(
-                messages=[{"role": "user", "content": user_prompt}], model="gpt-4-1106-preview"
-            ),
-        )
-        output_categories = completion.choices[0].message.content
-        return json.loads(output_categories)  # type: ignore
+    for attempt in range(max_retries):
+        try:
+            loop = asyncio.get_event_loop()
+            completion = await loop.run_in_executor(
+                None,  # Executor
+                lambda: client.chat.completions.create(
+                    messages=[{"role": "user", "content": user_prompt}], model="gpt-4-1106-preview"
+                ),
+            )
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        output_categories = ["Error"] * len(responses_batch)
-    return output_categories
+            output_categories = json.loads(completion.choices[0].message.content)  # type: ignore
+
+            if any(category not in categories for category in output_categories):
+                print(
+                    f"\nUnexpected category returned in categories: {output_categories}\nRetrying attempt {attempt + 1}/{max_retries}..."
+                )
+                continue
+
+            return output_categories  # type: ignore
+
+        except Exception as e:
+            print(
+                f"\nAn error occurred: {e}.\nResponses in batch: {responses_batch}\nRetrying attempt {attempt + 1}/{max_retries}..."
+            )
+
+    print(f"Max retries reached for responses: {responses_batch}")
+    return ["Error"] * len(responses_batch)
 
 
-async def process_batches(client, question, categories_list, responses, batch_size=3):
+async def process_batches(client, question, categories_list, responses, batch_size, max_retries):
     categorized_responses = {}
     batches = list(create_batches(list(responses), batch_size))
     tasks = []
 
     for batch in batches:
         task = asyncio.create_task(
-            categorize_response_batch_GPT(client, question, batch, categories_list)
+            GPT_categorize_response_batch(client, question, batch, categories_list, max_retries)
         )
         tasks.append(task)
 
@@ -76,11 +89,11 @@ async def process_batches(client, question, categories_list, responses, batch_si
     return categorized_responses
 
 
-async def categorize_responses_gpt_main(
-    client, question, categories_list, unique_responses, batch_size
+async def GPT_categorize_responses_main(
+    client, question, categories_list, unique_responses, batch_size, max_retries
 ):
     categorized_responses = await process_batches(
-        client, question, categories_list, unique_responses, batch_size
+        client, question, categories_list, unique_responses, batch_size, max_retries
     )
     return categorized_responses
 
@@ -97,8 +110,11 @@ def categorize_response_in_dataframe(
     for column in categorized_data[response_columns]:
         mask |= categorized_data[column] == response
 
-    categorized_data.loc[mask, "Uncategorized"] = 0
-    categorized_data.loc[mask, category] = 1
+    if category in categorized_data.columns:
+        categorized_data.loc[mask, "Uncategorized"] = 0
+        categorized_data.loc[mask, category] = 1
+    else:
+        print(f"\nUnknown category: {category} for response: {response}")
 
 
 def categorize_missing_data(categorized_data: pd.DataFrame) -> pd.DataFrame:
@@ -120,7 +136,7 @@ def export_dataframe_to_csv(file_path: str, export_df: pd.DataFrame, header: boo
         export_df.to_csv(file_path, index=False, header=header)
 
     except Exception as e:
-        print(f"Error while writing to CSV: {e}")
+        print(f"\nError while writing to CSV: {e}")
 
 
 # Load data
@@ -132,7 +148,7 @@ df = pd.read_csv(data_file_path, encoding=encoding)
 
 print("Cleaning responses...")
 df_preprocessed = df.iloc[:, 1:].map(preprocess_text)  # type: ignore
-print("\nResponses:\n", df_preprocessed.head(10))
+print(f"\nResponses:\n{df_preprocessed.head(10)}")
 
 # Load categories
 categories_file_path = "categories_output.csv"
@@ -140,7 +156,7 @@ print("Loading categories...")
 with open(categories_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
 categories = pd.read_csv(categories_file_path, encoding=encoding)
-print("Categories:\n", categories)
+print(f"\nCategories:\n{categories}")
 
 # Create data structures
 categories_list = categories.iloc[:, 0].tolist()
@@ -161,22 +177,24 @@ question = "Why were you or your child consuming media at this time?"
 print("Categorizing data with GPT-4...")
 # unique_responses_sample = list(unique_responses)[:20]
 categorized_responses = asyncio.run(
-    categorize_responses_gpt_main(client, question, categories_list, unique_responses, batch_size=3)
+    GPT_categorize_responses_main(
+        client, question, categories_list, unique_responses, batch_size=3, max_retries=3
+    )
 )
 print("Finished categorizing with GPT-4...")
 
-print("Preparing data...")
+print("Preparing output data...")
 for response, category in categorized_responses.items():
     if category != "Error":
         categorize_response_in_dataframe(response, category, categorized_data, response_columns)
     else:
-        print(f"Response '{response}' was not categorized.")
+        print(f"\nResponse '{response}' was not categorized.")
 categorized_data = categorize_missing_data(categorized_data)
-print("Categorized results:\n", categorized_data.head(10))
+print(f"\nCategorized results:\n{categorized_data.head(10)}")
 
 # Save to csv
 result_file_path = "categorized_data.csv"
 print(f"\nSaving to {result_file_path} ...")
 export_dataframe_to_csv(result_file_path, categorized_data, header=True)
 
-print("\nDone")
+print("\nFinished")
