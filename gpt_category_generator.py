@@ -78,7 +78,7 @@ questionnaire_question = "What are your new year resolutions?"
 categories = generate_categories_GPT(
     client, questionnaire_question, responses_sample, number_of_categories=20
 )
-categories.extend(["Other", "Bad response"])
+categories.extend(["Other", "Bad response", "Missing data"])
 categories_df = pd.DataFrame(categories)
 print(f"\nCategories:\n{categories}")
 

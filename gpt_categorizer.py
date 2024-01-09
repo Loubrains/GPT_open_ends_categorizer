@@ -144,6 +144,7 @@ with open(data_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
 df = pd.read_csv(data_file_path, encoding=encoding)
 
+# Clean data
 print("Cleaning responses...")
 df_preprocessed = df.iloc[:, 1:].map(preprocess_text)  # type: ignore
 print(f"\nResponses:\n{df_preprocessed.head(10)}")
@@ -158,7 +159,6 @@ print(f"\nCategories:\n{categories}")
 
 # Create data structures
 categories_list = categories.iloc[:, 0].tolist()
-
 unique_responses = set(df_preprocessed.stack().dropna().reset_index(drop=True)) - {""}
 uuids = df.iloc[:, 0]
 response_columns = list(df_preprocessed.columns)
@@ -166,9 +166,7 @@ categorized_data = pd.concat([uuids, df_preprocessed], axis=1)
 categorized_data["Uncategorized"] = 1  # Everything starts uncategorized
 for category in categories_list:
     categorized_data[category] = 0
-categorized_data["Missing data"] = 0
 categorize_missing_data(categorized_data)
-
 
 # Categorize responses using GPT API
 question = "Why were you or your child consuming media at this time?"
@@ -179,6 +177,7 @@ categorized_dict = asyncio.run(
         client, question, categories_list, unique_responses, batch_size=3, max_retries=5
     )
 )
+categorized_dict.pop("", None)
 print("Finished categorizing with GPT-4...")
 
 # Create categorized dataframe
@@ -188,6 +187,7 @@ for response, category in categorized_dict.items():
         categorize_response_in_dataframe(response, category, categorized_data, response_columns)
     else:
         print(f"\nResponse '{response}' was not categorized.")
+
 categorized_data = categorize_missing_data(categorized_data)
 print(f"\nCategorized results:\n{categorized_data.head(10)}")
 
