@@ -169,7 +169,7 @@ for category in categories_list:
 categorize_missing_data(categorized_data)
 
 # Categorize responses using GPT API
-question = "Why were you or your child consuming media at this time?"
+question = "What are your new year resolutions?"
 print("Categorizing data with GPT-4...")
 # unique_responses_sample = list(unique_responses)[:20]
 categorized_dict = asyncio.run(
