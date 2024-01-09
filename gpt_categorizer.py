@@ -1,6 +1,4 @@
-# TODO: Need to stop it from adding new categories
 # TODO: Fix bug where every row is categorized as "Bad response"
-# TODO: Get it to retry any cases where errors occur (including above errors)
 
 from openai import OpenAI
 import asyncio
@@ -71,7 +69,7 @@ async def GPT_categorize_response_batch(
 
 
 async def process_batches(client, question, categories_list, responses, batch_size, max_retries):
-    categorized_responses = {}
+    categorized_dict = {}
     batches = list(create_batches(list(responses), batch_size))
     tasks = []
 
@@ -84,18 +82,18 @@ async def process_batches(client, question, categories_list, responses, batch_si
     for i, task in enumerate(tasks):
         output_categories = await task
         for response, category in zip(batches[i], output_categories):
-            categorized_responses[response] = category
+            categorized_dict[response] = category
 
-    return categorized_responses
+    return categorized_dict
 
 
 async def GPT_categorize_responses_main(
     client, question, categories_list, unique_responses, batch_size, max_retries
 ):
-    categorized_responses = await process_batches(
+    categorized_dict = await process_batches(
         client, question, categories_list, unique_responses, batch_size, max_retries
     )
-    return categorized_responses
+    return categorized_dict
 
 
 def categorize_response_in_dataframe(
@@ -172,19 +170,20 @@ categorized_data["Missing data"] = 0
 categorize_missing_data(categorized_data)
 
 
-# Get GPT responses
+# Categorize responses using GPT API
 question = "Why were you or your child consuming media at this time?"
 print("Categorizing data with GPT-4...")
 # unique_responses_sample = list(unique_responses)[:20]
-categorized_responses = asyncio.run(
+categorized_dict = asyncio.run(
     GPT_categorize_responses_main(
-        client, question, categories_list, unique_responses, batch_size=3, max_retries=3
+        client, question, categories_list, unique_responses, batch_size=3, max_retries=5
     )
 )
 print("Finished categorizing with GPT-4...")
 
+# Create categorized dataframe
 print("Preparing output data...")
-for response, category in categorized_responses.items():
+for response, category in categorized_dict.items():
     if category != "Error":
         categorize_response_in_dataframe(response, category, categorized_data, response_columns)
     else:
