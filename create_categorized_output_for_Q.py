@@ -96,7 +96,6 @@ print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.item
 
 # Create data structures
 categories_list = categories.iloc[:, 0].tolist()
-unique_responses = set(df_preprocessed.stack().dropna().reset_index(drop=True)) - {""}
 uuids = df.iloc[:, 0]
 response_columns = list(df_preprocessed.columns)
 categorized_data = pd.concat([uuids, df_preprocessed], axis=1)
@@ -108,7 +107,7 @@ categorized_data["Missing data"] = 0  # all start as 0 before calculating missin
 categorize_missing_data_in_entire_dataframe(categorized_data)
 
 
-# Create categorized dataframe
+# Populate categorized dataframe
 print("Preparing output data...")
 for response, category in categorized_dict.items():
     if category != "Error":
