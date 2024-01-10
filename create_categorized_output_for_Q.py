@@ -103,8 +103,8 @@ categorized_data = pd.concat([uuids, df_preprocessed], axis=1)
 for category in categories_list:
     categorized_data[category] = 0
 categorized_data["Uncategorized"] = 1  # Everything starts uncategorized
-# Missing data rows not yet set (also putting this here as insurance in case "Missing data" is not in the list of categories)
-categorized_data["Missing data"] = 0
+# putting this here as insurance in case "Missing data" is not in the list of categories)
+categorized_data["Missing data"] = 0  # all start as 0 before calculating missing data rows.
 categorize_missing_data_in_entire_dataframe(categorized_data)
 
 
