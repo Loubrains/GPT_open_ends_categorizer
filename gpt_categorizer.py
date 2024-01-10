@@ -128,7 +128,7 @@ categories_file_path = "categories.csv"
 print("Loading categories...")
 with open(categories_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
-categories = pd.read_csv(categories_file_path, encoding=encoding)
+categories = pd.read_csv(categories_file_path, encoding=encoding, header=None)
 print(f"\nCategories:\n{categories}")
 
 categories_list = categories.iloc[:, 0].tolist()
@@ -137,7 +137,7 @@ categories_list.remove("Missing data")
 categories_list.remove("Uncategorized")
 
 # Categorize responses using GPT API
-question = "What are your new year resolutions?"
+question = "What is your new year resolution?"
 print("Categorizing data with GPT-4...")
 # unique_responses_sample = list(unique_responses)[:20]
 categorized_dict = asyncio.run(

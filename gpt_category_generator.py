@@ -74,7 +74,7 @@ print("\nFetching sample...")
 responses_sample = get_random_sample_from_series(unique_responses, 200).to_list()  # type: ignore
 
 print("Generating categories with GPT-4...")
-questionnaire_question = "What are your new year resolutions?"
+questionnaire_question = "What is your new year resolution?"
 categories = generate_categories_GPT(
     client, questionnaire_question, responses_sample, number_of_categories=20
 )

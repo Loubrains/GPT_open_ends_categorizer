@@ -99,7 +99,7 @@ categories_file_path = "categories.csv"
 print("Loading categories...")
 with open(categories_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
-categories = pd.read_csv(categories_file_path, encoding=encoding)
+categories = pd.read_csv(categories_file_path, encoding=encoding, header=None)
 print(f"\nCategories:\n{categories}")
 
 # Load codeframe (dictionary of response-category pairs)
