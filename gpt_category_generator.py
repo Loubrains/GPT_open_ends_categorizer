@@ -78,11 +78,11 @@ questionnaire_question = "What are your new year resolutions?"
 categories = generate_categories_GPT(
     client, questionnaire_question, responses_sample, number_of_categories=20
 )
-categories.extend(["Other", "Bad response", "Missing data"])
+categories.extend(["Other", "Bad response", "Uncategorized", "Missing data"])
 categories_df = pd.DataFrame(categories)
 print(f"\nCategories:\n{categories}")
 
-file_path = "categories_output.csv"
+file_path = "categories.csv"
 print(f"\nSaving to {file_path} ...")
 export_dataframe_to_csv(file_path, categories_df)
 

@@ -1,11 +1,10 @@
-# TODO: Fix bug where every row is categorized as "Bad response"
-
 from openai import OpenAI
 import asyncio
 import pandas as pd
 import json
 import re
 import chardet
+from itertools import islice
 
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = OpenAI()
@@ -96,77 +95,46 @@ async def GPT_categorize_responses_main(
     return categorized_dict
 
 
-def categorize_response_in_dataframe(
-    response: str,
-    category: str,
-    categorized_data: pd.DataFrame,
-    response_columns: list[str],
-):
-    # Boolean mask for rows in categorized_data containing selected responses
-    mask = pd.Series([False] * len(categorized_data))
-
-    for column in categorized_data[response_columns]:
-        mask |= categorized_data[column] == response
-
-    if category in categorized_data.columns:
-        categorized_data.loc[mask, "Uncategorized"] = 0
-        categorized_data.loc[mask, category] = 1
-    else:
-        print(f"\nUnknown category: {category} for response: {response}")
-
-
-def categorize_missing_data(categorized_data: pd.DataFrame) -> pd.DataFrame:
-    def is_missing(value):
-        return pd.isna(value) or value is None or value == "missing data" or value == "nan"
-
-    # Boolean mask where each row is True if all elements are missing
-    all_missing_mask = df_preprocessed.map(is_missing).all(axis=1)  # type: ignore
-    categorized_data.loc[all_missing_mask, "Missing data"] = 1
-    categorized_data.loc[all_missing_mask, "Uncategorized"] = 0
-    return categorized_data
-
-
-def export_dataframe_to_csv(file_path: str, export_df: pd.DataFrame, header: bool = False) -> None:
+def export_dict_to_csv(file_path: str, export_dict: dict, header: bool = True) -> None:
     try:
-        if export_df.empty:
-            raise pd.errors.EmptyDataError
+        if not export_dict:
+            raise ValueError("Data is empty")
 
-        export_df.to_csv(file_path, index=False, header=header)
+        df = pd.DataFrame(list(export_dict.items()), columns=["key", "value"])
+        df.to_csv(file_path, index=False, header=header)
 
     except Exception as e:
         print(f"\nError while writing to CSV: {e}")
 
 
-# Load data
+# Load open ends
 data_file_path = "New Year Resolution - A2 open ends.csv"
 print("Loading data...")
 with open(data_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
 df = pd.read_csv(data_file_path, encoding=encoding)
 
-# Clean data
+# Clean open ends
 print("Cleaning responses...")
 df_preprocessed = df.iloc[:, 1:].map(preprocess_text)  # type: ignore
-print(f"\nResponses:\n{df_preprocessed.head(10)}")
+print(f"\nResponses (first 10):\n{df_preprocessed.head(10)}")
+
+unique_responses = set(df_preprocessed.stack().dropna().reset_index(drop=True))
+# we don't want to match empty strings against every row, and also don't want chatgpt to handle missing data for us
+unique_responses = unique_responses - {""} - {"nan"} - {"missing data"}
 
 # Load categories
-categories_file_path = "categories_output.csv"
+categories_file_path = "categories.csv"
 print("Loading categories...")
 with open(categories_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
 categories = pd.read_csv(categories_file_path, encoding=encoding)
 print(f"\nCategories:\n{categories}")
 
-# Create data structures
 categories_list = categories.iloc[:, 0].tolist()
-unique_responses = set(df_preprocessed.stack().dropna().reset_index(drop=True)) - {""}
-uuids = df.iloc[:, 0]
-response_columns = list(df_preprocessed.columns)
-categorized_data = pd.concat([uuids, df_preprocessed], axis=1)
-categorized_data["Uncategorized"] = 1  # Everything starts uncategorized
-for category in categories_list:
-    categorized_data[category] = 0
-categorize_missing_data(categorized_data)
+# Missing data and uncategorized are helper categories for later, we don't want ChatGPT to use them.
+categories_list.remove("Missing data")
+categories_list.remove("Uncategorized")
 
 # Categorize responses using GPT API
 question = "What are your new year resolutions?"
@@ -177,23 +145,14 @@ categorized_dict = asyncio.run(
         client, question, categories_list, unique_responses, batch_size=3, max_retries=5
     )
 )
-categorized_dict.pop("", None)
+categorized_dict.pop("", None)  # removing empty string since it matches against every row
+print("Codeframe (first 10):\n")
+print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.items(), 10)))
 print("Finished categorizing with GPT-4...")
 
-# Create categorized dataframe
-print("Preparing output data...")
-for response, category in categorized_dict.items():
-    if category != "Error":
-        categorize_response_in_dataframe(response, category, categorized_data, response_columns)
-    else:
-        print(f"\nResponse '{response}' was not categorized.")
-
-categorized_data = categorize_missing_data(categorized_data)
-print(f"\nCategorized results:\n{categorized_data.head(10)}")
-
-# Save to csv
-result_file_path = "categorized_data.csv"
-print(f"\nSaving to {result_file_path} ...")
-export_dataframe_to_csv(result_file_path, categorized_data, header=True)
+# Saving codeframe (dictionary of response-category pairs)
+result_file_path = "codeframe.csv"
+print(f"\nSaving codeframe to {result_file_path} ...")
+export_dict_to_csv(result_file_path, categorized_dict)
 
 print("\nFinished")
