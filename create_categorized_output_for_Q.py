@@ -25,36 +25,50 @@ def preprocess_text(text) -> str:
     return text
 
 
-def categorize_responses_in_entire_dataframe(
-    response: str,
-    category: str,
-    categorized_data: pd.DataFrame,
-    response_columns: list[str],
+def construct_default_categorized_dataframe(
+    categorized_data: pd.DataFrame, response_columns: list[str], categories_list: list[str]
 ):
-    # Boolean mask for rows in categorized_data containing selected responses
-    mask = pd.Series([False] * len(categorized_data))
-
-    for column in categorized_data[response_columns]:
-        mask |= categorized_data[column] == response
-
-    if category in categorized_data.columns:
-        categorized_data.loc[mask, "Uncategorized"] = 0
-        categorized_data.loc[mask, category] = 1
-    else:
-        print(f"\nUnknown category: {category} for response: {response}")
+    for response_column in response_columns:
+        for category in categories_list:
+            col_name = f"{category}_{response_column}"
+            if category == "Uncategorized":
+                categorized_data[col_name] = 1
+            else:
+                categorized_data[col_name] = 0
+    return categorized_data
 
 
-def categorize_missing_data_in_entire_dataframe(categorized_data: pd.DataFrame) -> pd.DataFrame:
+def categorize_missing_data_in_response_column(
+    categorized_data: pd.DataFrame, response_column: str
+) -> pd.DataFrame:
     def _is_missing(value):
         return (
             value == "missing data" or value == "nan"
         )  # after processing the data all nan values become lowercase text
 
     # Boolean mask where each row is True if all elements are missing
-    all_missing_mask = df_preprocessed.map(_is_missing).all(axis=1)  # type: ignore
-    categorized_data.loc[all_missing_mask, "Missing data"] = 1
-    categorized_data.loc[all_missing_mask, "Uncategorized"] = 0
+    missing_data_mask = categorized_data[response_column].map(_is_missing)
+    categorized_data.loc[missing_data_mask, f"Missing data_{response_column}"] = 1
+    categorized_data.loc[missing_data_mask, f"Uncategorized_{response_column}"] = 0
     return categorized_data
+
+
+def categorize_responses_in_response_column(
+    response: str,
+    category: str,
+    response_column: str,
+    categorized_data: pd.DataFrame,
+):
+    # Boolean mask for rows in response_column containing selected response
+    mask = categorized_data[response_column] == response
+
+    col_name = f"{category}_{response_column}"
+
+    if col_name in categorized_data.columns:
+        categorized_data.loc[mask, f"Uncategorized_{response_column}"] = 0
+        categorized_data.loc[mask, col_name] = 1
+    else:
+        print(f"\nUnknown category: {category} for response: {response}")
 
 
 def export_dataframe_to_csv(file_path: str, export_df: pd.DataFrame, header: bool = True) -> None:
@@ -99,25 +113,28 @@ categories_list = categories.iloc[:, 0].tolist()
 uuids = df.iloc[:, 0]
 response_columns = list(df_preprocessed.columns)
 categorized_data = pd.concat([uuids, df_preprocessed], axis=1)
-for category in categories_list:
-    categorized_data[category] = 0
-categorized_data["Uncategorized"] = 1  # Everything starts uncategorized
-# putting this here as insurance in case "Missing data" is not in the list of categories)
-categorized_data["Missing data"] = 0  # all start as 0 before calculating missing data rows.
-categorize_missing_data_in_entire_dataframe(categorized_data)
+# repeat categories columns for each response column
+categorized_data = construct_default_categorized_dataframe(
+    categorized_data, response_columns, categories_list
+)
+for response_column in response_columns:
+    categorized_data = categorize_missing_data_in_response_column(categorized_data, response_column)
 
 
 # Populate categorized dataframe
 print("Preparing output data...")
-for response, category in categorized_dict.items():
-    if category != "Error":
-        categorize_responses_in_entire_dataframe(
-            response, category, categorized_data, response_columns
-        )
-    else:
-        print(f"\nResponse '{response}' was not categorized.")
+for response_column in response_columns:
+    for response, category in categorized_dict.items():
+        if category != "Error":
+            categorize_responses_in_response_column(
+                response, category, response_column, categorized_data
+            )
 
-categorized_data = categorize_missing_data_in_entire_dataframe(categorized_data)
+        else:
+            print(f"\nResponse '{response}' was not categorized.")
+
+    categorized_data = categorize_missing_data_in_response_column(categorized_data, response_column)
+
 print(f"\nCategorized results:\n{categorized_data.head(10)}")
 
 # Save to csv
