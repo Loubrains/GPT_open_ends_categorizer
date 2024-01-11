@@ -138,17 +138,12 @@ for response_column in response_column_names:
 print("Preparing output data...")
 for response_column in response_column_names:
     for response, category in categorized_dict.items():
-        if category != "Error":
-            categorize_responses_for_response_column(
-                response, category, response_column, categorized_data
-            )
-
-        else:
+        if category == "Error":
             print(f"\nResponse '{response}' was not categorized.")
 
-    categorized_data = categorize_missing_data_for_response_column(
-        categorized_data, response_column, categories_list
-    )
+        categorize_responses_for_response_column(
+            response, category, response_column, categorized_data
+        )
 
 print(f"\nCategorized results:\n{categorized_data.head(10)}")
 

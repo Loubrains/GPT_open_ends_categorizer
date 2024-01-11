@@ -114,13 +114,13 @@ async def GPT_categorize_responses_main(
     return categorized_dict
 
 
-def export_dict_to_csv(file_path: str, dict_to_export: dict, header: bool = True) -> None:
+def export_dict_of_lists_to_csv(file_path: str, dict_to_export: dict, header: bool = True) -> None:
     try:
         if not dict_to_export:
             raise ValueError("Data is empty")
 
         formatted_data = [(key, ", ".join(value)) for key, value in dict_to_export.items()]
-        df = pd.DataFrame(formatted_data, columns=["Response", "Categories"])
+        df = pd.DataFrame(formatted_data, columns=["key", "value"])
         df.to_csv(file_path, index=False, header=header)
 
     except Exception as e:
@@ -173,6 +173,6 @@ print("Finished categorizing with GPT-4...")
 # Saving codeframe (dictionary of response-category pairs)
 result_file_path = "codeframe.csv"
 print(f"\nSaving codeframe to {result_file_path} ...")
-export_dict_to_csv(result_file_path, categorized_dict)
+export_dict_of_lists_to_csv(result_file_path, categorized_dict)
 
 print("\nFinished")
