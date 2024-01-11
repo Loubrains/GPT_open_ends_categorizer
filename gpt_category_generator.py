@@ -4,12 +4,17 @@ import json
 import re
 import chardet
 import random
+from typing import Any
+from pandas._libs.missing import NAType
 
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = OpenAI()
 
 
-def preprocess_text(text) -> str:
+def preprocess_text(text: Any) -> str | NAType:
+    if pd.isna(text):
+        return pd.NA
+
     text = str(text).lower()
     # Convert one or more of any kind of space to single space
     text = re.sub(r"\s+", " ", text)

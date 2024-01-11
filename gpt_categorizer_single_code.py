@@ -1,3 +1,5 @@
+# TODO: need to strip csv's after loading before sending to gpt
+
 from openai import OpenAI
 import asyncio
 import pandas as pd
@@ -5,12 +7,17 @@ import json
 import re
 import chardet
 from itertools import islice
+from typing import Any
+from pandas._libs.missing import NAType
 
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = OpenAI()
 
 
-def preprocess_text(text) -> str:
+def preprocess_text(text: Any) -> str | NAType:
+    if pd.isna(text):
+        return pd.NA
+
     text = str(text).lower()
     # Convert one or more of any kind of space to single space
     text = re.sub(r"\s+", " ", text)
@@ -116,12 +123,13 @@ df = pd.read_csv(data_file_path, encoding=encoding)
 
 # Clean open ends
 print("Cleaning responses...")
+# Assume first column UUIDs, remaining columns are responses
 df_preprocessed = df.iloc[:, 1:].map(preprocess_text)  # type: ignore
 print(f"\nResponses (first 10):\n{df_preprocessed.head(10)}")
 
 unique_responses = set(df_preprocessed.stack().dropna().reset_index(drop=True))
-# we don't want to match empty strings against every row, and also don't want chatgpt to handle missing data for us
-unique_responses = unique_responses - {""} - {"nan"} - {"missing data"}
+# we don't want to match empty strings against every row
+unique_responses = unique_responses - {""}
 
 # Load categories
 categories_file_path = "categories.csv"

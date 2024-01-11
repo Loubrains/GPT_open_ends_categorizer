@@ -1,8 +1,12 @@
+# TODO: need to strip csv's after loading before sending to gpt
+
 import pandas as pd
 import chardet
 import re
 from itertools import islice
 import sys
+from typing import Any
+from pandas._libs.missing import NAType
 
 
 def load_csv_to_dict(file_path: str) -> dict:
@@ -15,7 +19,10 @@ def load_csv_to_dict(file_path: str) -> dict:
         sys.exit(1)
 
 
-def preprocess_text(text) -> str:
+def preprocess_text(text: Any) -> str | NAType:
+    if pd.isna(text):
+        return pd.NA
+
     text = str(text).lower()
     # Convert one or more of any kind of space to single space
     text = re.sub(r"\s+", " ", text)
@@ -26,9 +33,9 @@ def preprocess_text(text) -> str:
 
 
 def construct_default_categorized_dataframe(
-    categorized_data: pd.DataFrame, response_columns: list[str], categories_list: list[str]
+    categorized_data: pd.DataFrame, response_column_names: list[str], categories_list: list[str]
 ):
-    for response_column in response_columns:
+    for response_column in response_column_names:
         for category in categories_list:
             col_name = f"{category}_{response_column}"
             if category == "Uncategorized":
@@ -42,9 +49,7 @@ def categorize_missing_data_in_response_column(
     categorized_data: pd.DataFrame, response_column: str
 ) -> pd.DataFrame:
     def _is_missing(value):
-        return (
-            value == "missing data" or value == "nan"
-        )  # after processing the data all nan values become lowercase text
+        return pd.isna(value)
 
     # Boolean mask where each row is True if all elements are missing
     missing_data_mask = categorized_data[response_column].map(_is_missing)
@@ -88,11 +93,12 @@ print("Loading data...")
 with open(data_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
 df = pd.read_csv(data_file_path, encoding=encoding)
+print(f"Raw data:\n{df.head(20)}")
 
 # Clean open ends
 print("Cleaning responses...")
-df_preprocessed = df.iloc[:, 1:].map(preprocess_text)  # type: ignore
-print(f"\nResponses (first 10):\n{df_preprocessed.head(10)}")
+response_columns = df.iloc[:, 1:].map(preprocess_text)  # type: ignore
+print(f"\nResponses (first 10):\n{response_columns.head(10)}")
 
 # Load categories
 categories_file_path = "categories.csv"
@@ -111,19 +117,19 @@ print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.item
 # Create data structures
 categories_list = categories.iloc[:, 0].tolist()
 uuids = df.iloc[:, 0]
-response_columns = list(df_preprocessed.columns)
-categorized_data = pd.concat([uuids, df_preprocessed], axis=1)
+response_column_names = list(response_columns.columns)
+categorized_data = pd.concat([uuids, response_columns], axis=1)
 # repeat categories columns for each response column
 categorized_data = construct_default_categorized_dataframe(
-    categorized_data, response_columns, categories_list
+    categorized_data, response_column_names, categories_list
 )
-for response_column in response_columns:
+for response_column in response_column_names:
     categorized_data = categorize_missing_data_in_response_column(categorized_data, response_column)
 
 
 # Populate categorized dataframe
 print("Preparing output data...")
-for response_column in response_columns:
+for response_column in response_column_names:
     for response, category in categorized_dict.items():
         if category != "Error":
             categorize_responses_in_response_column(
