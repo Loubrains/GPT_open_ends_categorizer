@@ -140,8 +140,7 @@ categories = pd.read_csv(categories_file_path, encoding=encoding, header=None)
 print(f"\nCategories:\n{categories}")
 
 categories_list = categories.iloc[:, 0].tolist()
-# Missing data and uncategorized are helper categories for later, we don't want ChatGPT to use them.
-categories_list.remove("Missing data")
+# Uncategorized is a helper category for later, we don't want ChatGPT to use it.
 categories_list.remove("Uncategorized")
 
 # Categorize responses using GPT API

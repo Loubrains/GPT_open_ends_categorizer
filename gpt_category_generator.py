@@ -64,7 +64,7 @@ def generate_categories_GPT(
     return categories
 
 
-file_name = "New Year Resolution - A2 open ends.csv"
+file_name = "B2a.csv"
 print("Loading data...")
 with open(file_name, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
@@ -79,11 +79,11 @@ print("\nFetching sample...")
 responses_sample = get_random_sample_from_series(unique_responses, 200).to_list()  # type: ignore
 
 print("Generating categories with GPT-4...")
-questionnaire_question = "What is your new year resolution?"
+questionnaire_question = "What in particular makes you interested in using this streaming service?"
 categories = generate_categories_GPT(
     client, questionnaire_question, responses_sample, number_of_categories=20
 )
-categories.extend(["Other", "Bad response", "Uncategorized", "Missing data"])
+categories.extend(["Other", "Bad response", "Uncategorized"])
 categories_df = pd.DataFrame(categories)
 print(f"\nCategories:\n{categories}")
 
@@ -91,4 +91,4 @@ file_path = "categories.csv"
 print(f"\nSaving to {file_path} ...")
 export_dataframe_to_csv(file_path, categories_df)
 
-print("\nDone")
+print("\nFinished")

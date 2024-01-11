@@ -45,20 +45,25 @@ def construct_default_categorized_dataframe(
     return categorized_data
 
 
-def categorize_missing_data_in_response_column(
-    categorized_data: pd.DataFrame, response_column: str
+def categorize_missing_data_for_response_column(
+    categorized_data: pd.DataFrame,
+    response_column: str,
+    categories_list: list[str],
 ) -> pd.DataFrame:
     def _is_missing(value):
         return pd.isna(value)
 
     # Boolean mask where each row is True if all elements are missing
     missing_data_mask = categorized_data[response_column].map(_is_missing)
-    categorized_data.loc[missing_data_mask, f"Missing data_{response_column}"] = 1
-    categorized_data.loc[missing_data_mask, f"Uncategorized_{response_column}"] = 0
+
+    for category in categories_list:
+        col_name = f"{category}_{response_column}"
+        categorized_data.loc[missing_data_mask, col_name] = pd.NA
+
     return categorized_data
 
 
-def categorize_responses_in_response_column(
+def categorize_responses_for_response_column(
     response: str,
     category: str,
     response_column: str,
@@ -124,7 +129,9 @@ categorized_data = construct_default_categorized_dataframe(
     categorized_data, response_column_names, categories_list
 )
 for response_column in response_column_names:
-    categorized_data = categorize_missing_data_in_response_column(categorized_data, response_column)
+    categorized_data = categorize_missing_data_for_response_column(
+        categorized_data, response_column, categories_list
+    )
 
 
 # Populate categorized dataframe
@@ -132,14 +139,16 @@ print("Preparing output data...")
 for response_column in response_column_names:
     for response, category in categorized_dict.items():
         if category != "Error":
-            categorize_responses_in_response_column(
+            categorize_responses_for_response_column(
                 response, category, response_column, categorized_data
             )
 
         else:
             print(f"\nResponse '{response}' was not categorized.")
 
-    categorized_data = categorize_missing_data_in_response_column(categorized_data, response_column)
+    categorized_data = categorize_missing_data_for_response_column(
+        categorized_data, response_column, categories_list
+    )
 
 print(f"\nCategorized results:\n{categorized_data.head(10)}")
 
