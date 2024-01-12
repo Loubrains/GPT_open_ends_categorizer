@@ -9,29 +9,29 @@ import dataframe_utils
 
 # Load open ends
 data_file_path = "New Year Resolution - A2 open ends.csv"
-print("Loading data...")
+print("\nLoading data...")
 with open(data_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
 df = pd.read_csv(data_file_path, encoding=encoding)
-print(f"Raw data:\n{df.head(20)}")
+print(f"\nRaw data:\n{df.head(20)}")
 
 # Clean open ends
-print("Cleaning responses...")
+print("\nCleaning responses...")
 response_columns = df.iloc[:, 1:].map(general_utils.preprocess_text)  # type: ignore
 print(f"\nResponses (first 10):\n{response_columns.head(10)}")
 
 # Load categories
 categories_file_path = "categories.csv"
-print("Loading categories...")
+print("\nLoading categories...")
 with open(categories_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
 categories = pd.read_csv(categories_file_path, encoding=encoding, header=None)
 print(f"\nCategories:\n{categories}")
 
 # Load codeframe (dictionary of response-category pairs)
-print("Loading codeframe...")
+print("\nLoading codeframe...")
 categorized_dict = general_utils.load_csv_to_dict("codeframe.csv")
-print("Codeframe (first 10):\n")
+print("\nCodeframe (first 10):\n")
 print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.items(), 10)))
 
 # Create data structures
@@ -50,7 +50,7 @@ for response_column in response_column_names:
 
 
 # Populate categorized dataframe
-print("Preparing output data...")
+print("\nPreparing output data...")
 for response_column in response_column_names:
     for response, category in categorized_dict.items():
         if category == "Error":

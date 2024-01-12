@@ -13,8 +13,8 @@ client = OpenAI()
 
 
 # Load open ends
-data_file_path = "New Year Resolution - A2 open ends.csv"
-print("Loading data...")
+data_file_path = "C3.csv"
+print("\nLoading data...")
 with open(data_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
 df = pd.read_csv(data_file_path, encoding=encoding)
@@ -31,7 +31,7 @@ unique_responses = unique_responses - {""}
 
 # Load categories
 categories_file_path = "categories.csv"
-print("Loading categories...")
+print("\nLoading categories...")
 with open(categories_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
 categories = pd.read_csv(categories_file_path, encoding=encoding, header=None)
@@ -42,8 +42,8 @@ categories_list = categories.iloc[:, 0].tolist()
 categories_list.remove("Uncategorized")
 
 # Categorize responses using GPT API
-question = "What is your new year resolution?"
-print("Categorizing data with GPT-4...")
+question = "Why do you not like the always-on player feature in this streaming service?"
+print("\nCategorizing data with GPT-4...")
 # unique_responses_sample = list(unique_responses)[:20]
 categorized_dict = asyncio.run(
     gpt_utils.GPT_categorize_responses_multicode_main(
@@ -51,9 +51,9 @@ categorized_dict = asyncio.run(
     )
 )
 categorized_dict.pop("", None)  # removing empty string since it matches against every row
-print("Codeframe (first 10):\n")
+print("\nCodeframe (first 10):")
 print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.items(), 10)))
-print("Finished categorizing with GPT-4...")
+print("\nFinished categorizing with GPT-4...")
 
 # Saving codeframe (dictionary of response-category pairs)
 result_file_path = "codeframe.csv"

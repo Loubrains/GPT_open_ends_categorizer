@@ -112,10 +112,18 @@ async def GPT_categorize_response_batch_multicode(
     combined_valid_categories = "\n".join(valid_categories)
 
     user_prompt = f"""Categorize these responses to the following survey question using one or multiple of the provided categories.
-    Return only a JSON list where each element is a list of category names for each response, in the format: `[["name 1", "name 2", ...], ["name 1", "name 2", ...], ...]`.\n\n
-    Question:\n`{question}`\n\n
-    Responses:\n`{combined_responses}`\n\n
-    Categories:\n```\n{combined_valid_categories}\n```"""
+    Return only a JSON list where each element is a list of category names for each response, in the format: `[["name 1", "name 2", ...], ["name 1", "name 2", ...], ...]`.
+    
+    Question:
+    `{question}`
+    
+    Responses:
+    `{combined_responses}`
+    
+    Categories:
+    ```
+    {combined_valid_categories}
+    ```"""
 
     for attempt in range(max_retries):
         try:
@@ -134,24 +142,24 @@ async def GPT_categorize_response_batch_multicode(
             if not isinstance(output_categories_list, list) or not all(
                 isinstance(category, list) for category in output_categories_list
             ):
-                raise ValueError(f"Output format is not as expected: {output_categories_list}")
+                raise ValueError(f"Output format is not as expected:\n{output_categories_list}")
 
             for response_categories in output_categories_list:
                 if any(category not in valid_categories for category in response_categories):
                     raise ValueError(
-                        f"\nUnexpected category returned in categories: {output_categories_list}"
+                        f"Unexpected category returned in categories:\n{output_categories_list}"
                     )
 
             return output_categories_list  # type: ignore
 
         except Exception as e:
             print(
-                f"""\nAn error occurred:\n{e}.\n
-                Responses in batch:\n{responses_batch}\n
-                Retrying attempt {attempt + 1}/{max_retries}..."""
+                f"""\nAn error occurred:\n{e}
+            Responses in batch:\n{responses_batch}
+            Retrying attempt {attempt + 1}/{max_retries}..."""
             )
 
-    print(f"Max retries reached for responses:\n{responses_batch}")
+    print(f"\nMax retries reached for responses:\n{responses_batch}")
     return [["Error"]] * len(responses_batch)
 
 
@@ -163,10 +171,18 @@ async def GPT_categorize_response_batch_singlecode(
     )
 
     user_prompt = f"""Categorize these responses to the following survey question using one of the provided categories.
-    Return only a JSON list of category names, in the format: `["name 1", "name 2", ...]`.\n\n
-    Question:\n`{question}`\n\n
-    Responses:\n`{combined_responses}`\n\n
-    Categories:\n```\n{categories}\n```"""
+    Return only a JSON list of category names, in the format: `["name 1", "name 2", ...]`.
+    
+    Question:
+    `{question}`
+    
+    Responses:
+    `{combined_responses}`
+    
+    Categories:
+    ```
+    {categories}
+    ```"""
 
     for attempt in range(max_retries):
         try:
@@ -184,17 +200,17 @@ async def GPT_categorize_response_batch_singlecode(
             # validating output
             if any(category not in categories for category in output_categories):
                 raise ValueError(
-                    f"\nUnexpected category returned in categories: {output_categories}"
+                    f"Unexpected category returned in categories:\n{output_categories}"
                 )
 
             return output_categories  # type: ignore
 
         except Exception as e:
             print(
-                f"""\nAn error occurred:\n{e}.\n
-                Responses in batch:\n{responses_batch}\n
-                Retrying attempt {attempt + 1}/{max_retries}..."""
+                f"""\nAn error occurred:\n{e}
+            Responses in batch:\n{responses_batch}
+            Retrying attempt {attempt + 1}/{max_retries}..."""
             )
 
-    print(f"Max retries reached for responses: {responses_batch}")
+    print(f"\nMax retries reached for responses: {responses_batch}")
     return ["Error"] * len(responses_batch)
