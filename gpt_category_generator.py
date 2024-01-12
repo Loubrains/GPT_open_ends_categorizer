@@ -8,7 +8,7 @@ import gpt_utils
 client = OpenAI()
 
 
-file_name = "B2a.csv"
+file_name = "C2.csv"
 print("Loading data...")
 with open(file_name, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
@@ -23,7 +23,7 @@ print("\nFetching sample...")
 responses_sample = general_utils.get_random_sample_from_series(unique_responses, 200).to_list()  # type: ignore
 
 print("Generating categories with GPT-4...")
-questionnaire_question = "What in particular makes you interested in using this streaming service?"
+questionnaire_question = "Why do you like the always-on player feature in this streaming service?"
 categories = gpt_utils.generate_categories_GPT(
     client, questionnaire_question, responses_sample, number_of_categories=20
 )
@@ -33,6 +33,6 @@ print(f"\nCategories:\n{categories}")
 
 file_path = "categories.csv"
 print(f"\nSaving to {file_path} ...")
-general_utils.export_dataframe_to_csv(file_path, categories_df)
+general_utils.export_dataframe_to_csv(file_path, categories_df, header=False)
 
 print("\nFinished")
