@@ -10,7 +10,7 @@ def generate_categories_GPT(
     number_of_categories: int = 20,
 ):
     user_prompt = f"""List the {number_of_categories} most relevant thematic categories for this sample of survey responses.
-    Return only the category names, in the format: `["name1", "name2", ...]`\n\n
+    Return only a JSON list of category names, in the format: `["name1", "name2", ...]`\n\n
     Question:\n`{question}`\n\n
     Responses:\n```\n{responses_sample}\n```"""
 
@@ -18,14 +18,16 @@ def generate_categories_GPT(
         completion = client.chat.completions.create(
             messages=[{"role": "user", "content": user_prompt}], model="gpt-4-1106-preview"
         )
-        categories = json.loads(completion.choices[0].message.content)  # type: ignore
+        output = completion.choices[0].message.content
+        output_cleaned = output.strip().replace("json", "").replace("`", "").replace("\n", "")  # type: ignore
+        output_categories = json.loads(output_cleaned)
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        categories = "Error"
+        output_categories = "Error"
         raise
 
-    return categories
+    return output_categories
 
 
 async def GPT_categorize_responses_multicode_main(
@@ -107,12 +109,13 @@ async def GPT_categorize_response_batch_multicode(
     combined_responses = "\n".join(
         [f"{i+1}: {response}" for i, response in enumerate(responses_batch)]
     )
+    combined_valid_categories = "\n".join(valid_categories)
 
     user_prompt = f"""Categorize these responses to the following survey question using one or multiple of the provided categories.
-    Return only a list where each element is a list of category names for each response, in the format: `[["name 1", "name 2", ...], ["name 1", "name 2", ...], ...]`.\n\n
+    Return only a JSON list where each element is a list of category names for each response, in the format: `[["name 1", "name 2", ...], ["name 1", "name 2", ...], ...]`.\n\n
     Question:\n`{question}`\n\n
-    Response:\n`{combined_responses}`\n\n
-    Categories:\n```\n{valid_categories}\n```"""
+    Responses:\n`{combined_responses}`\n\n
+    Categories:\n```\n{combined_valid_categories}\n```"""
 
     for attempt in range(max_retries):
         try:
@@ -123,7 +126,9 @@ async def GPT_categorize_response_batch_multicode(
                     messages=[{"role": "user", "content": user_prompt}], model="gpt-4-1106-preview"
                 ),
             )
-            output_categories_list = json.loads(completion.choices[0].message.content)  # type: ignore
+            output = completion.choices[0].message.content
+            output_cleaned = output.strip().replace("json", "").replace("`", "").replace("\n", "")  # type: ignore
+            output_categories_list = json.loads(output_cleaned)
 
             # Validating output
             if not isinstance(output_categories_list, list) or not all(
@@ -158,9 +163,9 @@ async def GPT_categorize_response_batch_singlecode(
     )
 
     user_prompt = f"""Categorize these responses to the following survey question using one of the provided categories.
-    Return only the category names, in the format: `["name 1", "name 2", ...]`.\n\n
+    Return only a JSON list of category names, in the format: `["name 1", "name 2", ...]`.\n\n
     Question:\n`{question}`\n\n
-    Response:\n`{combined_responses}`\n\n
+    Responses:\n`{combined_responses}`\n\n
     Categories:\n```\n{categories}\n```"""
 
     for attempt in range(max_retries):
@@ -172,7 +177,9 @@ async def GPT_categorize_response_batch_singlecode(
                     messages=[{"role": "user", "content": user_prompt}], model="gpt-4-1106-preview"
                 ),
             )
-            output_categories = json.loads(completion.choices[0].message.content)  # type: ignore
+            output = completion.choices[0].message.content
+            output_cleaned = output.strip().replace("json", "").replace("`", "").replace("\n", "")  # type: ignore
+            output_categories = json.loads(output_cleaned)
 
             # validating output
             if any(category not in categories for category in output_categories):
