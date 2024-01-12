@@ -10,9 +10,15 @@ def generate_categories_GPT(
     number_of_categories: int = 20,
 ):
     user_prompt = f"""List the {number_of_categories} most relevant thematic categories for this sample of survey responses.
-    Return only a JSON list of category names, in the format: `["name1", "name2", ...]`\n\n
-    Question:\n`{question}`\n\n
-    Responses:\n```\n{responses_sample}\n```"""
+    Return only a JSON list of category names, in the format: `["name1", "name2", ...]`
+    
+    Question:
+    `{question}`
+    
+    Responses:
+    ```
+    {responses_sample}
+    ```"""
 
     try:
         completion = client.chat.completions.create(
@@ -23,7 +29,7 @@ def generate_categories_GPT(
         output_categories = json.loads(output_cleaned)
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"\nAn error occurred: {e}")
         output_categories = "Error"
         raise
 
