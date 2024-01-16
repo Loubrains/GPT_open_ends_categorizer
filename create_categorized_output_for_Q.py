@@ -51,12 +51,10 @@ for response_column in response_column_names:
 print("\nPreparing output data...")
 for response_column in response_column_names:
     for response, categories in categorized_dict.items():
-        if is_multicode:
-            if "Error" in categories:
-                print(f"\nResponse '{response}' was not categorized.")
-        else:
-            if categories == "Error":
-                print(f"\nResponse '{response}' was not categorized.")
+        if is_multicode and "Error" in categories:
+            print(f"\nResponse '{response}' was not categorized.")
+        elif categories == "Error":
+            print(f"\nResponse '{response}' was not categorized.")
 
         dataframe_utils.categorize_responses_for_response_column(
             response, categories, response_column, categorized_data, is_multicode
