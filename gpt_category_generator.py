@@ -8,7 +8,7 @@ import gpt_utils
 client = OpenAI()
 
 ### CHANGE THESE VALUES TO WHAT YOU NEED
-file_name = "C3.csv"
+data_file_path = "C3.csv"
 result_categories_file_path = "categories.csv"
 questionnaire_question = (
     "Why do you not like the always-on player feature in this streaming service?"
@@ -16,9 +16,9 @@ questionnaire_question = (
 
 
 print("Loading data...")
-with open(file_name, "rb") as file:
+with open(data_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
-df = pd.read_csv(file_name, encoding=encoding)
+df = pd.read_csv(data_file_path, encoding=encoding)
 
 print("Cleaning responses...")
 processed_responses = df[df.columns[1:]].map(general_utils.preprocess_text)
