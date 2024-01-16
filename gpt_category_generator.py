@@ -3,19 +3,12 @@ import pandas as pd
 import chardet
 import general_utils
 import gpt_utils
+from config import *
+
+### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
 
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = OpenAI()
-
-### USER DEFINED VARIABLES
-data_file_path = "C3.csv"
-responses_sample_size = 200
-number_of_categories = 20
-result_categories_file_path = "categories.csv"
-questionnaire_question = (
-    "Why do you not like the always-on player feature in this streaming service?"
-)
-
 
 # Load open ends
 print("Loading data...")
@@ -35,7 +28,7 @@ responses_sample = general_utils.get_random_sample_from_series(unique_responses,
 
 # Generate categories using the GPT API
 print("Generating categories with GPT-4...")
-categories = gpt_utils.generate_categories_GPT(
+categories = gpt_utils.GPT_generate_categories_list(
     client, questionnaire_question, responses_sample, number_of_categories
 )
 categories.extend(["Other", "Bad response", "Uncategorized"])

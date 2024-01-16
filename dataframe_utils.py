@@ -32,38 +32,30 @@ def categorize_missing_data_for_response_column(
     return categorized_data
 
 
-def categorize_responses_for_response_column_multicode(
+def categorize_responses_for_response_column(
     response: str,
-    categories: list[str],
+    categories: list[str] | str,
     response_column: str,
     categorized_data: pd.DataFrame,
+    is_multicode: bool,
 ):
     # Boolean mask for rows in response_column containing selected response
     mask = categorized_data[response_column] == response
 
-    for category in categories:
-        col_name = f"{category}_{response_column}"
+    if is_multicode:
+        for category in categories:
+            col_name = f"{category}_{response_column}"
+
+            if col_name in categorized_data.columns:
+                categorized_data.loc[mask, f"Uncategorized_{response_column}"] = 0
+                categorized_data.loc[mask, col_name] = 1
+            else:
+                print(f"\nUnknown category: {category} for response: {response}")
+    else:
+        col_name = f"{categories}_{response_column}"
 
         if col_name in categorized_data.columns:
             categorized_data.loc[mask, f"Uncategorized_{response_column}"] = 0
             categorized_data.loc[mask, col_name] = 1
         else:
-            print(f"\nUnknown category: {category} for response: {response}")
-
-
-def categorize_responses_for_response_column_singlecode(
-    response: str,
-    category: str,
-    response_column: str,
-    categorized_data: pd.DataFrame,
-):
-    # Boolean mask for rows in response_column containing selected response
-    mask = categorized_data[response_column] == response
-
-    col_name = f"{category}_{response_column}"
-
-    if col_name in categorized_data.columns:
-        categorized_data.loc[mask, f"Uncategorized_{response_column}"] = 0
-        categorized_data.loc[mask, col_name] = 1
-    else:
-        print(f"\nUnknown category: {category} for response: {response}")
+            print(f"\nUnknown category: {categories} for response: {response}")

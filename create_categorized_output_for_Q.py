@@ -1,17 +1,9 @@
-# TODO: need to strip csv's after loading before sending to gpt
-
 import pandas as pd
 import chardet
 from itertools import islice
 import general_utils
 import dataframe_utils
-
-### USER DEFINED VARIABLES
-data_file_path = "C3.csv"
-categories_file_path = "categories.csv"
-codeframe_file_path = "codeframe.csv"
-result_file_path = "categorized_data.csv"
-
+from config import *
 
 # Load open ends
 print("\nLoading data...")
@@ -22,7 +14,7 @@ print(f"\nRaw data:\n{df.head(20)}")
 
 # Clean open ends
 print("\nCleaning responses...")
-response_columns = df.iloc[:, 1:].map(general_utils.preprocess_text)  # type: ignore
+response_columns = df.iloc[:, 1:].map(general_utils.preprocess_text)
 print(f"\nResponses (first 10):\n{response_columns.head(10)}")
 
 # Load categories
@@ -34,7 +26,10 @@ print(f"\nCategories:\n{categories}")
 
 # Load codeframe (dictionary of response-category pairs)
 print("\nLoading codeframe...")
-categorized_dict = general_utils.load_csv_to_dict_of_lists(codeframe_file_path)
+if is_multicode:
+    categorized_dict = general_utils.load_csv_to_dict_of_lists(result_codeframe_file_path)
+else:
+    categorized_dict = general_utils.load_csv_to_dict(result_codeframe_file_path)
 print("\nCodeframe (first 10):\n")
 print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.items(), 10)))
 
@@ -52,16 +47,19 @@ for response_column in response_column_names:
         categorized_data, response_column, categories_list
     )
 
-
 # Populate categorized dataframe
 print("\nPreparing output data...")
 for response_column in response_column_names:
     for response, categories in categorized_dict.items():
-        if "Error" in categories:
-            print(f"\nResponse '{response}' was not categorized.")
+        if is_multicode:
+            if "Error" in categories:
+                print(f"\nResponse '{response}' was not categorized.")
+        else:
+            if categories == "Error":
+                print(f"\nResponse '{response}' was not categorized.")
 
-        dataframe_utils.categorize_responses_for_response_column_multicode(
-            response, categories, response_column, categorized_data
+        dataframe_utils.categorize_responses_for_response_column(
+            response, categories, response_column, categorized_data, is_multicode
         )
 
 print(f"\nCategorized results:\n{categorized_data.head(10)}")
