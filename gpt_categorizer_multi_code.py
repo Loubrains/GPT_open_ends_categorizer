@@ -11,7 +11,7 @@ import gpt_utils
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = OpenAI()
 
-### CHANGE THESE VALUES TO WHAT YOU NEED
+### USER DEFINED VARIABLES
 data_file_path = "C3.csv"
 categories_file_path = "categories.csv"
 batch_size = 3

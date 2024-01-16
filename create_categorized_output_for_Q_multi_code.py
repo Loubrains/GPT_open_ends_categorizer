@@ -6,7 +6,7 @@ from itertools import islice
 import general_utils
 import dataframe_utils
 
-### CHANGE THESE VALUES TO WHAT YOU NEED
+### USER DEFINED VARIABLES
 data_file_path = "C3.csv"
 categories_file_path = "categories.csv"
 codeframe_file_path = "codeframe.csv"

@@ -7,7 +7,7 @@ import gpt_utils
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = OpenAI()
 
-### CHANGE THESE VALUES TO WHAT YOU NEED
+### USER DEFINED VARIABLES
 data_file_path = "C3.csv"
 responses_sample_size = 200
 number_of_categories = 20
@@ -15,6 +15,7 @@ result_categories_file_path = "categories.csv"
 questionnaire_question = (
     "Why do you not like the always-on player feature in this streaming service?"
 )
+
 
 # Load open ends
 print("Loading data...")
