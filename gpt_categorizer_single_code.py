@@ -12,10 +12,12 @@ import gpt_utils
 client = OpenAI()
 
 ### CHANGE THESE VALUES TO WHAT YOU NEED
-data_file_path = "New Year Resolution - A2 open ends.csv"
+data_file_path = "C3.csv"
 categories_file_path = "categories.csv"
 result_codeframe_file_path = "codeframe.csv"
-questionnaire_question = "What is your new year resolution?"
+questionnaire_question = (
+    "Why do you not like the always-on player feature in this streaming service?"
+)
 
 
 # Load open ends
