@@ -6,9 +6,14 @@ from itertools import islice
 import general_utils
 import dataframe_utils
 
+### CHANGE THESE VALUES TO WHAT YOU NEED
+data_file_path = "C3.csv"
+categories_file_path = "categories.csv"
+codeframe_file_path = "codeframe.csv"
+result_file_path = "categorized_data.csv"
+
 
 # Load open ends
-data_file_path = "New Year Resolution - A2 open ends.csv"
 print("\nLoading data...")
 with open(data_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
@@ -21,7 +26,6 @@ response_columns = df.iloc[:, 1:].map(general_utils.preprocess_text)  # type: ig
 print(f"\nResponses (first 10):\n{response_columns.head(10)}")
 
 # Load categories
-categories_file_path = "categories.csv"
 print("\nLoading categories...")
 with open(categories_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
@@ -30,7 +34,7 @@ print(f"\nCategories:\n{categories}")
 
 # Load codeframe (dictionary of response-category pairs)
 print("\nLoading codeframe...")
-categorized_dict = general_utils.load_csv_to_dict("codeframe.csv")
+categorized_dict = general_utils.load_csv_to_dict(codeframe_file_path)
 print("\nCodeframe (first 10):\n")
 print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.items(), 10)))
 
@@ -63,7 +67,6 @@ for response_column in response_column_names:
 print(f"\nCategorized results:\n{categorized_data.head(10)}")
 
 # Save to csv
-result_file_path = "categorized_data.csv"
 print(f"\nSaving to {result_file_path} ...")
 general_utils.export_dataframe_to_csv(result_file_path, categorized_data)
 

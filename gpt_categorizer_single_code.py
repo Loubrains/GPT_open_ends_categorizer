@@ -11,9 +11,14 @@ import gpt_utils
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = OpenAI()
 
+### CHANGE THESE VALUES TO WHAT YOU NEED
+data_file_path = "New Year Resolution - A2 open ends.csv"
+categories_file_path = "categories.csv"
+result_codeframe_file_path = "codeframe.csv"
+questionnaire_question = "What is your new year resolution?"
+
 
 # Load open ends
-data_file_path = "New Year Resolution - A2 open ends.csv"
 print("\nLoading data...")
 with open(data_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
@@ -30,7 +35,6 @@ unique_responses = set(df_preprocessed.stack().dropna().reset_index(drop=True))
 unique_responses = unique_responses - {""}
 
 # Load categories
-categories_file_path = "categories.csv"
 print("\nLoading categories...")
 with open(categories_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
@@ -42,12 +46,16 @@ categories_list = categories.iloc[:, 0].tolist()
 categories_list.remove("Uncategorized")
 
 # Categorize responses using GPT API
-question = "What is your new year resolution?"
 print("\nCategorizing data with GPT-4...")
 # unique_responses_sample = list(unique_responses)[:20]
 categorized_dict = asyncio.run(
     gpt_utils.GPT_categorize_responses_singlecode_main(
-        client, question, categories_list, unique_responses, batch_size=3, max_retries=5
+        client,
+        questionnaire_question,
+        categories_list,
+        unique_responses,
+        batch_size=3,
+        max_retries=5,
     )
 )
 categorized_dict.pop("", None)  # removing empty string since it matches against every row
@@ -56,8 +64,7 @@ print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.item
 print("\nFinished categorizing with GPT-4...")
 
 # Saving codeframe (dictionary of response-category pairs)
-result_file_path = "codeframe.csv"
-print(f"\nSaving codeframe to {result_file_path} ...")
-general_utils.export_dict_to_csv(result_file_path, categorized_dict)
+print(f"\nSaving codeframe to {result_codeframe_file_path} ...")
+general_utils.export_dict_to_csv(result_codeframe_file_path, categorized_dict)
 
 print("\nFinished")

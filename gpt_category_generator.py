@@ -7,8 +7,14 @@ import gpt_utils
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = OpenAI()
 
-
+### CHANGE THESE VALUES TO WHAT YOU NEED
 file_name = "C3.csv"
+result_categories_file_path = "categories.csv"
+questionnaire_question = (
+    "Why do you not like the always-on player feature in this streaming service?"
+)
+
+
 print("Loading data...")
 with open(file_name, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
@@ -23,9 +29,6 @@ print("\nFetching sample...")
 responses_sample = general_utils.get_random_sample_from_series(unique_responses, 200).to_list()  # type: ignore
 
 print("Generating categories with GPT-4...")
-questionnaire_question = (
-    "Why do you not like the always-on player feature in this streaming service?"
-)
 categories = gpt_utils.generate_categories_GPT(
     client, questionnaire_question, responses_sample, number_of_categories=20
 )
@@ -33,8 +36,7 @@ categories.extend(["Other", "Bad response", "Uncategorized"])
 categories_df = pd.DataFrame(categories)
 print(f"\nCategories:\n{categories}")
 
-file_path = "categories.csv"
-print(f"\nSaving to {file_path} ...")
-general_utils.export_dataframe_to_csv(file_path, categories_df, header=False)
+print(f"\nSaving to {result_categories_file_path} ...")
+general_utils.export_dataframe_to_csv(result_categories_file_path, categories_df, header=False)
 
 print("\nFinished")
