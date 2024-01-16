@@ -14,6 +14,8 @@ client = OpenAI()
 ### CHANGE THESE VALUES TO WHAT YOU NEED
 data_file_path = "C3.csv"
 categories_file_path = "categories.csv"
+batch_size = 3
+max_retries = 5
 result_codeframe_file_path = "codeframe.csv"
 questionnaire_question = (
     "Why do you not like the always-on player feature in this streaming service?"
@@ -33,7 +35,7 @@ df_preprocessed = df.iloc[:, 1:].map(general_utils.preprocess_text)  # type: ign
 print(f"\nResponses (first 10):\n{df_preprocessed.head(10)}")
 
 unique_responses = set(df_preprocessed.stack().dropna().reset_index(drop=True))
-# we don't want to match empty strings against every row
+# we don't want to match empty string against every row
 unique_responses = unique_responses - {""}
 
 # Load categories
@@ -47,7 +49,7 @@ categories_list = categories.iloc[:, 0].tolist()
 # Uncategorized is a helper category for later, we don't want ChatGPT to use it.
 categories_list.remove("Uncategorized")
 
-# Categorize responses using GPT API
+# Categorize responses using the GPT API
 print("\nCategorizing data with GPT-4...")
 # unique_responses_sample = list(unique_responses)[:20]
 categorized_dict = asyncio.run(
@@ -56,8 +58,8 @@ categorized_dict = asyncio.run(
         questionnaire_question,
         categories_list,
         unique_responses,
-        batch_size=3,
-        max_retries=5,
+        batch_size,
+        max_retries,
     )
 )
 categorized_dict.pop("", None)  # removing empty string since it matches against every row
