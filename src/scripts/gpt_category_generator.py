@@ -2,9 +2,9 @@ from openai import AsyncOpenAI
 import asyncio
 import pandas as pd
 import chardet
-import general_utils
-import gpt_utils
-from config import *
+from utils import general_utils
+from utils import gpt_utils
+from config.config import *
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
 

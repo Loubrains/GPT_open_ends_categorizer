@@ -1,7 +1,9 @@
-open_end_data_file_path = "C3.csv"
-categories_file_path = "categories.csv"  # Save to or load from
-codeframe_file_path = "codeframe.csv"  # Save to or load from
-categorized_data_file_path = "categorized_data.csv"
+### User defined settings - change these before running the scripts!
+
+open_end_data_file_path = "data/C3.csv"
+categories_file_path = "data/categories.csv"  # Save to or load from
+codeframe_file_path = "data/codeframe.csv"  # Save to or load from
+categorized_data_file_path = "data/categorized_data.csv"
 
 # Number of responses sent to GPT to generate initial list of categories
 responses_sample_size = 200

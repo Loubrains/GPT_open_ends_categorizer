@@ -3,9 +3,9 @@ import asyncio
 import pandas as pd
 import chardet
 from itertools import islice
-import general_utils
-import gpt_utils
-from config import *
+from utils import general_utils
+from utils import gpt_utils
+from config.config import *
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
 ### NOTE: IF YOU SEE EVERY BATCH OF RESPONSES IS REACHING 5/5 RETRIES, TERMINATE THE PROGRAM AND DEBUG.

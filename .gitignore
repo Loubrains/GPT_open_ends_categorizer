@@ -1,2 +1,17 @@
+# Ignore everything
 *
-!*.py
+
+# Include these directories, and files within them
+!/src
+!/src/**
+!/tests
+!/tests/*.py
+
+# Include these directories but not the data within them
+!/data
+!/data/*
+
+# Include files at the root
+!/README.md
+!/requirements.txt
+!/.gitignore

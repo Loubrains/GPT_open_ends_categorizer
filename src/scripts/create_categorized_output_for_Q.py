@@ -1,9 +1,9 @@
 import pandas as pd
 import chardet
 from itertools import islice
-import general_utils
-import dataframe_utils
-from config import *
+from utils import general_utils
+from utils import dataframe_utils
+from config.config import *
 
 # Load open ends
 print("\nLoading data...")
