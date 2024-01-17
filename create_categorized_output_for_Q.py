@@ -7,9 +7,9 @@ from config import *
 
 # Load open ends
 print("\nLoading data...")
-with open(data_file_path, "rb") as file:
+with open(open_end_data_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
-df = pd.read_csv(data_file_path, encoding=encoding)
+df = pd.read_csv(open_end_data_file_path, encoding=encoding)
 print(f"\nRaw data:\n{df.head(20)}")
 
 # Clean open ends
@@ -27,9 +27,9 @@ print(f"\nCategories:\n{categories}")
 # Load codeframe (dictionary of response-category pairs)
 print("\nLoading codeframe...")
 if is_multicode:
-    categorized_dict = general_utils.load_csv_to_dict_of_lists(result_codeframe_file_path)
+    categorized_dict = general_utils.load_csv_to_dict_of_lists(codeframe_file_path)
 else:
-    categorized_dict = general_utils.load_csv_to_dict(result_codeframe_file_path)
+    categorized_dict = general_utils.load_csv_to_dict(codeframe_file_path)
 print("\nCodeframe (first 10):\n")
 print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.items(), 10)))
 
@@ -63,7 +63,7 @@ for response_column in response_column_names:
 print(f"\nCategorized results:\n{categorized_data.head(10)}")
 
 # Save to csv
-print(f"\nSaving to {result_file_path} ...")
-general_utils.export_dataframe_to_csv(result_file_path, categorized_data)
+print(f"\nSaving to {categorized_data_file_path} ...")
+general_utils.export_dataframe_to_csv(categorized_data_file_path, categorized_data)
 
 print("\nFinished")

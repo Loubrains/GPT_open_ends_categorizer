@@ -8,15 +8,16 @@ import gpt_utils
 from config import *
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
+### NOTE: IF YOU SEE EVERY BATCH OF RESPONSES IS REACHING 5/5 RETRIES, TERMINATE THE PROGRAM AND DEBUG.
 
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = OpenAI()
 
 # Load open ends
 print("\nLoading data...")
-with open(data_file_path, "rb") as file:
+with open(open_end_data_file_path, "rb") as file:
     encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
-df = pd.read_csv(data_file_path, encoding=encoding)
+df = pd.read_csv(open_end_data_file_path, encoding=encoding)
 
 # Clean open ends
 print("Cleaning responses...")
@@ -27,6 +28,7 @@ print(f"\nResponses (first 10):\n{df_preprocessed.head(10)}")
 unique_responses = set(df_preprocessed.stack().dropna().reset_index(drop=True))
 # we don't want to match empty string against every row
 unique_responses = unique_responses - {""}
+unique_responses = [str(item) for item in unique_responses]  # convert to list[str]
 
 # Load categories
 print("\nLoading categories...")
@@ -43,7 +45,7 @@ categories_list.remove("Uncategorized")
 print("\nCategorizing data with GPT-4...")
 # unique_responses_sample = list(unique_responses)[:20]
 categorized_dict = asyncio.run(
-    gpt_utils.GPT_categorize_responses_main(
+    gpt_utils.GPT_categorize_response_batches_main(
         client,
         questionnaire_question,
         unique_responses,
@@ -61,7 +63,7 @@ print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.item
 print("\nFinished categorizing with GPT-4...")
 
 # Saving codeframe (dictionary of response-category pairs)
-print(f"\nSaving codeframe to {result_codeframe_file_path} ...")
-general_utils.export_dict_to_csv(result_codeframe_file_path, categorized_dict)
+print(f"\nSaving codeframe to {codeframe_file_path} ...")
+general_utils.export_dict_to_csv(codeframe_file_path, categorized_dict)
 
 print("\nFinished")
