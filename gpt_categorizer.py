@@ -1,4 +1,4 @@
-from openai import OpenAI
+from openai import AsyncOpenAI
 import asyncio
 import pandas as pd
 import chardet
@@ -11,7 +11,7 @@ from config import *
 ### NOTE: IF YOU SEE EVERY BATCH OF RESPONSES IS REACHING 5/5 RETRIES, TERMINATE THE PROGRAM AND DEBUG.
 
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
-client = OpenAI()
+client = AsyncOpenAI()
 
 # Load open ends
 print("\nLoading data...")
@@ -43,7 +43,7 @@ categories_list.remove("Uncategorized")
 
 # Categorize responses using the GPT API
 print("\nCategorizing data with GPT-4...")
-# unique_responses_sample = list(unique_responses)[:20]
+# unique_responses_sample = unique_responses[:20]
 categorized_dict = asyncio.run(
     gpt_utils.GPT_categorize_response_batches_main(
         client,

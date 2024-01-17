@@ -1,4 +1,5 @@
-from openai import OpenAI
+from openai import AsyncOpenAI
+import asyncio
 import pandas as pd
 import chardet
 import general_utils
@@ -8,7 +9,7 @@ from config import *
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
 
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
-client = OpenAI()
+client = AsyncOpenAI()
 
 # Load open ends
 print("Loading data...")
@@ -28,8 +29,10 @@ responses_sample = general_utils.get_random_sample_from_series(unique_responses,
 
 # Generate categories using the GPT API
 print("Generating categories with GPT-4...")
-categories = gpt_utils.GPT_generate_categories_list(
-    client, questionnaire_question, responses_sample, number_of_categories, max_retries
+categories = asyncio.run(
+    gpt_utils.GPT_generate_categories_list(
+        client, questionnaire_question, responses_sample, number_of_categories, max_retries
+    )
 )
 categories.extend(["Other", "Bad response", "Uncategorized"])
 categories_df = pd.DataFrame(categories)

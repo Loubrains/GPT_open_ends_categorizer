@@ -1,14 +1,14 @@
-from openai import OpenAI
+from openai import AsyncOpenAI
 import json
 import asyncio
 
 
-def call_gpt(
-    client: OpenAI,
+async def call_gpt(
+    client: AsyncOpenAI,
     user_prompt: str,
 ) -> str | None:
     try:
-        completion = client.chat.completions.create(
+        completion = await client.chat.completions.create(
             messages=[{"role": "user", "content": user_prompt}], model="gpt-4-1106-preview"
         )
         content = completion.choices[0].message.content
@@ -21,8 +21,8 @@ def call_gpt(
     return content
 
 
-def GPT_generate_categories_list(
-    client: OpenAI,
+async def GPT_generate_categories_list(
+    client: AsyncOpenAI,
     question: str,
     responses_sample: list[str],
     number_of_categories: int = 20,
@@ -40,7 +40,7 @@ def GPT_generate_categories_list(
     ```"""
     for attempt in range(max_retries):
         try:
-            output = call_gpt(client, user_prompt)
+            output = await call_gpt(client, user_prompt)
             output_cleaned = output.strip().replace("json", "").replace("`", "").replace("\n", "")  # type: ignore
             output_categories_list = json.loads(output_cleaned)
 
@@ -63,29 +63,43 @@ def GPT_generate_categories_list(
 
 
 def validate_gpt_categorized_output(output_categories, categories_list, is_multicode):
-    def _check_categories_are_valid(categories_to_check):
-        if any(category not in categories_list for category in categories_to_check):
-            raise ValueError(
-                f"Unexpected category returned in output_categories:\n{categories_to_check}"
-            )
+    def _check_elements_of_list_are_strings(list_to_check):
+        for element in list_to_check:
+            if not isinstance(element, str):
+                raise ValueError(
+                    f"""Output format is not a as expected (expected string)
+                    output_categories:\n{list_to_check}
+                    element:\n{element}"""
+                )
 
-    # Check if output is a list
+    def _check_categories_are_valid(categories_to_check):
+        for category in categories_to_check:
+            if category not in categories_list:
+                raise ValueError(
+                    f"""Unexpected category returned in output_categories
+                    output_categories:\n{categories_to_check}
+                    unexpected_category:\n{category}"""
+                )
+
+    # Check if overall output is a list
     if not isinstance(output_categories, list):
         raise ValueError(
             f"Output format is not a as expected (expected list [..., ...]):\n{output_categories}\n"
         )
 
     if is_multicode:
-        # Check if each element is itself a list
-        if not all(isinstance(category, list) for category in output_categories):
+        # Check if all elements themselvers are lists
+        if not all(isinstance(element, list) for element in output_categories):
             raise ValueError(
                 f"Output format is not as expected (expected list of lists [[...], [...], ...]):\n{output_categories}"
             )
 
         for response_categories in output_categories:
+            _check_elements_of_list_are_strings(response_categories)
             _check_categories_are_valid(response_categories)
 
     else:
+        _check_elements_of_list_are_strings(output_categories)
         _check_categories_are_valid(output_categories)
 
 
@@ -96,11 +110,11 @@ def create_user_prompt_for_gpt_categorization(question, responses, categories_li
     if is_multicode:
         multiple_categories_text = "or multiple "
         output_format_text = "a list of category names "
-        output_format = '`[["name 1", "name 2", ...], ["name 1", "name 2", ...], ...]`'
+        output_format = '`[["category 1 for response 1", "category 2 for response 1", ...], ["category 1 for response 2", "category 2 for response 2", ...], ...]`'
     else:
         multiple_categories_text = ""
         output_format_text = "a category name "
-        output_format = '`["name 1", "name 2", ...]`'
+        output_format = '`["category for response 1", "category for response 2", ...]`'
 
     user_prompt = f"""Categorize these responses to the following survey question using one {multiple_categories_text}of the provided categories.
     Return only a JSON list where each element is {output_format_text}for each response, in the format: {output_format}.
@@ -120,7 +134,7 @@ def create_user_prompt_for_gpt_categorization(question, responses, categories_li
 
 
 async def GPT_categorize_responses(
-    client: OpenAI,
+    client: AsyncOpenAI,
     question: str,
     responses: list[str],
     categories_list: list[str],
@@ -131,11 +145,9 @@ async def GPT_categorize_responses(
         question, responses, categories_list, is_multicode
     )
 
-    print("responses:", responses)
-
     for attempt in range(max_retries):
         try:
-            output = call_gpt(client, user_prompt)
+            output = await call_gpt(client, user_prompt)
             output_cleaned = output.strip().replace("json", "").replace("`", "").replace("\n", "")  # type: ignore
             output_categories = json.loads(output_cleaned)
 
@@ -165,7 +177,7 @@ def create_batches(data: list[str], batch_size: int = 3):
 
 
 async def GPT_categorize_response_batches_main(
-    client: OpenAI,
+    client: AsyncOpenAI,
     question: str,
     responses: list[str] | set[str],
     categories_list: list[str],
@@ -178,19 +190,16 @@ async def GPT_categorize_response_batches_main(
     tasks = []
 
     for batch in batches:
-        print("batch:", batch)
         task = GPT_categorize_responses(
             client, question, batch, categories_list, max_retries, is_multicode
         )
         tasks.append(task)
 
-    print("Task list built")
-    print(tasks)
     output_categories = await asyncio.gather(*tasks)
     print("output_categories:", output_categories)
 
-    for i, categories in enumerate(output_categories):
-        for response, categories in zip(batches[i], output_categories):
+    for i, categories_in_batch in enumerate(output_categories):
+        for response, categories in zip(batches[i], categories_in_batch):
             categorized_dict[response] = categories
 
     return categorized_dict
