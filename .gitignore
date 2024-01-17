@@ -3,13 +3,13 @@
 
 # Include these directories, and files within them
 !/src
-!/src/**
+!/src/**.py
 !/tests
-!/tests/*.py
+!/tests/**
 
 # Include these directories but not the data within them
 !/data
-!/data/*
+!/data/**
 
 # Include files at the root
 !/README.md

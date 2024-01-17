@@ -8,7 +8,6 @@ from utils import gpt_utils
 from config.config import *
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
-### NOTE: IF YOU SEE EVERY BATCH OF RESPONSES IS REACHING 5/5 RETRIES, TERMINATE THE PROGRAM AND DEBUG.
 
 ### NOTE: Make sure OpenAI_API_KEY is set up in your system environment variables ###
 client = AsyncOpenAI()
