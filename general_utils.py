@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 import random
+import ast
 from typing import Any
 from pandas._libs.missing import NAType
 import sys
@@ -38,7 +39,7 @@ def load_csv_to_dict(file_path: str) -> dict:
 def load_csv_to_dict_of_lists(file_path: str) -> dict:
     try:
         df = pd.read_csv(file_path)
-        df["value"] = df["value"].map(lambda x: x.split(", ") if isinstance(x, str) else [])
+        df["value"] = df["value"].map(lambda x: ast.literal_eval(x) if isinstance(x, str) else [])
         return dict(zip(df["key"], df["value"]))
 
     except Exception as e:

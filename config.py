@@ -13,7 +13,7 @@ batch_size = 3
 max_retries = 5
 
 # Whether each response can be put into multiple categories
-is_multicode = True
+is_multicode = False
 
 questionnaire_question = (
     "Why do you not like the always-on player feature in this streaming service?"
