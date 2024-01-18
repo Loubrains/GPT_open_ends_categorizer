@@ -3,7 +3,7 @@ import chardet
 from itertools import islice
 from utils import general_utils
 from utils import dataframe_utils
-from config.config import *
+from config import *
 
 # Load open ends
 print("\nLoading data...")

@@ -5,11 +5,14 @@
 !/src
 !/src/**.py
 !/tests
-!/tests/**
+!/tests/**.py
+!/tests/.keep
 
 # Include these directories but not the data within them
 !/data
-!/data/**
+!/data/*
+# NOTE: This isn't yet recursive :/
+!/data/*/.keep
 
 # Include files at the root
 !/README.md

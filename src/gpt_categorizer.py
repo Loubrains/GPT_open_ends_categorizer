@@ -5,7 +5,7 @@ import chardet
 from itertools import islice
 from utils import general_utils
 from utils import gpt_utils
-from config.config import *
+from config import *
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
 

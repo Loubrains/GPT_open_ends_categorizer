@@ -4,7 +4,7 @@ import pandas as pd
 import chardet
 from utils import general_utils
 from utils import gpt_utils
-from config.config import *
+from config import *
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
 
