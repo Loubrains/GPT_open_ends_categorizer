@@ -2,6 +2,11 @@ from openai import AsyncOpenAI
 import json
 import asyncio
 
+### NOTE: potential future update: call gpt with JSON mode
+### Put the following in the .create() parameters:
+### `response_format={ "type": "json_object" }`
+### Make sure the prompt specifies the JSON structure, and then parse the output
+
 
 async def call_gpt(
     client: AsyncOpenAI,
