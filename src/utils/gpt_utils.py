@@ -2,8 +2,8 @@ from openai import AsyncOpenAI
 import json
 import asyncio
 
-### NOTE: potential future update: call gpt with JSON mode
-### Put the following in the .create() parameters:
+### NOTE: potential future update to these utils: call gpt with JSON mode
+### Put the following in the client.chat.completions.create() arguments:
 ### `response_format={ "type": "json_object" }`
 ### Make sure the prompt specifies the JSON structure, and then parse the output
 
