@@ -1,3 +1,14 @@
+"""
+This module provides utilities for building a dataframe for the categorization of open-ended survey responses.
+It is designed with an output format in mind that is suitable for use in Q Research Software (or data analysis in general).
+It expects the input data to have a column for uuids, and then subsequent columns for responses.
+
+Functions:
+    construct_default_categorized_dataframe: Initializes a DataFrame with category columns for each specified response column, setting all entries to 0 except for "Uncategorized" which are set to 1.
+    categorize_missing_data_for_response_column: Marks category columns as missing (pd.NA) for rows where the corresponding response column has missing data.
+    categorize_responses_for_response_column: Categorizes responses in a response column by setting the corresponding category columns to 1 and the 'Uncategorized' column to 0 for matched responses.
+"""
+
 import pandas as pd
 
 

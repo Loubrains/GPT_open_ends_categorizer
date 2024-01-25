@@ -1,3 +1,16 @@
+"""
+This module provides a collection of utilities for handling and processing text data using pandas.
+
+Functions:
+    preprocess_text: Preprocesses input text by converting to lowercase, normalizing whitespace, and removing special characters.
+    get_random_sample_from_series: Retrieves a random sample of specified size from a pandas Series.
+    create_batches: Yields consecutive batches of data from a list.
+    load_csv_to_dict: Loads a CSV file with 'key' and 'value' columns into a dictionary.
+    load_csv_to_dict_of_lists: Loads a CSV file with 'key' and 'value' columns into a dictionary, where the 'value' column contains lists in string representation.
+    export_dataframe_to_csv: Exports a pandas DataFrame to a CSV file.
+    export_dict_to_csv: Exports a dictionary to a CSV file with 'key' and 'value' columns.
+"""
+
 import pandas as pd
 import re
 import random
@@ -49,6 +62,22 @@ def get_random_sample_from_series(series: pd.Series, sample_size: int) -> pd.Ser
     if sample_size > len(series):
         raise ValueError("Sample size n cannot be greater than the length of the series")
     return series.sample(sample_size, random_state=random.randint(1, 10000))
+
+
+def create_batches(data: list[str], batch_size: int = 3):
+    """
+    Yields consecutive batches of data from the list.
+
+    Args:
+        data (list[str]): The list of data to be batched.
+        batch_size (int): The size of each batch. Defaults to 3.
+
+    Yields:
+        list[str]: A batch of data.
+    """
+
+    for i in range(0, len(data), batch_size):
+        yield data[i : i + batch_size]
 
 
 def load_csv_to_dict(file_path: str) -> dict:

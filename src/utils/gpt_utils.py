@@ -1,6 +1,21 @@
+"""
+This module provides utilities for interacting with the OpenAI GPT model to perform tasks related to survey data categorization. 
+It allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
+validation of categorization results, and batch processing of responses for efficient categorization.
+
+Functions:
+    call_gpt: Asynchronously sends a user prompt to the GPT model and retrieves the completion.
+    gpt_generate_categories_list: Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
+    validate_gpt_categorized_output: Validates the GPT output received by the categorizer.
+    create_user_prompt_for_gpt_categorization: Creates a user prompt to send to the GPT model to categorize survey question responses.
+    gpt_categorize_responses: Asynchronously categorizes a list of responses using the GPT model.
+    gpt_categorize_response_batches_main: Asynchronously sends batches of survey responses to be categorized using the GPT model.
+"""
+
 from openai import AsyncOpenAI
 import json
 import asyncio
+from .general_utils import create_batches
 
 ### NOTE: potential future update to these utils: call gpt with JSON mode
 ### Put the following in the client.chat.completions.create() arguments:
@@ -40,7 +55,7 @@ async def call_gpt(
     return content
 
 
-async def GPT_generate_categories_list(
+async def gpt_generate_categories_list(
     client: AsyncOpenAI,
     question: str,
     responses_sample: list[str],
@@ -93,6 +108,7 @@ async def GPT_generate_categories_list(
             Retrying attempt {attempt + 1}/{max_retries}..."""
             )
 
+    # Error case
     print("\nMax retries reached for responses")
     output_categories_list = ["Error"]
 
@@ -197,7 +213,7 @@ def create_user_prompt_for_gpt_categorization(question, responses, categories_li
     return user_prompt
 
 
-async def GPT_categorize_responses(
+async def gpt_categorize_responses(
     client: AsyncOpenAI,
     question: str,
     responses: list[str],
@@ -247,6 +263,7 @@ async def GPT_categorize_responses(
             Retrying attempt {attempt + 1}/{max_retries}..."""
             )
 
+    # Error case
     print(f"\nMax retries reached for responses:\n{responses}")
     if is_multicode:
         output_categories = [["Error"]] * len(responses)
@@ -256,23 +273,7 @@ async def GPT_categorize_responses(
     return output_categories
 
 
-def create_batches(data: list[str], batch_size: int = 3):
-    """
-    Yields consecutive batches of data from the list.
-
-    Args:
-        data (list[str]): The list of data to be batched.
-        batch_size (int): The size of each batch. Defaults to 3.
-
-    Yields:
-        list[str]: A batch of data.
-    """
-
-    for i in range(0, len(data), batch_size):
-        yield data[i : i + batch_size]
-
-
-async def GPT_categorize_response_batches_main(
+async def gpt_categorize_response_batches_main(
     client: AsyncOpenAI,
     question: str,
     responses: list[str] | set[str],
@@ -306,14 +307,16 @@ async def GPT_categorize_response_batches_main(
     batches = list(create_batches(list(responses), batch_size))
     tasks = []
 
+    # Create async gpt tasks
     for batch in batches:
-        task = GPT_categorize_responses(
+        task = gpt_categorize_responses(
             client, question, batch, categories_list, max_retries, is_multicode
         )
         tasks.append(task)
 
     output_categories = await asyncio.gather(*tasks)
 
+    # Construct codeframe (dict of responses to categories)
     for i, categories_in_batch in enumerate(output_categories):
         for response, categories in zip(batches[i], categories_in_batch):
             categorized_dict[response] = categories

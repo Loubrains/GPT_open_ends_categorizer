@@ -1,20 +1,35 @@
-### User defined settings - change these before running the scripts!
+"""
+### MODIFY THIS BEFORE RUNNING ANY SCRIPTS ###
+This module serves as a configuration script for setting up user-defined parameters used in the open-end response categorization process. 
+It includes settings for file paths for data loading and saving, defining the questionnaire question, categorization options, sample sizes.
 
+Configuration Variables:
+    open_end_data_file_path: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
+    categories_file_path: File path for saving or loading the GPT generated categories to CSV.
+    codeframe_file_path: File path for saving or loading the GPT generated codeframe to CSV.
+    categorized_data_file_path: File path for saving the final categorized data to CSV.    
+    questionnaire_question: Text of the questionnaire question associated with the open-ended responses.    
+    is_multicode: Boolean flag indicating whether each response can belong to multiple categories.
+    max_retries: Number of retry attempts for GPT requests upon encountering errors.
+    number_of_categories: Number of categories to generate.
+    responses_sample_size: Number of responses sent to GPT to generate the initial list of categories.
+    batch_size: Number of responses to send to GPT per request.
+"""
+
+# File paths
 open_end_data_file_path = "data/test_data/New Year Resolution - A2 open ends.csv"
 categories_file_path = "data/output_data/categories.csv"  # Save to or load from
 codeframe_file_path = "data/output_data/codeframe.csv"  # Save to or load from
 categorized_data_file_path = "data/output_data/categorized_data.csv"  # Save to
 
-# Number of responses sent to GPT to generate initial list of categories
-responses_sample_size = 200
-# Number of categories to generate
-number_of_categories = 20
-# Number of responses to send to GPT per request
-batch_size = 3
-# Number of retry GPT requests upon error
+# Global settings
+questionnaire_question = "What is your new year resolution?"
+is_multicode = True
 max_retries = 5
 
-# Whether each response can be put into multiple categories
-is_multicode = True
+# Category generation settings
+number_of_categories = 20
+responses_sample_size = 200
 
-questionnaire_question = "What is your new year resolution?"
+# Codeframe generation settings
+batch_size = 3

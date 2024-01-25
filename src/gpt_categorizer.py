@@ -72,7 +72,7 @@ categories_list.remove("Uncategorized")
 print("\nCategorizing data with GPT-4...")
 # unique_responses_sample = unique_responses[:20]
 categorized_dict = asyncio.run(
-    gpt_utils.GPT_categorize_response_batches_main(
+    gpt_utils.gpt_categorize_response_batches_main(
         client,
         questionnaire_question,
         unique_responses,

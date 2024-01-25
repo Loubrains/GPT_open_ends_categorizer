@@ -58,7 +58,7 @@ responses_sample = general_utils.get_random_sample_from_series(unique_responses,
 # Generate categories using the GPT API
 print("Generating categories with GPT-4...")
 categories = asyncio.run(
-    gpt_utils.GPT_generate_categories_list(
+    gpt_utils.gpt_generate_categories_list(
         client, questionnaire_question, responses_sample, number_of_categories, max_retries
     )
 )
