@@ -16,8 +16,8 @@ python -m pip install --upgrade pip
 
 1. Make a copy of the project folder on your local system.
 
-2. In your command line tool, navigate to the copied project root directory.<br>
-   E.g. `cd 'C:\Users\[user]\path\to\project'`
+2. In your command line tool, navigate to the copied project root directory:<br>
+   `cd 'C:\Users\[user]\path\to\project'`
 
 3. Run the following command to install the required packages:
 
