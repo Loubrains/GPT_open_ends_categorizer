@@ -6,7 +6,6 @@
 !/src/**.py
 !/tests
 !/tests/**.py
-!/tests/.keep
 
 # Include these directories but not the data within them
 !/data
@@ -14,7 +13,7 @@
 # NOTE: This isn't yet recursive :/
 !/data/*/.keep
 
-# Include files at the root
+# Include these files at the root
 !/README.md
 !/requirements.txt
 !/.gitignore

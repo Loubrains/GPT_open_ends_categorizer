@@ -17,14 +17,14 @@ Configuration Variables:
 """
 
 # File paths
-open_end_data_file_path = "data/test_data/New Year Resolution - A2 open ends.csv"
-categories_file_path = "data/output_data/categories.csv"  # Save to or load from
-codeframe_file_path = "data/output_data/codeframe.csv"  # Save to or load from
-categorized_data_file_path = "data/output_data/categorized_data.csv"  # Save to
+open_end_data_file_path = "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a open ends.csv"
+categories_file_path = "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a gpt categories.csv"  # Save to or load from
+codeframe_file_path = "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a gpt codeframe.csv"  # Save to or load from
+categorized_data_file_path = "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a gpt categorized_data.csv"  # Save to
 
 # Global settings
-questionnaire_question = "What is your new year resolution?"
-is_multicode = True
+questionnaire_question = "What best describes the type of media content it is that you consumed?"
+is_multicode = False
 max_retries = 5
 
 # Category generation settings
