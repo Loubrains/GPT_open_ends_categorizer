@@ -111,8 +111,8 @@ def categorize_responses_for_response_column(
     # Boolean mask for rows in response_column containing selected response
     mask = categorized_data[response_column] == response
 
-    def _categorize_response(categories):
-        col_name = f"{categories}_{response_column}"
+    def _categorize_response(category):
+        col_name = f"{category}_{response_column}"
 
         if col_name in categorized_data.columns:
             categorized_data.loc[mask, f"Uncategorized_{response_column}"] = 0
