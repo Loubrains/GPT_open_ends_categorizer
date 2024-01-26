@@ -5,7 +5,7 @@ It expects the input data to have a column for uuids, and then subsequent column
 
 Functions:
     construct_default_categorized_dataframe: Initializes a DataFrame with category columns for each specified response column, setting all entries to 0 except for "Uncategorized" which are set to 1.
-    categorize_missing_data_for_response_column: Marks category columns as missing (pd.NA) for rows where the corresponding response column has missing data.
+    categorize_missing_data_for_response_column: Marks category columns as missing (pd.NA) for rows where the corresponding response column has missing data. Expects the category columns to be Int64 type to support pd.NA.
     categorize_responses_for_response_column: Categorizes responses in a response column by setting the corresponding category columns to 1 and the 'Uncategorized' column to 0 for matched responses.
 """
 
@@ -39,6 +39,10 @@ def construct_default_categorized_dataframe(
                 categorized_data[col_name] = 1
             else:
                 categorized_data[col_name] = 0
+
+            # Convert to Int64 to support pd.NA
+            categorized_data[col_name] = categorized_data[col_name].astype("Int64")
+
     return categorized_data
 
 
@@ -52,6 +56,8 @@ def categorize_missing_data_for_response_column(
 
     This function checks the specified response column for missing value (pd.NA) rows, and updates the corresponding category
     columns to pd.NA for those rows. This is done for all categories in categories_list.
+
+    Expects the category columns to be Int64 type to support pd.NA.
 
     Args:
         categorized_data (pd.DataFrame): The DataFrame to modify. Must include the columns specified in response_column.
@@ -105,16 +111,7 @@ def categorize_responses_for_response_column(
     # Boolean mask for rows in response_column containing selected response
     mask = categorized_data[response_column] == response
 
-    if is_multicode:
-        for category in categories:
-            col_name = f"{category}_{response_column}"
-
-            if col_name in categorized_data.columns:
-                categorized_data.loc[mask, f"Uncategorized_{response_column}"] = 0
-                categorized_data.loc[mask, col_name] = 1
-            else:
-                print(f"\nUnknown category: {category} for response: {response}")
-    else:
+    def _categorize_response(categories):
         col_name = f"{categories}_{response_column}"
 
         if col_name in categorized_data.columns:
@@ -122,3 +119,10 @@ def categorize_responses_for_response_column(
             categorized_data.loc[mask, col_name] = 1
         else:
             print(f"\nUnknown category: {categories} for response: {response}")
+
+    if is_multicode:
+        for category in categories:
+            _categorize_response(category)
+
+    else:
+        _categorize_response(categories)
