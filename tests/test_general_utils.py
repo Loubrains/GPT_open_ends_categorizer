@@ -3,7 +3,6 @@ import pandas as pd
 from src.utils import general_utils
 
 
-### ----------------------- Tests ----------------------- ###
 @pytest.mark.parametrize(
     "test_data, expected_output",
     [
@@ -115,7 +114,7 @@ def test_load_csv_to_dict_of_lists(
     csv_file.write_text(csv_content)
 
     if expect_exception:
-        # Use monkeypatch to replace sys.exit with a lambda that raises SystemExit
+        # Mock sys.exit using monkeypatch
         monkeypatch.setattr("sys.exit", lambda x: (_ for _ in ()).throw(SystemExit(x)))
         with pytest.raises(SystemExit):
             general_utils.load_csv_to_dict_of_lists(str(csv_file))

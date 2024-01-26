@@ -3,7 +3,6 @@ import pandas as pd
 from src.utils import gpt_utils
 
 
-### ----------------------- Tests ----------------------- ###
 @pytest.mark.parametrize(
     "output_categories, categories_list, is_multicode, expect_exception",
     [
