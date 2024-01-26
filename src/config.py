@@ -14,9 +14,11 @@ Configuration Variables:
     number_of_categories: Number of categories to generate.
     responses_sample_size: Number of responses sent to GPT to generate the initial list of categories.
     batch_size: Number of responses to send to GPT per request.
+    
+File paths expect foreward slashes.
 """
 
-# File paths
+# File paths (expects foreward slashes)
 open_end_data_file_path = "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a open ends.csv"
 categories_file_path = "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a gpt categories.csv"  # Save to or load from
 codeframe_file_path = "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a gpt codeframe.csv"  # Save to or load from
