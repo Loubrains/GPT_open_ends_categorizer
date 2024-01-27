@@ -2,9 +2,10 @@
 *
 
 # Include these directories, and files within them
-!/src
-!/src/utils
-!/src/**.py
+!/gpt_categorizer_utils
+!/gpt_categorizer_utils/**.py
+!/scripts
+!/scripts/**.py
 !/tests
 !/tests/**.py
 
