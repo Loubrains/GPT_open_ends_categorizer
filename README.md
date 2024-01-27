@@ -2,26 +2,29 @@
 
 This project contains scripts and modules for the automatic categorization of open-ended text responses to survey questions using GPT-4.
 
-## Prerequisites
+# Prerequisites
 
-**Python**: Ensure Python is installed on your system. Download and install the latest version from [Python's official website](https://www.python.org/downloads/).
+**Python**: Ensure Python is installed on your system. Download and install the latest version from [Python's official website](https://www.python.org/downloads/). During installation, ensure you select the option to 'Add Python to PATH'.
 
 **Pip**: It's recommended to use the latest version of pip. Update pip using the following command in your command line tool _(such as Windows PowerShell)_:
 
-```sh
+```powershell
 python -m pip install --upgrade pip
 ```
 
-## Installation
+# Installation
 
 1. Make a copy of the project folder on your local system.
 
-2. In your command line tool, navigate to the copied project root directory:<br>
-   `cd 'C:\Users\[user]\path\to\project'`
+2. In your command line tool, navigate to the copied project root directory:
+
+```powershell
+cd 'C:\Users\[user]\path\to\project'
+```
 
 3. Run the following command to install the required packages:
 
-```sh
+```powershell
 pip install -r requirements.txt
 ```
 
@@ -29,18 +32,18 @@ pip install -r requirements.txt
 
 ### Scripts
 
-1. **config.py**: Holds user defined variables (file paths, questionnaire text, settings) that are used by the scripts.<br>
+1. **config.py**: Contains user defined variables (file paths, questionnaire text, settings) that are used by the scripts.<br>
    **Modify this file before running any scripts.**
-2. **gpt_category_generator.py**: Generates categories based a sample of the response data. Exports to CSV.
+2. **gpt_category_generator.py**: Generates a list of categories based a sample of the response data. Exports to CSV.
 3. **gpt_categorizer.py**: Generates a codeframe, a map of responses to their corresponding categories, based on a list of predefined list of categories. Exports to CSV.
 4. **create_categorized_output.py**: Applies a codeframe to the open-ends data to construct a final categorized DataFrame. Exports to a CSV.
 
 ### Running a script
 
-From the project root directory, execute a script using:
+From the project root directory, execute a script using the following command:
 
-```sh
-python src/[script_name].py
+```powershell
+python src/script_name.py
 ```
 
 **Note on loading the data**:
@@ -48,6 +51,26 @@ python src/[script_name].py
 - Accepts only `.csv` files.
 - The first column should contains UUIDs.
 - Subsequent columns should contain open-ended text responses.
+
+# Tests
+
+To run the test suite, run pytest by entering the following command in the project root directory:
+
+```powershell
+pytest
+```
+
+Optionally, you can run tests in a specific file or directory by providing the path:
+
+```powershell
+pytest tests/test_specific_module.py
+```
+
+For more verbose output, use the -v flag:
+
+```powershell
+pytest -v
+```
 
 # Future developments
 
