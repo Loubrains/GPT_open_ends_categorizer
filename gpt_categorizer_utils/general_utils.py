@@ -11,6 +11,7 @@ Functions:
     `export_dict_to_csv`: Exports a dictionary to a CSV file with 'key' and 'value' columns.
 """
 
+from pathlib import Path
 import pandas as pd
 import re
 import random
@@ -80,7 +81,7 @@ def create_batches(data: list[str], batch_size: int = 3):
         yield data[i : i + batch_size]
 
 
-def load_csv_to_dict(file_path: str) -> dict:
+def load_csv_to_dict(file_path: Path) -> dict:
     """
     Loads a CSV file into a dictionary. Expects the CSV to have two columns named 'key' and 'value'.
 
@@ -103,7 +104,7 @@ def load_csv_to_dict(file_path: str) -> dict:
         sys.exit(1)
 
 
-def load_csv_to_dict_of_lists(file_path: str) -> dict:
+def load_csv_to_dict_of_lists(file_path: Path) -> dict:
     """
     Loads a CSV file into a dictionary. Expects the CSV to have two columns named 'key' and 'value',
     where 'value' is a string representation of a list.
@@ -128,7 +129,7 @@ def load_csv_to_dict_of_lists(file_path: str) -> dict:
         sys.exit(1)
 
 
-def export_dataframe_to_csv(file_path: str, export_df: pd.DataFrame, header: bool = True) -> None:
+def export_dataframe_to_csv(file_path: Path, export_df: pd.DataFrame, header: bool = True) -> None:
     """
     Exports a pandas DataFrame to a CSV file.
 
@@ -151,7 +152,7 @@ def export_dataframe_to_csv(file_path: str, export_df: pd.DataFrame, header: boo
         print(f"\nError while writing to CSV: {e}")
 
 
-def export_dict_to_csv(file_path: str, export_dict: dict, header: bool = True) -> None:
+def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) -> None:
     """
     Exports a dictionary to a CSV file with 'key' and 'value' columns.
 
