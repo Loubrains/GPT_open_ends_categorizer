@@ -6,8 +6,11 @@
 !/.gitignore
 
 # Include these source directories and python files within them
+!/gpt_categorizer_utils
 !/gpt_categorizer_utils/**.py
+!/scripts
 !/scripts/**.py
+!/tests
 !/tests/**.py
 
 # Include the setup and requirements for installing packages
@@ -15,4 +18,5 @@
 !/requirements.txt
 
 # Include data directories but not the data within them
+!/data
 !/data/.keep
