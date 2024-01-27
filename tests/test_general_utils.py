@@ -85,10 +85,10 @@ def test_load_csv_to_dict(monkeypatch, tmp_path, csv_content, expected_dict, exp
         # Mock sys.exit using monkeypatch
         monkeypatch.setattr("sys.exit", lambda x: (_ for _ in ()).throw(SystemExit(x)))
         with pytest.raises(SystemExit):
-            general_utils.load_csv_to_dict(str(csv_file))
+            general_utils.load_csv_to_dict(csv_file)
 
     else:
-        result_dict = general_utils.load_csv_to_dict(str(csv_file))
+        result_dict = general_utils.load_csv_to_dict(csv_file)
         assert result_dict == expected_dict
 
 
@@ -117,8 +117,8 @@ def test_load_csv_to_dict_of_lists(
         # Mock sys.exit using monkeypatch
         monkeypatch.setattr("sys.exit", lambda x: (_ for _ in ()).throw(SystemExit(x)))
         with pytest.raises(SystemExit):
-            general_utils.load_csv_to_dict_of_lists(str(csv_file))
+            general_utils.load_csv_to_dict_of_lists(csv_file)
 
     else:
-        result_dict = general_utils.load_csv_to_dict_of_lists(str(csv_file))
+        result_dict = general_utils.load_csv_to_dict_of_lists(csv_file)
         assert result_dict == expected_dict
