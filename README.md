@@ -2,6 +2,8 @@
 
 This project contains scripts and modules for the automatic categorization of open-ended text responses to survey questions using GPT-4.
 
+It costs less than 1$ and takes about 15 seconds to categorize a dataset fo 1500 responses.
+
 # Prerequisites
 
 **Python**: Ensure Python is installed on your system. Download and install the latest version from [Python's official website](https://www.python.org/downloads/). During installation, ensure you select the option to 'Add Python to PATH'.
@@ -10,6 +12,12 @@ This project contains scripts and modules for the automatic categorization of op
 
 ```powershell
 python -m pip install --upgrade pip
+```
+
+**OpenAI API key**: Obtain your API key from the [OpenAI API Keys portal](https://platform.openai.com/api-keys). Once you have your key, set it as an environment variable named OPENAI_API_KEY on your system. This will be used for authenticating with OpenAI account and billing to your account.
+
+```powershell
+setx OPENAI_API_KEY "your_api_key_here"
 ```
 
 # Installation
