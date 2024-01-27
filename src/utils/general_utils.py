@@ -1,14 +1,14 @@
 """
-This module provides a collection of utilities for handling and processing text data using pandas.
+Utilities for handling and processing text data.
 
 Functions:
-    preprocess_text: Preprocesses input text by converting to lowercase, normalizing whitespace, and removing special characters.
-    get_random_sample_from_series: Retrieves a random sample of specified size from a pandas Series.
-    create_batches: Yields consecutive batches of data from a list.
-    load_csv_to_dict: Loads a CSV file with 'key' and 'value' columns into a dictionary.
-    load_csv_to_dict_of_lists: Loads a CSV file with 'key' and 'value' columns into a dictionary, where the 'value' column contains lists in string representation.
-    export_dataframe_to_csv: Exports a pandas DataFrame to a CSV file.
-    export_dict_to_csv: Exports a dictionary to a CSV file with 'key' and 'value' columns.
+    `preprocess_text`: Preprocesses input text by converting to lowercase, normalizing whitespace, and removing special characters.
+    `get_random_sample_from_series`: Retrieves a random sample of specified size from a pandas Series.
+    `create_batches`: Yields consecutive batches of data from a list.
+    `load_csv_to_dict`: Loads a CSV file with 'key' and 'value' columns into a dictionary.
+    `load_csv_to_dict_of_lists`: Loads a CSV file with 'key' and 'value' columns into a dictionary, where the 'value' column contains lists in string representation.
+    `export_dataframe_to_csv`: Exports a pandas DataFrame to a CSV file.
+    `export_dict_to_csv`: Exports a dictionary to a CSV file with 'key' and 'value' columns.
 """
 
 import pandas as pd

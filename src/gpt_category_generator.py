@@ -1,6 +1,6 @@
 """
-This generates a list of thematic categories based on a sample of open-ended survey responses using the GPT-4 API.
-It exports the generated categories to a CSV file.
+Script that generates a list of thematic categories based on a sample of open-ended survey responses using the GPT-4 API.
+Exports the generated categories to a CSV file.
 
 Steps:
 1. Load raw response data from a specified CSV file.
@@ -11,18 +11,15 @@ Steps:
 6. Export the generated categories to a CSV file.
 
 Input Files:
-- Open-ended response data file (open_end_data_file_path): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
+- Open-ended response data file (`open_end_data_file_path`): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
 
 Output Files:
-- Categories file (categories_file_path): A CSV file where the generated categories are saved.
-
-The script uses utility functions from the 'general_utils' and 'gpt_utils' modules for processing. The configurations, including file paths and GPT model parameters, are defined in the 'config' module.
+- Categories file (`categories_file_path`): A CSV file where the generated categories are saved.
 
 Notes:
 - Make sure OPENAI_API_KEY is set up in your system environment variables.
-- User-defined variables should be properly set in the config.py file.
-- The script supports asynchronous operations for calling the GPT-4 API.
-- The script provides console output at each major step to track progress and outputs.
+- The script uses utility functions from the `general_utils` and `gpt_utils` modules.
+- User-defined variables should be properly set in the `config.py` file before running this script.
 """
 
 

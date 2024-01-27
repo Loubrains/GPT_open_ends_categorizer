@@ -1,6 +1,6 @@
 """
-This script generates a dataframe of categorized open-ended survey responses based on a pre-defined codeframe.
-It exports the DataFrame to a CSV file.
+Script that generates a dataframe of categorized open-ended survey responses based on a pre-defined codeframe.
+Exports the DataFrame to a CSV file.
 
 Steps:
 1. Load the raw response data from a specified CSV file.
@@ -11,19 +11,17 @@ Steps:
 6. Save the categorized data to a CSV file.
 
 Input Files:
-- Open-ended response data file (open_end_data_file_path): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
-- Categories file (categories_file_path): A CSV file containing the list of categories. Expects no header.
-- Codeframe file (codeframe_file_path): A CSV file containing the predefined response-category pairs. Expects two columns, with headers 'key' and 'value'. Supports single or multiple categories per response based on the is_multicode flag.
+- Open-ended response data file (`open_end_data_file_path`): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
+- Categories file (`categories_file_path`): A CSV file containing the list of categories. Expects no header.
+- Codeframe file (`codeframe_file_path`): A CSV file containing the predefined response-category pairs. Expects two columns, with headers `key` and `value`. Supports single or multiple categories per response based on the `is_multicode` flag.
 
 Output File:
-- Categorized data file (categorized_data_file_path): A CSV file where the processed and categorized data is saved.
+- Categorized data file (`categorized_data_file_path`): A CSV file where the processed and categorized data is saved.
 
-The script utilizes utility functions from 'general_utils' and 'dataframe_utils' modules for processing and uses configurations defined in the 'config' module.
-
-Note:
-- User-defined variables should be properly set in the config.py file.
-- The script supports both single-category and multi-category (is_multicode) response categorization.
-- The script prints the progress at each major step and provides a summary of the categorized results.
+Notes:
+- The script utilizes utility functions from `general_utils` and `dataframe_utils` modules.
+- User-defined variables such as file paths should be properly set in the `config.py` file before running this script.
+- The script supports both single-category and multi-category (`is_multicode`) response categorization.
 """
 
 import pandas as pd

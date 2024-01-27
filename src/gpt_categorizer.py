@@ -1,6 +1,7 @@
 """
-This script generates a thematic codeframe for survey responses using the GPT-4 API.
-The codeframe is a dictionary of responses to categories. It exports the codeframe to a CSV file.
+Script that generates a thematic codeframe for survey responses using the GPT-4 API.
+The codeframe is a dictionary of responses to categories.
+Exports the codeframe to a CSV file.
 
 Steps:
 1. Load the raw response data from a specified CSV file.
@@ -11,19 +12,16 @@ Steps:
 6. Export the categorized responses (codeframe) to a CSV file.
 
 Input Files:
-- Open-ended response data file (open_end_data_file_path): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
-- Categories file (categories_file_path): A CSV file containing the list of predefined categories. Expects no header.
+- Open-ended response data file (`open_end_data_file_path`): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
+- Categories file (`categories_file_path`): A CSV file containing the list of predefined categories. Expects no header.
 
 Output File:
-- Codeframe file (codeframe_file_path): A CSV file where the response-category pairs (codeframe) are saved.
-
-The script uses utility functions from the 'general_utils' and 'gpt_utils' modules for processing. Configurations, including file paths and GPT model parameters, are defined in the 'config' module.
+- Codeframe file (`codeframe_file_path`): A CSV file where the response-category pairs (codeframe) are saved.
 
 Notes:
 - Make sure OPENAI_API_KEY is set up in your system environment variables.
-- User-defined variables should be properly set in the config.py file.
-- The script supports asynchronous operations for calling the GPT-4 API.
-- The script provides console output at each major step to track progress and outputs.
+- The script uses utility functions from the `general_utils` and `gpt_utils` modules.
+- User-defined variables should be properly set in the `config.py` file before running this script.
 """
 
 from openai import AsyncOpenAI

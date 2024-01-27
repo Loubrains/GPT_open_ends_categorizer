@@ -1,15 +1,16 @@
 """
-This module provides utilities for interacting with the OpenAI GPT model to perform tasks related to survey data categorization. 
-It allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
+Utilities for interacting with the OpenAI GPT model to categorize survey responses.
+
+This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
 validation of categorization results, and batch processing of responses for efficient categorization.
 
 Functions:
-    call_gpt: Asynchronously sends a user prompt to the GPT model and retrieves the completion.
-    gpt_generate_categories_list: Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
-    validate_gpt_categorized_output: Validates the GPT output received by the categorizer.
-    create_user_prompt_for_gpt_categorization: Creates a user prompt to send to the GPT model to categorize survey question responses.
-    gpt_categorize_responses: Asynchronously categorizes a list of responses using the GPT model.
-    gpt_categorize_response_batches_main: Asynchronously sends batches of survey responses to be categorized using the GPT model.
+    `call_gpt`: Asynchronously sends a user prompt to the GPT model and retrieves the completion.
+    `gpt_generate_categories_list`: Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
+    `validate_gpt_categorized_output`: Validates the GPT output received by the categorizer.
+    `create_user_prompt_for_gpt_categorization`: Creates a user prompt to send to the GPT model to categorize survey question responses.
+    `gpt_categorize_responses`: Asynchronously categorizes a list of responses using the GPT model.
+    `gpt_categorize_response_batches_main`: Asynchronously sends batches of survey responses to be categorized using the GPT model.
 """
 
 from openai import AsyncOpenAI
