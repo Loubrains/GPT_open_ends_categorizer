@@ -27,8 +27,7 @@ Notes:
 import pandas as pd
 import chardet
 from itertools import islice
-from utils import general_utils
-from utils import dataframe_utils
+from gpt_categorizer_utils import general_utils, dataframe_utils
 from config import *
 
 # Load open ends
