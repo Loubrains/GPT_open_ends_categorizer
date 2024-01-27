@@ -43,7 +43,7 @@ pip install -r requirements.txt
 From the project root directory, execute a script using the following command:
 
 ```powershell
-python src/script_name.py
+python scripts/script_name.py
 ```
 
 **Note on loading the data**:
@@ -54,13 +54,13 @@ python src/script_name.py
 
 # Tests
 
-To run the test suite, run pytest by entering the following command in the project root directory:
+To run the test suite, enter the following command in the project root directory:
 
 ```powershell
 pytest
 ```
 
-Optionally, you can run tests in a specific file or directory by providing the path:
+You can run tests in a specific file or directory by providing the path:
 
 ```powershell
 pytest tests/test_specific_module.py
@@ -74,7 +74,6 @@ pytest -v
 
 # Future developments
 
-- **Packaging**: Convert this project into a Python package for easier distribution and use.
 - **General gpt utility function**: Create a more general gpt utility function that isn't locked into the prompts that the other functions are - but does include cleaning, validation, retries, error handling, etc.
 - **Automation script**: Create a script that sequentially runs all the necessary scripts for a full automation (use with caution)
 - **User experience**: Create a smoother experience for new users to dive right in without modifying files, running multiple scripts, etc.
