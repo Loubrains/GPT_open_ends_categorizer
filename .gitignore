@@ -1,20 +1,18 @@
 # Ignore everything
 *
 
-# Include these directories, and files within them
-!/src
-!/src/utils
-!/src/**.py
-!/tests
-!/tests/**.py
-
-# Include these directories but not the data within them
-!/data
-!/data/*
-# NOTE: This isn't yet recursive :/
-!/data/*/.keep
-
 # Include these files at the root
 !/README.md
-!/requirements.txt
 !/.gitignore
+
+# Include these source directories and python files within them
+!/gpt_categorizer_utils/**.py
+!/scripts/**.py
+!/tests/**.py
+
+# Include the setup and requirements for installing packages
+!setup.py
+!/requirements.txt
+
+# Include data directories but not the data within them
+!/data/.keep

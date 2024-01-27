@@ -27,8 +27,7 @@ from openai import AsyncOpenAI
 import asyncio
 import pandas as pd
 import chardet
-from utils import general_utils
-from utils import gpt_utils
+from gpt_categorizer_utils import general_utils, gpt_utils
 from config import *
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py

@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from src.utils import dataframe_utils
+from gpt_categorizer_utils import dataframe_utils
 
 
 @pytest.mark.parametrize(
