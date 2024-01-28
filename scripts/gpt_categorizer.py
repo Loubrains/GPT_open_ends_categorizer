@@ -35,67 +35,67 @@ from gpt_categorizer_utils import general_utils, gpt_utils
 import config as cfg
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
-
 ### NOTE: Make sure OPENAI_API_KEY is set up in your system environment variables ###
-client = AsyncOpenAI()
 
+if __name__ == "__main__":
+    try:
+        client = AsyncOpenAI()
 
-try:
-    # Load open ends
-    print("\nLoading data...")
-    with open(cfg.open_end_data_file_path_load, "rb") as file:
-        encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
-    df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
+        # Load open ends
+        print("\nLoading data...")
+        with open(cfg.open_end_data_file_path_load, "rb") as file:
+            encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
+        df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
 
-    # Clean open ends
-    print("Cleaning responses...")
-    # Assume first column UUIDs, remaining columns are responses
-    df_preprocessed = df.iloc[:, 1:].map(general_utils.preprocess_text)
-    print(f"\nResponses (first 10):\n{df_preprocessed.head(10)}")
+        # Clean open ends
+        print("Cleaning responses...")
+        # Assume first column UUIDs, remaining columns are responses
+        df_preprocessed = df.iloc[:, 1:].map(general_utils.preprocess_text)
+        print(f"\nResponses (first 10):\n{df_preprocessed.head(10)}")
 
-    unique_responses = set(df_preprocessed.stack().dropna().reset_index(drop=True))
-    # we don't want to match empty string against every row
-    unique_responses = unique_responses - {""}
-    unique_responses = [str(item) for item in unique_responses]  # convert to list[str]
+        unique_responses = set(df_preprocessed.stack().dropna().reset_index(drop=True))
+        # we don't want to match empty string against every row
+        unique_responses = unique_responses - {""}
+        unique_responses = [str(item) for item in unique_responses]  # convert to list[str]
 
-    # Load categories
-    print("\nLoading categories...")
-    with open(cfg.categories_file_path_load, "rb") as file:
-        encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
-    categories = pd.read_csv(cfg.categories_file_path_load, encoding=encoding, header=None)
-    print(f"\nCategories:\n{categories}")
+        # Load categories
+        print("\nLoading categories...")
+        with open(cfg.categories_file_path_load, "rb") as file:
+            encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
+        categories = pd.read_csv(cfg.categories_file_path_load, encoding=encoding, header=None)
+        print(f"\nCategories:\n{categories}")
 
-    categories_list = categories.iloc[:, 0].tolist()
-    # Uncategorized is a helper category for later, we don't want ChatGPT to use it.
-    categories_list.remove("Uncategorized")
+        categories_list = categories.iloc[:, 0].tolist()
+        # Uncategorized is a helper category for later, we don't want ChatGPT to use it.
+        categories_list.remove("Uncategorized")
 
-    # Categorize responses using the GPT API
-    print("\nCategorizing data with GPT-4...")
-    # unique_responses_sample = unique_responses[:20]
-    categorized_dict = asyncio.run(
-        gpt_utils.gpt_categorize_response_batches_main(
-            client,
-            cfg.questionnaire_question,
-            unique_responses,
-            categories_list,
-            cfg.batch_size,
-            cfg.max_retries,
-            cfg.is_multicode,
+        # Categorize responses using the GPT API
+        print("\nCategorizing data with GPT-4...")
+        # unique_responses_sample = unique_responses[:20]
+        categorized_dict = asyncio.run(
+            gpt_utils.gpt_categorize_response_batches_main(
+                client,
+                cfg.questionnaire_question,
+                unique_responses,
+                categories_list,
+                cfg.batch_size,
+                cfg.max_retries,
+                cfg.is_multicode,
+            )
         )
-    )
 
-    categorized_dict.pop("", None)  # removing empty string since it matches against every row
+        categorized_dict.pop("", None)  # removing empty string since it matches against every row
 
-    print("\nCodeframe (first 10):")
-    print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.items(), 10)))
-    print("\nFinished categorizing with GPT-4...")
+        print("\nCodeframe (first 10):")
+        print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.items(), 10)))
+        print("\nFinished categorizing with GPT-4...")
 
-    # Saving codeframe (dictionary of response-category pairs)
-    print(f"\nSaving codeframe to {cfg.codeframe_file_path_save} ...")
-    general_utils.export_dict_to_csv(cfg.codeframe_file_path_save, categorized_dict)
+        # Saving codeframe (dictionary of response-category pairs)
+        print(f"\nSaving codeframe to {cfg.codeframe_file_path_save} ...")
+        general_utils.export_dict_to_csv(cfg.codeframe_file_path_save, categorized_dict)
 
-    print("\nFinished")
+        print("\nFinished")
 
-except Exception as e:
-    print(e)
-    sys.exit(1)
+    except Exception as e:
+        print(e)
+        sys.exit(1)
