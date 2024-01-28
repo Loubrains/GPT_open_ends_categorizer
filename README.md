@@ -2,7 +2,7 @@
 
 This project contains scripts and modules for the automatic categorization of open-ended text responses to survey questions using GPT-4.
 
-It costs less than 1$ and takes about 15 seconds to categorize a dataset fo 1500 responses.
+It costs less than 1$ and takes about 15 seconds to categorize a dataset of 1500 responses.
 
 # Prerequisites
 
