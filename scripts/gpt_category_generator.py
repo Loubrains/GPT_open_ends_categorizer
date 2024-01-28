@@ -34,51 +34,55 @@ from gpt_categorizer_utils import general_utils, gpt_utils
 import config as cfg
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
-
 ### NOTE: Make sure OPENAI_API_KEY is set up in your system environment variables ###
-client = AsyncOpenAI()
 
-try:
-    # Load open ends
-    print("Loading data...")
 
-    with open(cfg.open_end_data_file_path_load, "rb") as file:
-        encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
-    df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
+if __name__ == "__main__":
+    try:
+        client = AsyncOpenAI()
 
-    # Clean open ends
-    print("Cleaning responses...")
-    processed_responses = df[df.columns[1:]].map(general_utils.preprocess_text)
-    unique_responses = processed_responses.stack().drop_duplicates().dropna().reset_index(drop=True)
-    print("\nResponses:\n", unique_responses.head(10))
+        # Load open ends
+        print("Loading data...")
 
-    # Get sample of responses
-    print("\nFetching sample...")
-    responses_sample = general_utils.get_random_sample_from_series(unique_responses, responses_sample_size).to_list()  # type: ignore
+        with open(cfg.open_end_data_file_path_load, "rb") as file:
+            encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
+        df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
 
-    # Generate categories using the GPT API
-    print("Generating categories with GPT-4...")
-    categories = asyncio.run(
-        gpt_utils.gpt_generate_categories_list(
-            client,
-            cfg.questionnaire_question,
-            responses_sample,
-            cfg.number_of_categories,
-            cfg.max_retries,
+        # Clean open ends
+        print("Cleaning responses...")
+        processed_responses = df[df.columns[1:]].map(general_utils.preprocess_text)
+        unique_responses = (
+            processed_responses.stack().drop_duplicates().dropna().reset_index(drop=True)
         )
-    )
-    categories.extend(["Other", "Bad response", "Uncategorized"])
-    categories_df = pd.DataFrame(categories)
-    print(f"\nCategories:\n{categories}")
+        print("\nResponses:\n", unique_responses.head(10))
 
-    # Save results
-    print(f"\nSaving to {cfg.categories_file_path_save} ...")
-    general_utils.export_dataframe_to_csv(
-        cfg.categories_file_path_save, categories_df, header=False
-    )
+        # Get sample of responses
+        print("\nFetching sample...")
+        responses_sample = general_utils.get_random_sample_from_series(unique_responses, responses_sample_size).to_list()  # type: ignore
 
-    print("\nFinished")
+        # Generate categories using the GPT API
+        print("Generating categories with GPT-4...")
+        categories = asyncio.run(
+            gpt_utils.gpt_generate_categories_list(
+                client,
+                cfg.questionnaire_question,
+                responses_sample,
+                cfg.number_of_categories,
+                cfg.max_retries,
+            )
+        )
+        categories.extend(["Other", "Bad response", "Uncategorized"])
+        categories_df = pd.DataFrame(categories)
+        print(f"\nCategories:\n{categories}")
 
-except Exception as e:
-    print(e)
-    sys.exit(1)
+        # Save results
+        print(f"\nSaving to {cfg.categories_file_path_save} ...")
+        general_utils.export_dataframe_to_csv(
+            cfg.categories_file_path_save, categories_df, header=False
+        )
+
+        print("\nFinished")
+
+    except Exception as e:
+        print(e)
+        sys.exit(1)
