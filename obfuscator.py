@@ -15,12 +15,16 @@ content and replaces any matches with predefined placeholders.
 Usage:
     To use this script as a Git filter, add the following to your .gitattributes file in the project root directory:
     
+        ```powershell
         config.py filter=obfuscate
+        ```
 
     Then configure the Git filter with the following commands in the project root directory:
 
+        ```powershell
         git config filter.obfuscate.clean './obfuscator.py'
         git config filter.obfuscate.smudge cat
+        ```
         
     This will configure Git to clean config.py with this obfuscator script,
     but not clean it when checking out code (e.g. switching branches)
