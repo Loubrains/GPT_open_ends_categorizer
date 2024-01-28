@@ -83,25 +83,32 @@ from itertools import islice
 import sys
 from gpt_categorizer_utils import general_utils, gpt_utils
 import config as cfg
+import logging
+from logging_utils import setup_logging
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
 ### NOTE: Make sure OPENAI_API_KEY is set up in your system environment variables ###
 
+
 if __name__ == &#34;__main__&#34;:
+    setup_logging()
+    logger = logging.getLogger(__name__)
+
     try:
         client = AsyncOpenAI()
 
         # Load open ends
-        print(&#34;\nLoading data...&#34;)
+        logger.info(&#34;Loading data&#34;)
         with open(cfg.open_end_data_file_path_load, &#34;rb&#34;) as file:
             encoding = chardet.detect(file.read())[&#34;encoding&#34;]  # Detect encoding
         df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
+        logger.debug(f&#34;\nRaw data (first 20):\n{df.head(20)}&#34;)
 
         # Clean open ends
-        print(&#34;Cleaning responses...&#34;)
+        logger.info(&#34;Cleaning responses&#34;)
         # Assume first column UUIDs, remaining columns are responses
         df_preprocessed = df.iloc[:, 1:].map(general_utils.preprocess_text)
-        print(f&#34;\nResponses (first 10):\n{df_preprocessed.head(10)}&#34;)
+        logger.debug(f&#34;Responses (first 10):\n{df_preprocessed.head(10)}&#34;)
 
         unique_responses = set(df_preprocessed.stack().dropna().reset_index(drop=True))
         # we don&#39;t want to match empty string against every row
@@ -109,18 +116,18 @@ if __name__ == &#34;__main__&#34;:
         unique_responses = [str(item) for item in unique_responses]  # convert to list[str]
 
         # Load categories
-        print(&#34;\nLoading categories...&#34;)
+        logger.info(&#34;Loading categories&#34;)
         with open(cfg.categories_file_path_load, &#34;rb&#34;) as file:
             encoding = chardet.detect(file.read())[&#34;encoding&#34;]  # Detect encoding
         categories = pd.read_csv(cfg.categories_file_path_load, encoding=encoding, header=None)
-        print(f&#34;\nCategories:\n{categories}&#34;)
+        logger.debug(f&#34;Categories:\n{categories}&#34;)
 
         categories_list = categories.iloc[:, 0].tolist()
         # Uncategorized is a helper category for later, we don&#39;t want ChatGPT to use it.
         categories_list.remove(&#34;Uncategorized&#34;)
 
         # Categorize responses using the GPT API
-        print(&#34;\nCategorizing data with GPT-4...&#34;)
+        logger.info(&#34;Categorizing data with GPT-4&#34;)
         # unique_responses_sample = unique_responses[:20]
         categorized_dict = asyncio.run(
             gpt_utils.gpt_categorize_response_batches_main(
@@ -133,21 +140,22 @@ if __name__ == &#34;__main__&#34;:
                 cfg.is_multicode,
             )
         )
-
         categorized_dict.pop(&#34;&#34;, None)  # removing empty string since it matches against every row
 
-        print(&#34;\nCodeframe (first 10):&#34;)
-        print(&#34;\n&#34;.join(f&#34;{key}: {value}&#34; for key, value in islice(categorized_dict.items(), 10)))
-        print(&#34;\nFinished categorizing with GPT-4...&#34;)
+        logger.debug(
+            &#34;Codeframe (first 10):\n&#34;,
+            &#34;&#34;.join(f&#34;{key}: {value}&#34; for key, value in islice(categorized_dict.items(), 10)),
+        )
+        logger.info(&#34;Finished categorizing with GPT-4&#34;)
 
         # Saving codeframe (dictionary of response-category pairs)
-        print(f&#34;\nSaving codeframe to {cfg.codeframe_file_path_save} ...&#34;)
+        logger.info(f&#34;Saving codeframe to {cfg.codeframe_file_path_save}&#34;)
         general_utils.export_dict_to_csv(cfg.codeframe_file_path_save, categorized_dict)
 
-        print(&#34;\nFinished&#34;)
+        logger.info(&#34;Finished&#34;)
 
     except Exception as e:
-        print(e)
+        logger.exception(e)
         sys.exit(1)</code></pre>
 </details>
 </section>

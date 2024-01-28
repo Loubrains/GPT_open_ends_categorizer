@@ -46,6 +46,9 @@ Functions:
 &#34;&#34;&#34;
 
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def construct_default_categorized_dataframe(
@@ -154,7 +157,9 @@ def categorize_responses_for_response_column(
             categorized_data.loc[mask, f&#34;Uncategorized_{response_column}&#34;] = 0
             categorized_data.loc[mask, col_name] = 1
         else:
-            print(f&#34;\nUnknown category: {categories} for response: {response}&#34;)
+            logging.error(
+                f&#34;Unknown category in categories:\n{categories}\nfor response:\n{response}&#34;
+            )
 
     if is_multicode:
         for category in categories:
@@ -298,7 +303,9 @@ category columns to 1 and the 'Uncategorized' column to 0 for those rows.</p>
             categorized_data.loc[mask, f&#34;Uncategorized_{response_column}&#34;] = 0
             categorized_data.loc[mask, col_name] = 1
         else:
-            print(f&#34;\nUnknown category: {categories} for response: {response}&#34;)
+            logging.error(
+                f&#34;Unknown category in categories:\n{categories}\nfor response:\n{response}&#34;
+            )
 
     if is_multicode:
         for category in categories:

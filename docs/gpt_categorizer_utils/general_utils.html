@@ -55,6 +55,9 @@ import random
 import ast
 from typing import Any
 from pandas._libs.missing import NAType
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def preprocess_text(text: Any) -&gt; str | NAType:
@@ -128,7 +131,7 @@ def load_csv_to_dict(file_path: Path) -&gt; dict:
         dict: A dictionary whose keys and values come from the loaded CSV&#39;s &#39;key&#39; and &#39;value&#39; columns.
 
     Raises:
-        Prints an error message if the CSV cannot be read or other errors occur.
+        Raises an error message if the CSV cannot be read or other errors occur.
     &#34;&#34;&#34;
 
     try:
@@ -136,7 +139,7 @@ def load_csv_to_dict(file_path: Path) -&gt; dict:
         return dict(zip(df[&#34;key&#34;], df[&#34;value&#34;]))
 
     except Exception as e:
-        print(f&#34;\nError while reading CSV: {e}&#34;)
+        logger.error(f&#34;\nError while loading CSV: {e}&#34;)
         raise
 
 
@@ -152,7 +155,7 @@ def load_csv_to_dict_of_lists(file_path: Path) -&gt; dict:
         dict: A dictionary whose keys and values come from the loaded CSV&#39;s &#39;key&#39; and &#39;value&#39; columns (the latter converted to lists).
 
     Raises:
-        Prints an error message if the CSV cannot be read or other errors occur.
+        Raises an error message if the CSV cannot be read or other errors occur.
     &#34;&#34;&#34;
 
     try:
@@ -161,7 +164,7 @@ def load_csv_to_dict_of_lists(file_path: Path) -&gt; dict:
         return dict(zip(df[&#34;key&#34;], df[&#34;value&#34;]))
 
     except Exception as e:
-        print(f&#34;\nError while reading CSV: {e}&#34;)
+        logger.error(&#34;An error occured while loading csv: {e}&#34;)
         raise
 
 
@@ -175,7 +178,7 @@ def export_dataframe_to_csv(file_path: Path, export_df: pd.DataFrame, header: bo
         header (bool): If True, include the header row in the CSV. Defaults to True.
 
     Raises:
-        Prints an error message if the DataFrame is empty or if there&#39;s an error during file writing.
+        Raises an error message if the DataFrame is empty or if there&#39;s an error during file writing.
     &#34;&#34;&#34;
 
     try:
@@ -185,7 +188,7 @@ def export_dataframe_to_csv(file_path: Path, export_df: pd.DataFrame, header: bo
         export_df.to_csv(file_path, index=False, header=header)
 
     except Exception as e:
-        print(f&#34;\nError while writing to CSV: {e}&#34;)
+        logger.error(f&#34;\nError while writing to CSV: {e}&#34;)
 
 
 def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) -&gt; None:
@@ -198,7 +201,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
         header (bool): If True, include the header row in the CSV. Defaults to True.
 
     Raises:
-        Prints an error message if the dictionary is empty or if there&#39;s an error during file writing.
+        Raises an error message if the dictionary is empty or if there&#39;s an error during file writing.
     &#34;&#34;&#34;
 
     try:
@@ -209,7 +212,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
         df.to_csv(file_path, index=False, header=header)
 
     except Exception as e:
-        print(f&#34;\nError while writing to CSV: {e}&#34;)</code></pre>
+        logger.error(f&#34;\nError while writing to CSV: {e}&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -271,7 +274,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
 <dd>If True, include the header row in the CSV. Defaults to True.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
-<p>Prints an error message if the DataFrame is empty or if there's an error during file writing.</p></div>
+<p>Raises an error message if the DataFrame is empty or if there's an error during file writing.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -286,7 +289,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
         header (bool): If True, include the header row in the CSV. Defaults to True.
 
     Raises:
-        Prints an error message if the DataFrame is empty or if there&#39;s an error during file writing.
+        Raises an error message if the DataFrame is empty or if there&#39;s an error during file writing.
     &#34;&#34;&#34;
 
     try:
@@ -296,7 +299,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
         export_df.to_csv(file_path, index=False, header=header)
 
     except Exception as e:
-        print(f&#34;\nError while writing to CSV: {e}&#34;)</code></pre>
+        logger.error(f&#34;\nError while writing to CSV: {e}&#34;)</code></pre>
 </details>
 </dd>
 <dt id="gpt_categorizer_utils.general_utils.export_dict_to_csv"><code class="name flex">
@@ -314,7 +317,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
 <dd>If True, include the header row in the CSV. Defaults to True.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
-<p>Prints an error message if the dictionary is empty or if there's an error during file writing.</p></div>
+<p>Raises an error message if the dictionary is empty or if there's an error during file writing.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -329,7 +332,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
         header (bool): If True, include the header row in the CSV. Defaults to True.
 
     Raises:
-        Prints an error message if the dictionary is empty or if there&#39;s an error during file writing.
+        Raises an error message if the dictionary is empty or if there&#39;s an error during file writing.
     &#34;&#34;&#34;
 
     try:
@@ -340,7 +343,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
         df.to_csv(file_path, index=False, header=header)
 
     except Exception as e:
-        print(f&#34;\nError while writing to CSV: {e}&#34;)</code></pre>
+        logger.error(f&#34;\nError while writing to CSV: {e}&#34;)</code></pre>
 </details>
 </dd>
 <dt id="gpt_categorizer_utils.general_utils.get_random_sample_from_series"><code class="name flex">
@@ -405,7 +408,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
 <dd>A dictionary whose keys and values come from the loaded CSV's 'key' and 'value' columns.</dd>
 </dl>
 <h2 id="raises">Raises</h2>
-<p>Prints an error message if the CSV cannot be read or other errors occur.</p></div>
+<p>Raises an error message if the CSV cannot be read or other errors occur.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -421,7 +424,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
         dict: A dictionary whose keys and values come from the loaded CSV&#39;s &#39;key&#39; and &#39;value&#39; columns.
 
     Raises:
-        Prints an error message if the CSV cannot be read or other errors occur.
+        Raises an error message if the CSV cannot be read or other errors occur.
     &#34;&#34;&#34;
 
     try:
@@ -429,7 +432,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
         return dict(zip(df[&#34;key&#34;], df[&#34;value&#34;]))
 
     except Exception as e:
-        print(f&#34;\nError while reading CSV: {e}&#34;)
+        logger.error(f&#34;\nError while loading CSV: {e}&#34;)
         raise</code></pre>
 </details>
 </dd>
@@ -450,7 +453,7 @@ where 'value' is a string representation of a list.</p>
 <dd>A dictionary whose keys and values come from the loaded CSV's 'key' and 'value' columns (the latter converted to lists).</dd>
 </dl>
 <h2 id="raises">Raises</h2>
-<p>Prints an error message if the CSV cannot be read or other errors occur.</p></div>
+<p>Raises an error message if the CSV cannot be read or other errors occur.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -467,7 +470,7 @@ where 'value' is a string representation of a list.</p>
         dict: A dictionary whose keys and values come from the loaded CSV&#39;s &#39;key&#39; and &#39;value&#39; columns (the latter converted to lists).
 
     Raises:
-        Prints an error message if the CSV cannot be read or other errors occur.
+        Raises an error message if the CSV cannot be read or other errors occur.
     &#34;&#34;&#34;
 
     try:
@@ -476,7 +479,7 @@ where 'value' is a string representation of a list.</p>
         return dict(zip(df[&#34;key&#34;], df[&#34;value&#34;]))
 
     except Exception as e:
-        print(f&#34;\nError while reading CSV: {e}&#34;)
+        logger.error(&#34;An error occured while loading csv: {e}&#34;)
         raise</code></pre>
 </details>
 </dd>

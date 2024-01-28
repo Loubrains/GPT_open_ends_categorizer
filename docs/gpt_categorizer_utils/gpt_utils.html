@@ -55,6 +55,9 @@ from openai import AsyncOpenAI
 import json
 import asyncio
 from .general_utils import create_batches
+import logging
+
+logger = logging.getLogger(__name__)
 
 ### NOTE: potential future update to these utils: call gpt with JSON mode
 ### Put the following in the client.chat.completions.create() arguments:
@@ -77,7 +80,7 @@ async def call_gpt(
         str | None: The content of the model&#39;s completion, or None if an error occurs.
 
     Raises:
-        Raises an exception and prints an error message if the API call fails.
+        Raises an exception if the API call fails.
     &#34;&#34;&#34;
 
     try:
@@ -87,7 +90,7 @@ async def call_gpt(
         content = completion.choices[0].message.content
 
     except Exception as e:
-        print(f&#34;\nAn error occurred: {e}&#34;)
+        logger.error(f&#34;\nAn error occurred: {e}&#34;)
         content = &#34;Error&#34;
         raise
 
@@ -142,13 +145,13 @@ async def gpt_generate_categories_list(
             return output_categories_list
 
         except Exception as e:
-            print(
+            logger.info(
                 f&#34;&#34;&#34;\nAn error occurred:\n{e}
             Retrying attempt {attempt + 1}/{max_retries}...&#34;&#34;&#34;
             )
 
     # Error case
-    print(&#34;\nMax retries reached for responses&#34;)
+    logger.info(&#34;\nMax retries reached for responses&#34;)
     output_categories_list = [&#34;Error&#34;]
 
     return output_categories_list
@@ -296,14 +299,14 @@ async def gpt_categorize_responses(
             return output_categories
 
         except Exception as e:
-            print(
+            logger.info(
                 f&#34;&#34;&#34;\nAn error occurred:\n{e}
             Responses:\n{responses}
             Retrying attempt {attempt + 1}/{max_retries}...&#34;&#34;&#34;
             )
 
     # Error case
-    print(f&#34;\nMax retries reached for responses:\n{responses}&#34;)
+    logger.info(f&#34;\nMax retries reached for responses:\n{responses}&#34;)
     if is_multicode:
         output_categories = [[&#34;Error&#34;]] * len(responses)
     else:
@@ -385,7 +388,7 @@ async def gpt_categorize_response_batches_main(
 <h2 id="returns">Returns</h2>
 <p>str | None: The content of the model's completion, or None if an error occurs.</p>
 <h2 id="raises">Raises</h2>
-<p>Raises an exception and prints an error message if the API call fails.</p></div>
+<p>Raises an exception if the API call fails.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -405,7 +408,7 @@ async def gpt_categorize_response_batches_main(
         str | None: The content of the model&#39;s completion, or None if an error occurs.
 
     Raises:
-        Raises an exception and prints an error message if the API call fails.
+        Raises an exception if the API call fails.
     &#34;&#34;&#34;
 
     try:
@@ -415,7 +418,7 @@ async def gpt_categorize_response_batches_main(
         content = completion.choices[0].message.content
 
     except Exception as e:
-        print(f&#34;\nAn error occurred: {e}&#34;)
+        logger.error(f&#34;\nAn error occurred: {e}&#34;)
         content = &#34;Error&#34;
         raise
 
@@ -651,14 +654,14 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
             return output_categories
 
         except Exception as e:
-            print(
+            logger.info(
                 f&#34;&#34;&#34;\nAn error occurred:\n{e}
             Responses:\n{responses}
             Retrying attempt {attempt + 1}/{max_retries}...&#34;&#34;&#34;
             )
 
     # Error case
-    print(f&#34;\nMax retries reached for responses:\n{responses}&#34;)
+    logger.info(f&#34;\nMax retries reached for responses:\n{responses}&#34;)
     if is_multicode:
         output_categories = [[&#34;Error&#34;]] * len(responses)
     else:
@@ -747,13 +750,13 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
             return output_categories_list
 
         except Exception as e:
-            print(
+            logger.info(
                 f&#34;&#34;&#34;\nAn error occurred:\n{e}
             Retrying attempt {attempt + 1}/{max_retries}...&#34;&#34;&#34;
             )
 
     # Error case
-    print(&#34;\nMax retries reached for responses&#34;)
+    logger.info(&#34;\nMax retries reached for responses&#34;)
     output_categories_list = [&#34;Error&#34;]
 
     return output_categories_list</code></pre>

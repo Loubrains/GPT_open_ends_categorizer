@@ -80,36 +80,44 @@ from itertools import islice
 import sys
 from gpt_categorizer_utils import general_utils, dataframe_utils
 import config as cfg
+import logging
+from logging_utils import setup_logging
+
 
 if __name__ == &#34;__main__&#34;:
+    setup_logging()
+    logger = logging.getLogger(__name__)
+
     try:
         # Load open ends
-        print(&#34;\nLoading data...&#34;)
+        logger.info(&#34;Loading data&#34;)
         with open(cfg.open_end_data_file_path_load, &#34;rb&#34;) as file:
             encoding = chardet.detect(file.read())[&#34;encoding&#34;]  # Detect encoding
         df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
-        print(f&#34;\nRaw data:\n{df.head(20)}&#34;)
+        logger.debug(f&#34;\nRaw data (first 20):\n{df.head(20)}&#34;)
 
         # Clean open ends
-        print(&#34;\nCleaning responses...&#34;)
+        logger.info(&#34;Cleaning data&#34;)
         response_columns = df.iloc[:, 1:].map(general_utils.preprocess_text)
-        print(f&#34;\nResponses (first 10):\n{response_columns.head(10)}&#34;)
+        logger.debug(f&#34;\nResponses (first 10):\n{response_columns.head(10)}&#34;)
 
         # Load categories
-        print(&#34;\nLoading categories...&#34;)
+        logger.info(&#34;Loading categories&#34;)
         with open(cfg.categories_file_path_load, &#34;rb&#34;) as file:
             encoding = chardet.detect(file.read())[&#34;encoding&#34;]  # Detect encoding
         categories = pd.read_csv(cfg.categories_file_path_load, encoding=encoding, header=None)
-        print(f&#34;\nCategories:\n{categories}&#34;)
+        logger.debug(f&#34;Categories:\n{categories}&#34;)
 
         # Load codeframe (dictionary of response-category pairs)
-        print(&#34;\nLoading codeframe...&#34;)
+        logger.info(&#34;Loading codeframe...&#34;)
         if cfg.is_multicode:
             categorized_dict = general_utils.load_csv_to_dict_of_lists(cfg.codeframe_file_path_load)
         else:
             categorized_dict = general_utils.load_csv_to_dict(cfg.codeframe_file_path_load)
-        print(&#34;\nCodeframe (first 10):\n&#34;)
-        print(&#34;\n&#34;.join(f&#34;{key}: {value}&#34; for key, value in islice(categorized_dict.items(), 10)))
+        logger.debug(
+            &#34;Codeframe (first 10):\n&#34;,
+            &#34;\n&#34;.join(f&#34;{key}: {value}&#34; for key, value in islice(categorized_dict.items(), 10)),
+        )
 
         # Create data structures
         categories_list = categories.iloc[:, 0].tolist()
@@ -126,28 +134,28 @@ if __name__ == &#34;__main__&#34;:
             )
 
         # Populate categorized dataframe
-        print(&#34;\nPreparing output data...&#34;)
+        logger.info(&#34;Preparing output data...&#34;)
         for response_column in response_column_names:
             for response, categories in categorized_dict.items():
                 if cfg.is_multicode and &#34;Error&#34; in categories:
-                    print(f&#34;\nResponse &#39;{response}&#39; was not categorized.&#34;)
+                    logger.error(f&#34;\nResponse &#39;{response}&#39; was not categorized.&#34;)
                 elif categories == &#34;Error&#34;:
-                    print(f&#34;\nResponse &#39;{response}&#39; was not categorized.&#34;)
+                    logger.error(f&#34;\nResponse &#39;{response}&#39; was not categorized.&#34;)
 
                 dataframe_utils.categorize_responses_for_response_column(
                     response, categories, response_column, categorized_data, cfg.is_multicode
                 )
 
-        print(f&#34;\nCategorized results:\n{categorized_data.head(10)}&#34;)
+        logger.debug(f&#34;\nCategorized results (first 10):\n{categorized_data.head(10)}&#34;)
 
         # Save to csv
-        print(f&#34;\nSaving to {cfg.categorized_data_file_path_save} ...&#34;)
+        logger.info(f&#34;Saving to {cfg.categorized_data_file_path_save} ...&#34;)
         general_utils.export_dataframe_to_csv(cfg.categorized_data_file_path_save, categorized_data)
 
-        print(&#34;\nFinished&#34;)
+        logger.info(&#34;Finished&#34;)
 
     except Exception as e:
-        print(e)
+        logger.exception(e)
         sys.exit(1)</code></pre>
 </details>
 </section>

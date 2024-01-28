@@ -4,9 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>scripts.gpt_category_generator API documentation</title>
-<meta name="description" content="Script that generates a list of thematic categories based on a sample of open-ended survey responses using the GPT-4 API.
-Exports the generated …" />
+<title>scripts.logging_utils API documentation</title>
+<meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -20,125 +19,38 @@ Exports the generated …" />
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>scripts.gpt_category_generator</code></h1>
+<h1 class="title">Module <code>scripts.logging_utils</code></h1>
 </header>
 <section id="section-intro">
-<p>Script that generates a list of thematic categories based on a sample of open-ended survey responses using the GPT-4 API.
-Exports the generated categories to a CSV file.</p>
-<p>Steps:
-1. Load raw response data from a specified CSV file.
-2. Clean the responses by preprocessing the text.
-3. Extract a unique set of responses and fetch a random sample from these unique responses.
-4. Use the GPT-4 API to generate a list of categories based on the sample of responses.
-5. Append additional default categories such as "Other", "Bad response", and "Uncategorized".
-6. Export the generated categories to a CSV file.</p>
-<p>Input Files:
-- Open-ended response data file (<code>open_end_data_file_path</code>): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.</p>
-<p>Output Files:
-- Categories file (<code>categories_file_path</code>): A CSV file where the generated categories are saved.</p>
-<p>Notes:
-- Make sure OPENAI_API_KEY is set up in your system environment variables.
-- The script uses utility functions from the <code>general_utils</code> and <code>gpt_utils</code> modules.
-- User-defined variables should be properly set in the <code>config.py</code> file before running this script.
-- The script terminates if exceptions are raised at any point.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;
-Script that generates a list of thematic categories based on a sample of open-ended survey responses using the GPT-4 API.
-Exports the generated categories to a CSV file.
-
-Steps:
-1. Load raw response data from a specified CSV file.
-2. Clean the responses by preprocessing the text.
-3. Extract a unique set of responses and fetch a random sample from these unique responses.
-4. Use the GPT-4 API to generate a list of categories based on the sample of responses.
-5. Append additional default categories such as &#34;Other&#34;, &#34;Bad response&#34;, and &#34;Uncategorized&#34;.
-6. Export the generated categories to a CSV file.
-
-Input Files:
-- Open-ended response data file (`open_end_data_file_path`): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
-
-Output Files:
-- Categories file (`categories_file_path`): A CSV file where the generated categories are saved.
-
-Notes:
-- Make sure OPENAI_API_KEY is set up in your system environment variables.
-- The script uses utility functions from the `general_utils` and `gpt_utils` modules.
-- User-defined variables should be properly set in the `config.py` file before running this script.
-- The script terminates if exceptions are raised at any point.
-&#34;&#34;&#34;
+<pre><code class="python">import logging
 
 
-from openai import AsyncOpenAI
-import asyncio
-import pandas as pd
-from pathlib import Path
-import chardet
-import sys
-from gpt_categorizer_utils import general_utils, gpt_utils
-import config as cfg
-import logging
-from logging_utils import setup_logging
+def setup_logging():
+    # Set up file logging
+    file_handler = logging.FileHandler(&#34;app.log&#34;, mode=&#34;w&#34;)
+    file_format = logging.Formatter(
+        &#34;%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s&#34;
+    )
+    file_handler.setFormatter(file_format)
+    file_handler.setLevel(logging.DEBUG)
 
-### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
-### NOTE: Make sure OPENAI_API_KEY is set up in your system environment variables ###
+    # Set up console logging
+    console_handler = logging.StreamHandler()
+    console_format = logging.Formatter(&#34;%(levelname)s - %(message)s&#34;)
+    console_handler.setFormatter(console_format)
+    console_handler.setLevel(logging.INFO)
 
+    logger = logging.getLogger()
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
 
-if __name__ == &#34;__main__&#34;:
-    setup_logging()
-    logger = logging.getLogger(__name__)
+    logging.getLogger(&#34;chardet&#34;).setLevel(logging.WARNING)  # Noisy library
 
-    try:
-        client = AsyncOpenAI()
-
-        # Load open ends
-        logger.info(&#34;Loading data&#34;)
-
-        with open(cfg.open_end_data_file_path_load, &#34;rb&#34;) as file:
-            encoding = chardet.detect(file.read())[&#34;encoding&#34;]  # Detect encoding
-        df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
-
-        # Clean open ends
-        logger.info(&#34;Cleaning responses&#34;)
-        processed_responses = df[df.columns[1:]].map(general_utils.preprocess_text)
-        unique_responses = (
-            processed_responses.stack().drop_duplicates().dropna().reset_index(drop=True)
-        )
-        logger.debug(f&#34;Responses (first 10):\n{unique_responses.head(10)}&#34;)
-
-        # Get sample of responses
-        logger.info(&#34;Fetching sample of responses&#34;)
-        responses_sample = general_utils.get_random_sample_from_series(unique_responses, cfg.responses_sample_size).to_list()  # type: ignore
-        logger.debug(f&#34;Sample (size {cfg.responses_sample_size}):\n{responses_sample}&#34;)
-
-        # Generate categories using the GPT API
-        logger.info(&#34;Generating categories with GPT-4&#34;)
-        categories = asyncio.run(
-            gpt_utils.gpt_generate_categories_list(
-                client,
-                cfg.questionnaire_question,
-                responses_sample,
-                cfg.number_of_categories,
-                cfg.max_retries,
-            )
-        )
-        categories.extend([&#34;Other&#34;, &#34;Bad response&#34;, &#34;Uncategorized&#34;])
-        categories_df = pd.DataFrame(categories)
-        logger.debug(f&#34;Categories generated:\n{categories}&#34;)
-
-        # Save results
-        logger.info(f&#34;Saving categories to {cfg.categories_file_path_save}&#34;)
-        general_utils.export_dataframe_to_csv(
-            cfg.categories_file_path_save, categories_df, header=False
-        )
-
-        logger.info(&#34;Finished&#34;)
-
-    except Exception as e:
-        logger.exception(e)
-        sys.exit(1)</code></pre>
+    logger.info(&#34;Logging initialized&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -146,6 +58,42 @@ if __name__ == &#34;__main__&#34;:
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="scripts.logging_utils.setup_logging"><code class="name flex">
+<span>def <span class="ident">setup_logging</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def setup_logging():
+    # Set up file logging
+    file_handler = logging.FileHandler(&#34;app.log&#34;, mode=&#34;w&#34;)
+    file_format = logging.Formatter(
+        &#34;%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s&#34;
+    )
+    file_handler.setFormatter(file_format)
+    file_handler.setLevel(logging.DEBUG)
+
+    # Set up console logging
+    console_handler = logging.StreamHandler()
+    console_format = logging.Formatter(&#34;%(levelname)s - %(message)s&#34;)
+    console_handler.setFormatter(console_format)
+    console_handler.setLevel(logging.INFO)
+
+    logger = logging.getLogger()
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    logging.getLogger(&#34;chardet&#34;).setLevel(logging.WARNING)  # Noisy library
+
+    logger.info(&#34;Logging initialized&#34;)</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -159,6 +107,11 @@ if __name__ == &#34;__main__&#34;:
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="scripts" href="index.html">scripts</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="scripts.logging_utils.setup_logging" href="#scripts.logging_utils.setup_logging">setup_logging</a></code></li>
 </ul>
 </li>
 </ul>
