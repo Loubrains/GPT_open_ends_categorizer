@@ -60,6 +60,10 @@ python scripts/script_name.py
 - The first column should contains UUIDs.
 - Subsequent columns should contain open-ended text responses.
 
+# Documentation
+
+The HTML documentation for this project is generated using `pdoc3`. You can view it by opening the files located in the `docs` directory with your web browser.
+
 # Tests
 
 To run the test suite, enter the following command in the project root directory:
