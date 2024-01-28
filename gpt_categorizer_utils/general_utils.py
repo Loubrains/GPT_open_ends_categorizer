@@ -18,6 +18,9 @@ import random
 import ast
 from typing import Any
 from pandas._libs.missing import NAType
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def preprocess_text(text: Any) -> str | NAType:
@@ -91,7 +94,7 @@ def load_csv_to_dict(file_path: Path) -> dict:
         dict: A dictionary whose keys and values come from the loaded CSV's 'key' and 'value' columns.
 
     Raises:
-        Prints an error message if the CSV cannot be read or other errors occur.
+        Raises an error message if the CSV cannot be read or other errors occur.
     """
 
     try:
@@ -99,7 +102,7 @@ def load_csv_to_dict(file_path: Path) -> dict:
         return dict(zip(df["key"], df["value"]))
 
     except Exception as e:
-        print(f"\nError while reading CSV: {e}")
+        logger.error(f"\nError while loading CSV: {e}")
         raise
 
 
@@ -115,7 +118,7 @@ def load_csv_to_dict_of_lists(file_path: Path) -> dict:
         dict: A dictionary whose keys and values come from the loaded CSV's 'key' and 'value' columns (the latter converted to lists).
 
     Raises:
-        Prints an error message if the CSV cannot be read or other errors occur.
+        Raises an error message if the CSV cannot be read or other errors occur.
     """
 
     try:
@@ -124,6 +127,7 @@ def load_csv_to_dict_of_lists(file_path: Path) -> dict:
         return dict(zip(df["key"], df["value"]))
 
     except Exception as e:
+        logger.error("An error occured while loading csv: {e}")
         raise
 
 
@@ -137,7 +141,7 @@ def export_dataframe_to_csv(file_path: Path, export_df: pd.DataFrame, header: bo
         header (bool): If True, include the header row in the CSV. Defaults to True.
 
     Raises:
-        Prints an error message if the DataFrame is empty or if there's an error during file writing.
+        Raises an error message if the DataFrame is empty or if there's an error during file writing.
     """
 
     try:
@@ -147,7 +151,7 @@ def export_dataframe_to_csv(file_path: Path, export_df: pd.DataFrame, header: bo
         export_df.to_csv(file_path, index=False, header=header)
 
     except Exception as e:
-        print(f"\nError while writing to CSV: {e}")
+        logger.error(f"\nError while writing to CSV: {e}")
 
 
 def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) -> None:
@@ -160,7 +164,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
         header (bool): If True, include the header row in the CSV. Defaults to True.
 
     Raises:
-        Prints an error message if the dictionary is empty or if there's an error during file writing.
+        Raises an error message if the dictionary is empty or if there's an error during file writing.
     """
 
     try:
@@ -171,4 +175,4 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
         df.to_csv(file_path, index=False, header=header)
 
     except Exception as e:
-        print(f"\nError while writing to CSV: {e}")
+        logger.error(f"\nError while writing to CSV: {e}")

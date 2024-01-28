@@ -11,6 +11,9 @@ Functions:
 """
 
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def construct_default_categorized_dataframe(
@@ -119,7 +122,9 @@ def categorize_responses_for_response_column(
             categorized_data.loc[mask, f"Uncategorized_{response_column}"] = 0
             categorized_data.loc[mask, col_name] = 1
         else:
-            print(f"\nUnknown category: {categories} for response: {response}")
+            logging.error(
+                f"Unknown category in categories:\n{categories}\nfor response:\n{response}"
+            )
 
     if is_multicode:
         for category in categories:

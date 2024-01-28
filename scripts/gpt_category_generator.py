@@ -32,36 +32,42 @@ import chardet
 import sys
 from gpt_categorizer_utils import general_utils, gpt_utils
 import config as cfg
+import logging
+from logging_utils import setup_logging
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
 ### NOTE: Make sure OPENAI_API_KEY is set up in your system environment variables ###
 
 
 if __name__ == "__main__":
+    setup_logging()
+    logger = logging.getLogger(__name__)
+
     try:
         client = AsyncOpenAI()
 
         # Load open ends
-        print("Loading data...")
+        logger.info("Loading data")
 
         with open(cfg.open_end_data_file_path_load, "rb") as file:
             encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
         df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
 
         # Clean open ends
-        print("Cleaning responses...")
+        logger.info("Cleaning responses")
         processed_responses = df[df.columns[1:]].map(general_utils.preprocess_text)
         unique_responses = (
             processed_responses.stack().drop_duplicates().dropna().reset_index(drop=True)
         )
-        print("\nResponses:\n", unique_responses.head(10))
+        logger.debug(f"Responses (first 10):\n{unique_responses.head(10)}")
 
         # Get sample of responses
-        print("\nFetching sample...")
-        responses_sample = general_utils.get_random_sample_from_series(unique_responses, responses_sample_size).to_list()  # type: ignore
+        logger.info("Fetching sample of responses")
+        responses_sample = general_utils.get_random_sample_from_series(unique_responses, cfg.responses_sample_size).to_list()  # type: ignore
+        logger.debug(f"Sample (size {cfg.responses_sample_size}):\n{responses_sample}")
 
         # Generate categories using the GPT API
-        print("Generating categories with GPT-4...")
+        logger.info("Generating categories with GPT-4")
         categories = asyncio.run(
             gpt_utils.gpt_generate_categories_list(
                 client,
@@ -73,16 +79,16 @@ if __name__ == "__main__":
         )
         categories.extend(["Other", "Bad response", "Uncategorized"])
         categories_df = pd.DataFrame(categories)
-        print(f"\nCategories:\n{categories}")
+        logger.debug(f"Categories generated:\n{categories}")
 
         # Save results
-        print(f"\nSaving to {cfg.categories_file_path_save} ...")
+        logger.info(f"Saving categories to {cfg.categories_file_path_save}")
         general_utils.export_dataframe_to_csv(
             cfg.categories_file_path_save, categories_df, header=False
         )
 
-        print("\nFinished")
+        logger.info("Finished")
 
     except Exception as e:
-        print(e)
+        logger.exception(e)
         sys.exit(1)

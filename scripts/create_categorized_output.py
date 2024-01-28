@@ -31,36 +31,44 @@ from itertools import islice
 import sys
 from gpt_categorizer_utils import general_utils, dataframe_utils
 import config as cfg
+import logging
+from logging_utils import setup_logging
+
 
 if __name__ == "__main__":
+    setup_logging()
+    logger = logging.getLogger(__name__)
+
     try:
         # Load open ends
-        print("\nLoading data...")
+        logger.info("Loading data")
         with open(cfg.open_end_data_file_path_load, "rb") as file:
             encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
         df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
-        print(f"\nRaw data:\n{df.head(20)}")
+        logger.debug(f"\nRaw data (first 20):\n{df.head(20)}")
 
         # Clean open ends
-        print("\nCleaning responses...")
+        logger.info("Cleaning data")
         response_columns = df.iloc[:, 1:].map(general_utils.preprocess_text)
-        print(f"\nResponses (first 10):\n{response_columns.head(10)}")
+        logger.debug(f"\nResponses (first 10):\n{response_columns.head(10)}")
 
         # Load categories
-        print("\nLoading categories...")
+        logger.info("Loading categories")
         with open(cfg.categories_file_path_load, "rb") as file:
             encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
         categories = pd.read_csv(cfg.categories_file_path_load, encoding=encoding, header=None)
-        print(f"\nCategories:\n{categories}")
+        logger.debug(f"Categories:\n{categories}")
 
         # Load codeframe (dictionary of response-category pairs)
-        print("\nLoading codeframe...")
+        logger.info("Loading codeframe...")
         if cfg.is_multicode:
             categorized_dict = general_utils.load_csv_to_dict_of_lists(cfg.codeframe_file_path_load)
         else:
             categorized_dict = general_utils.load_csv_to_dict(cfg.codeframe_file_path_load)
-        print("\nCodeframe (first 10):\n")
-        print("\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.items(), 10)))
+        logger.debug(
+            "Codeframe (first 10):\n",
+            "\n".join(f"{key}: {value}" for key, value in islice(categorized_dict.items(), 10)),
+        )
 
         # Create data structures
         categories_list = categories.iloc[:, 0].tolist()
@@ -77,26 +85,26 @@ if __name__ == "__main__":
             )
 
         # Populate categorized dataframe
-        print("\nPreparing output data...")
+        logger.info("Preparing output data...")
         for response_column in response_column_names:
             for response, categories in categorized_dict.items():
                 if cfg.is_multicode and "Error" in categories:
-                    print(f"\nResponse '{response}' was not categorized.")
+                    logger.error(f"\nResponse '{response}' was not categorized.")
                 elif categories == "Error":
-                    print(f"\nResponse '{response}' was not categorized.")
+                    logger.error(f"\nResponse '{response}' was not categorized.")
 
                 dataframe_utils.categorize_responses_for_response_column(
                     response, categories, response_column, categorized_data, cfg.is_multicode
                 )
 
-        print(f"\nCategorized results:\n{categorized_data.head(10)}")
+        logger.debug(f"\nCategorized results (first 10):\n{categorized_data.head(10)}")
 
         # Save to csv
-        print(f"\nSaving to {cfg.categorized_data_file_path_save} ...")
+        logger.info(f"Saving to {cfg.categorized_data_file_path_save} ...")
         general_utils.export_dataframe_to_csv(cfg.categorized_data_file_path_save, categorized_data)
 
-        print("\nFinished")
+        logger.info("Finished")
 
     except Exception as e:
-        print(e)
+        logger.exception(e)
         sys.exit(1)

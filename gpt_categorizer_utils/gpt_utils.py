@@ -17,6 +17,9 @@ from openai import AsyncOpenAI
 import json
 import asyncio
 from .general_utils import create_batches
+import logging
+
+logger = logging.getLogger(__name__)
 
 ### NOTE: potential future update to these utils: call gpt with JSON mode
 ### Put the following in the client.chat.completions.create() arguments:
@@ -39,7 +42,7 @@ async def call_gpt(
         str | None: The content of the model's completion, or None if an error occurs.
 
     Raises:
-        Raises an exception and prints an error message if the API call fails.
+        Raises an exception if the API call fails.
     """
 
     try:
@@ -49,7 +52,7 @@ async def call_gpt(
         content = completion.choices[0].message.content
 
     except Exception as e:
-        print(f"\nAn error occurred: {e}")
+        logger.error(f"\nAn error occurred: {e}")
         content = "Error"
         raise
 
@@ -104,13 +107,13 @@ async def gpt_generate_categories_list(
             return output_categories_list
 
         except Exception as e:
-            print(
+            logger.info(
                 f"""\nAn error occurred:\n{e}
             Retrying attempt {attempt + 1}/{max_retries}..."""
             )
 
     # Error case
-    print("\nMax retries reached for responses")
+    logger.info("\nMax retries reached for responses")
     output_categories_list = ["Error"]
 
     return output_categories_list
@@ -258,14 +261,14 @@ async def gpt_categorize_responses(
             return output_categories
 
         except Exception as e:
-            print(
+            logger.info(
                 f"""\nAn error occurred:\n{e}
             Responses:\n{responses}
             Retrying attempt {attempt + 1}/{max_retries}..."""
             )
 
     # Error case
-    print(f"\nMax retries reached for responses:\n{responses}")
+    logger.info(f"\nMax retries reached for responses:\n{responses}")
     if is_multicode:
         output_categories = [["Error"]] * len(responses)
     else:
