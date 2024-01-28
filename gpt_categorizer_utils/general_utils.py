@@ -91,7 +91,7 @@ def load_csv_to_dict(file_path: Path) -> dict:
         dict: A dictionary whose keys and values come from the loaded CSV's 'key' and 'value' columns.
 
     Raises:
-        Prints an error message and exits the program if the CSV cannot be read or other errors occur.
+        Prints an error message if the CSV cannot be read or other errors occur.
     """
 
     try:
@@ -115,7 +115,7 @@ def load_csv_to_dict_of_lists(file_path: Path) -> dict:
         dict: A dictionary whose keys and values come from the loaded CSV's 'key' and 'value' columns (the latter converted to lists).
 
     Raises:
-        Prints an error message and exits the program if the CSV cannot be read or other errors occur.
+        Prints an error message if the CSV cannot be read or other errors occur.
     """
 
     try:
