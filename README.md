@@ -62,7 +62,13 @@ python scripts/script_name.py
 
 # Documentation
 
-The HTML documentation for this project is generated using `pdoc3`. You can view it by opening the files located in the `docs` directory with your web browser.
+The HTML documentation for this project is generated with `pdoc3` using the following command:
+
+```powershell
+pdoc --html --output-dir docs --force scripts gpt_categorizer_utils
+```
+
+You can view it by opening the files located in the `docs` directory with your web browser.
 
 # Tests
 
