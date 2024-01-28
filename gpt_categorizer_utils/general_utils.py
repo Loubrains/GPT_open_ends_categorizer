@@ -85,7 +85,7 @@ def load_csv_to_dict(file_path: Path) -> dict:
     Loads a CSV file into a dictionary. Expects the CSV to have two columns named 'key' and 'value'.
 
     Args:
-        file_path (str): The path to the CSV file.
+        file_path (pathlib.Path): The path to the CSV file.
 
     Returns:
         dict: A dictionary whose keys and values come from the loaded CSV's 'key' and 'value' columns.
@@ -109,7 +109,7 @@ def load_csv_to_dict_of_lists(file_path: Path) -> dict:
     where 'value' is a string representation of a list.
 
     Args:
-        file_path (str): The path to the CSV file.
+        file_path (pathlib.Path): The path to the CSV file.
 
     Returns:
         dict: A dictionary whose keys and values come from the loaded CSV's 'key' and 'value' columns (the latter converted to lists).
@@ -132,7 +132,7 @@ def export_dataframe_to_csv(file_path: Path, export_df: pd.DataFrame, header: bo
     Exports a pandas DataFrame to a CSV file.
 
     Args:
-        file_path (str): The path where the CSV file will be saved.
+        file_path (pathlib.Path): The path where the CSV file will be saved.
         export_df (pd.DataFrame): The DataFrame to export.
         header (bool): If True, include the header row in the CSV. Defaults to True.
 
@@ -155,7 +155,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
     Exports a dictionary to a CSV file with 'key' and 'value' columns.
 
     Args:
-        file_path (str): The path where the CSV file will be saved.
+        file_path (pathlib.Path): The path where the CSV file will be saved.
         export_dict (dict): The dictionary to export.
         header (bool): If True, include the header row in the CSV. Defaults to True.
 
