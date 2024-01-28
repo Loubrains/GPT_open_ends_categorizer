@@ -263,7 +263,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
 <div class="desc"><p>Exports a pandas DataFrame to a CSV file.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>file_path</code></strong> :&ensp;<code>pathlib.Path</code></dt>
 <dd>The path where the CSV file will be saved.</dd>
 <dt><strong><code>export_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
 <dd>The DataFrame to export.</dd>
@@ -306,7 +306,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
 <div class="desc"><p>Exports a dictionary to a CSV file with 'key' and 'value' columns.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>file_path</code></strong> :&ensp;<code>pathlib.Path</code></dt>
 <dd>The path where the CSV file will be saved.</dd>
 <dt><strong><code>export_dict</code></strong> :&ensp;<code>dict</code></dt>
 <dd>The dictionary to export.</dd>
@@ -396,7 +396,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
 <div class="desc"><p>Loads a CSV file into a dictionary. Expects the CSV to have two columns named 'key' and 'value'.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>file_path</code></strong> :&ensp;<code>pathlib.Path</code></dt>
 <dd>The path to the CSV file.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
@@ -441,7 +441,7 @@ def export_dict_to_csv(file_path: Path, export_dict: dict, header: bool = True) 
 where 'value' is a string representation of a list.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>file_path</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>file_path</code></strong> :&ensp;<code>pathlib.Path</code></dt>
 <dd>The path to the CSV file.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
