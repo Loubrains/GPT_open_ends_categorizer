@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>gpt_categorizer_utils.gpt_utils API documentation</title>
+<meta name="description" content="Utilities for interacting with the OpenAI GPT model to categorize survey responses …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>gpt_categorizer_utils.gpt_utils</code></h1>
+</header>
+<section id="section-intro">
+<p>Utilities for interacting with the OpenAI GPT model to categorize survey responses.</p>
+<p>This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories,
+validation of categorization results, and batch processing of responses for efficient categorization.</p>
+<h2 id="functions">Functions</h2>
+<p><code><a title="gpt_categorizer_utils.gpt_utils.call_gpt" href="#gpt_categorizer_utils.gpt_utils.call_gpt">call_gpt()</a></code>: Asynchronously sends a user prompt to the GPT model and retrieves the completion.
+<code><a title="gpt_categorizer_utils.gpt_utils.gpt_generate_categories_list" href="#gpt_categorizer_utils.gpt_utils.gpt_generate_categories_list">gpt_generate_categories_list()</a></code>: Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
+<code><a title="gpt_categorizer_utils.gpt_utils.validate_gpt_categorized_output" href="#gpt_categorizer_utils.gpt_utils.validate_gpt_categorized_output">validate_gpt_categorized_output()</a></code>: Validates the GPT output received by the categorizer.
+<code><a title="gpt_categorizer_utils.gpt_utils.create_user_prompt_for_gpt_categorization" href="#gpt_categorizer_utils.gpt_utils.create_user_prompt_for_gpt_categorization">create_user_prompt_for_gpt_categorization()</a></code>: Creates a user prompt to send to the GPT model to categorize survey question responses.
+<code><a title="gpt_categorizer_utils.gpt_utils.gpt_categorize_responses" href="#gpt_categorizer_utils.gpt_utils.gpt_categorize_responses">gpt_categorize_responses()</a></code>: Asynchronously categorizes a list of responses using the GPT model.
+<code><a title="gpt_categorizer_utils.gpt_utils.gpt_categorize_response_batches_main" href="#gpt_categorizer_utils.gpt_utils.gpt_categorize_response_batches_main">gpt_categorize_response_batches_main()</a></code>: Asynchronously sends batches of survey responses to be categorized using the GPT model.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+Utilities for interacting with the OpenAI GPT model to categorize survey responses.
+
+This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
+validation of categorization results, and batch processing of responses for efficient categorization.
+
+Functions:
+    `call_gpt`: Asynchronously sends a user prompt to the GPT model and retrieves the completion.
+    `gpt_generate_categories_list`: Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
+    `validate_gpt_categorized_output`: Validates the GPT output received by the categorizer.
+    `create_user_prompt_for_gpt_categorization`: Creates a user prompt to send to the GPT model to categorize survey question responses.
+    `gpt_categorize_responses`: Asynchronously categorizes a list of responses using the GPT model.
+    `gpt_categorize_response_batches_main`: Asynchronously sends batches of survey responses to be categorized using the GPT model.
+&#34;&#34;&#34;
+
+from openai import AsyncOpenAI
+import json
+import asyncio
+from .general_utils import create_batches
+
+### NOTE: potential future update to these utils: call gpt with JSON mode
+### Put the following in the client.chat.completions.create() arguments:
+### `response_format={ &#34;type&#34;: &#34;json_object&#34; }`
+### Make sure the prompt specifies the JSON structure, and then parse the output
+
+
+async def call_gpt(
+    client: AsyncOpenAI,
+    user_prompt: str,
+) -&gt; str | None:
+    &#34;&#34;&#34;
+    Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
+
+    Args:
+        client (AsyncOpenAI): The client instance used to communicate with the GPT model.
+        user_prompt (str): The prompt text to send to the model.
+
+    Returns:
+        str | None: The content of the model&#39;s completion, or None if an error occurs.
+
+    Raises:
+        Raises an exception and prints an error message if the API call fails.
+    &#34;&#34;&#34;
+
+    try:
+        completion = await client.chat.completions.create(
+            messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-1106-preview&#34;
+        )
+        content = completion.choices[0].message.content
+
+    except Exception as e:
+        print(f&#34;\nAn error occurred: {e}&#34;)
+        content = &#34;Error&#34;
+        raise
+
+    return content
+
+
+async def gpt_generate_categories_list(
+    client: AsyncOpenAI,
+    question: str,
+    responses_sample: list[str],
+    number_of_categories: int = 20,
+    max_retries: int = 5,
+) -&gt; list[str]:
+    &#34;&#34;&#34;
+    Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
+
+    Args:
+        client (AsyncOpenAI): The client instance used to communicate with the GPT model.
+        question (str): The survey question related to the responses.
+        responses_sample (list[str]): A sample of survey responses.
+        number_of_categories (int): The number of categories to generate. Defaults to 20.
+        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
+
+    Returns:
+        list[str]: A list of generated category names.
+
+    Notes:
+        - Expects the GPT model to return a JSON list of category names.
+        - Retries the API call up to max_retries times if errors occur.
+    &#34;&#34;&#34;
+
+    user_prompt = f&#34;&#34;&#34;List the {number_of_categories} most relevant thematic categories for this sample of survey responses.
+    Return only a JSON list of category names, in the format: `[&#34;name1&#34;, &#34;name2&#34;, ...]`
+    
+    Question:
+    `{question}`
+    
+    Responses:
+    ```
+    {responses_sample}
+    ```&#34;&#34;&#34;
+    for attempt in range(max_retries):
+        try:
+            output = await call_gpt(client, user_prompt)
+            output_cleaned = output.strip().replace(&#34;json&#34;, &#34;&#34;).replace(&#34;`&#34;, &#34;&#34;).replace(&#34;\n&#34;, &#34;&#34;)  # type: ignore
+            output_categories_list = json.loads(output_cleaned)
+
+            # Check if loaded json is a list
+            if not isinstance(output_categories_list, list):
+                raise ValueError(f&#34;Output format is not as expected:\n{output_categories_list}&#34;)
+
+            return output_categories_list
+
+        except Exception as e:
+            print(
+                f&#34;&#34;&#34;\nAn error occurred:\n{e}
+            Retrying attempt {attempt + 1}/{max_retries}...&#34;&#34;&#34;
+            )
+
+    # Error case
+    print(&#34;\nMax retries reached for responses&#34;)
+    output_categories_list = [&#34;Error&#34;]
+
+    return output_categories_list
+
+
+def validate_gpt_categorized_output(output_categories, categories_list, is_multicode):
+    &#34;&#34;&#34;
+    Validates the GPT output received by the the categorizer.
+    Checks the that the format is correct (i.e. a list, whose elements are strings (is_multicode = False) or a list of strings (is_multicode = True)).
+    Checks the categories are valid.
+
+    Args:
+        output_categories (list[str] | list[list[str]]): The GPT output to validate.
+        categories_list (list[str]): The list of valid category names.
+        is_multicode (bool): If True, the output should be a list of lists of strings. If False, the output should be a list of strings.
+
+    Raises:
+        ValueError: If the output_categories format is incorrect or contains invalid categories.
+    &#34;&#34;&#34;
+
+    def _check_elements_of_list_are_strings(list_to_check):
+        for element in list_to_check:
+            if not isinstance(element, str):
+                raise ValueError(
+                    f&#34;&#34;&#34;Output format is not a as expected (expected string)
+                    output_categories:\n{list_to_check}
+                    element:\n{element}&#34;&#34;&#34;
+                )
+
+    def _check_categories_are_valid(categories_to_check):
+        for category in categories_to_check:
+            if category not in categories_list:
+                raise ValueError(
+                    f&#34;&#34;&#34;Unexpected category returned in output_categories
+                    output_categories:\n{categories_to_check}
+                    unexpected_category:\n{category}&#34;&#34;&#34;
+                )
+
+    # Check if overall output is a list
+    if not isinstance(output_categories, list):
+        raise ValueError(
+            f&#34;Output format is not a as expected (expected list [..., ...]):\n{output_categories}\n&#34;
+        )
+
+    if is_multicode:
+        # Check if all elements themselvers are lists
+        if not all(isinstance(element, list) for element in output_categories):
+            raise ValueError(
+                f&#34;Output format is not as expected (expected list of lists [[...], [...], ...]):\n{output_categories}&#34;
+            )
+
+        for response_categories in output_categories:
+            _check_elements_of_list_are_strings(response_categories)
+            _check_categories_are_valid(response_categories)
+
+    else:
+        _check_elements_of_list_are_strings(output_categories)
+        _check_categories_are_valid(output_categories)
+
+
+def create_user_prompt_for_gpt_categorization(question, responses, categories_list, is_multicode):
+    &#34;&#34;&#34;
+    Creates a user prompt to send to the GPT model to categorize survey question responses.
+
+    Args:
+        question (str): The survey question related to the responses.
+        responses (list[str]): The list of responses to categorize.
+        categories_list (list[str]): The list of valid category names.
+        is_multicode (bool): Changes the prompt to explain whether multiple categories can be used, and the expected output format.
+
+    Returns:
+        str: The user prompt formatted for the GPT model.
+    &#34;&#34;&#34;
+
+    combined_responses = &#34;\n&#34;.join([f&#34;{i+1}: {response}&#34; for i, response in enumerate(responses)])
+    combined_categories_list = &#34;\n&#34;.join(categories_list)
+
+    if is_multicode:
+        multiple_categories_text = &#34;or multiple &#34;
+        output_format_text = &#34;a list of category names &#34;
+        output_format = &#39;`[[&#34;category 1 for response 1&#34;, &#34;category 2 for response 1&#34;, ...], [&#34;category 1 for response 2&#34;, &#34;category 2 for response 2&#34;, ...], ...]`&#39;
+    else:
+        multiple_categories_text = &#34;&#34;
+        output_format_text = &#34;a category name &#34;
+        output_format = &#39;`[&#34;category for response 1&#34;, &#34;category for response 2&#34;, ...]`&#39;
+
+    user_prompt = f&#34;&#34;&#34;Categorize these responses to the following survey question using one {multiple_categories_text}of the provided categories.
+    Return only a JSON list where each element is {output_format_text}for each response, in the format: {output_format}.
+    
+    Question:
+    `{question}`
+    
+    Responses:
+    `{combined_responses}`
+    
+    categories:
+    ```
+    {combined_categories_list}
+    ```&#34;&#34;&#34;
+
+    return user_prompt
+
+
+async def gpt_categorize_responses(
+    client: AsyncOpenAI,
+    question: str,
+    responses: list[str],
+    categories_list: list[str],
+    max_retries: int = 5,
+    is_multicode: bool = False,
+) -&gt; list[str] | list[list[str]]:
+    &#34;&#34;&#34;
+    Asynchronously categorizes a list of responses using the GPT model.
+    `is_multicode = True` allows multiple categories to be associated with each response.
+
+    Args:
+        client (AsyncOpenAI): The client instance used to communicate with the GPT model.
+        question (str): The survey question related to the responses.
+        responses (list[str]): The list of responses to categorize.
+        categories_list (list[str]): The list of valid category names.
+        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
+        is_multicode (bool): If True, each response can belong to multiple categories. Defaults to False.
+
+    Returns:
+        list[str] | list[list[str]]:
+            - If &#39;is_multi&#39; is False, returns a list of categories, where each category is assigned to a single response in the same order they were fed in.
+            - If &#39;is_multi&#39; is True, returns a list of lists of categories, where each inner list contains multiple categories assigned to the corresponding response.
+
+    Notes:
+        - Retries the API call up to max_retries times if errors occur.
+    &#34;&#34;&#34;
+
+    user_prompt = create_user_prompt_for_gpt_categorization(
+        question, responses, categories_list, is_multicode
+    )
+
+    for attempt in range(max_retries):
+        try:
+            output = await call_gpt(client, user_prompt)
+            output_cleaned = output.strip().replace(&#34;json&#34;, &#34;&#34;).replace(&#34;`&#34;, &#34;&#34;).replace(&#34;\n&#34;, &#34;&#34;)  # type: ignore
+            output_categories = json.loads(output_cleaned)
+
+            validate_gpt_categorized_output(output_categories, categories_list, is_multicode)
+
+            return output_categories
+
+        except Exception as e:
+            print(
+                f&#34;&#34;&#34;\nAn error occurred:\n{e}
+            Responses:\n{responses}
+            Retrying attempt {attempt + 1}/{max_retries}...&#34;&#34;&#34;
+            )
+
+    # Error case
+    print(f&#34;\nMax retries reached for responses:\n{responses}&#34;)
+    if is_multicode:
+        output_categories = [[&#34;Error&#34;]] * len(responses)
+    else:
+        output_categories = [&#34;Error&#34;] * len(responses)
+
+    return output_categories
+
+
+async def gpt_categorize_response_batches_main(
+    client: AsyncOpenAI,
+    question: str,
+    responses: list[str] | set[str],
+    categories_list: list[str],
+    batch_size: int = 3,
+    max_retries: int = 5,
+    is_multicode: bool = False,
+) -&gt; dict[str, str] | dict[str, list[str]]:
+    &#34;&#34;&#34;
+    Asynchronously sends batches of survey responses to be categorized using the GPT model,
+    and constructs a codeframe from the output (i.e. dictionary of responses to categories)
+
+    Args:
+        client (AsyncOpenAI): The client instance used to communicate with the GPT model.
+        question (str): The survey question related to the responses.
+        responses (list[str] | set[str]): The responses to categorize.
+        categories_list (list[str]): The list of valid category names.
+        batch_size (int): The number of responses to process in each batch. Defaults to 3.
+        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
+        is_multicode (bool): If True, each response can belong to multiple categories. Defaults to False.
+
+    Returns:
+        dict[str, str] | dict[str, list[str]]: A dictionary mapping each response to its category (if is_multicode if False) or categories (if is_multicode if True).
+
+    Notes:
+        - Processes the responses in batches for efficiency.
+        - Retries the API call for a batch up to max_retries times if errors occur.
+    &#34;&#34;&#34;
+
+    categorized_dict = {}
+    batches = list(create_batches(list(responses), batch_size))
+    tasks = []
+
+    # Create async gpt tasks
+    for batch in batches:
+        task = gpt_categorize_responses(
+            client, question, batch, categories_list, max_retries, is_multicode
+        )
+        tasks.append(task)
+
+    output_categories = await asyncio.gather(*tasks)
+
+    # Construct codeframe (dict of responses to categories)
+    for i, categories_in_batch in enumerate(output_categories):
+        for response, categories in zip(batches[i], categories_in_batch):
+            categorized_dict[response] = categories
+
+    return categorized_dict</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="gpt_categorizer_utils.gpt_utils.call_gpt"><code class="name flex">
+<span>async def <span class="ident">call_gpt</span></span>(<span>client: openai.AsyncOpenAI, user_prompt: str) ‑> str | None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>client</code></strong> :&ensp;<code>AsyncOpenAI</code></dt>
+<dd>The client instance used to communicate with the GPT model.</dd>
+<dt><strong><code>user_prompt</code></strong> :&ensp;<code>str</code></dt>
+<dd>The prompt text to send to the model.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>str | None: The content of the model's completion, or None if an error occurs.</p>
+<h2 id="raises">Raises</h2>
+<p>Raises an exception and prints an error message if the API call fails.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def call_gpt(
+    client: AsyncOpenAI,
+    user_prompt: str,
+) -&gt; str | None:
+    &#34;&#34;&#34;
+    Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
+
+    Args:
+        client (AsyncOpenAI): The client instance used to communicate with the GPT model.
+        user_prompt (str): The prompt text to send to the model.
+
+    Returns:
+        str | None: The content of the model&#39;s completion, or None if an error occurs.
+
+    Raises:
+        Raises an exception and prints an error message if the API call fails.
+    &#34;&#34;&#34;
+
+    try:
+        completion = await client.chat.completions.create(
+            messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-1106-preview&#34;
+        )
+        content = completion.choices[0].message.content
+
+    except Exception as e:
+        print(f&#34;\nAn error occurred: {e}&#34;)
+        content = &#34;Error&#34;
+        raise
+
+    return content</code></pre>
+</details>
+</dd>
+<dt id="gpt_categorizer_utils.gpt_utils.create_user_prompt_for_gpt_categorization"><code class="name flex">
+<span>def <span class="ident">create_user_prompt_for_gpt_categorization</span></span>(<span>question, responses, categories_list, is_multicode)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates a user prompt to send to the GPT model to categorize survey question responses.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>question</code></strong> :&ensp;<code>str</code></dt>
+<dd>The survey question related to the responses.</dd>
+<dt><strong><code>responses</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>The list of responses to categorize.</dd>
+<dt><strong><code>categories_list</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>The list of valid category names.</dd>
+<dt><strong><code>is_multicode</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Changes the prompt to explain whether multiple categories can be used, and the expected output format.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>The user prompt formatted for the GPT model.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_user_prompt_for_gpt_categorization(question, responses, categories_list, is_multicode):
+    &#34;&#34;&#34;
+    Creates a user prompt to send to the GPT model to categorize survey question responses.
+
+    Args:
+        question (str): The survey question related to the responses.
+        responses (list[str]): The list of responses to categorize.
+        categories_list (list[str]): The list of valid category names.
+        is_multicode (bool): Changes the prompt to explain whether multiple categories can be used, and the expected output format.
+
+    Returns:
+        str: The user prompt formatted for the GPT model.
+    &#34;&#34;&#34;
+
+    combined_responses = &#34;\n&#34;.join([f&#34;{i+1}: {response}&#34; for i, response in enumerate(responses)])
+    combined_categories_list = &#34;\n&#34;.join(categories_list)
+
+    if is_multicode:
+        multiple_categories_text = &#34;or multiple &#34;
+        output_format_text = &#34;a list of category names &#34;
+        output_format = &#39;`[[&#34;category 1 for response 1&#34;, &#34;category 2 for response 1&#34;, ...], [&#34;category 1 for response 2&#34;, &#34;category 2 for response 2&#34;, ...], ...]`&#39;
+    else:
+        multiple_categories_text = &#34;&#34;
+        output_format_text = &#34;a category name &#34;
+        output_format = &#39;`[&#34;category for response 1&#34;, &#34;category for response 2&#34;, ...]`&#39;
+
+    user_prompt = f&#34;&#34;&#34;Categorize these responses to the following survey question using one {multiple_categories_text}of the provided categories.
+    Return only a JSON list where each element is {output_format_text}for each response, in the format: {output_format}.
+    
+    Question:
+    `{question}`
+    
+    Responses:
+    `{combined_responses}`
+    
+    categories:
+    ```
+    {combined_categories_list}
+    ```&#34;&#34;&#34;
+
+    return user_prompt</code></pre>
+</details>
+</dd>
+<dt id="gpt_categorizer_utils.gpt_utils.gpt_categorize_response_batches_main"><code class="name flex">
+<span>async def <span class="ident">gpt_categorize_response_batches_main</span></span>(<span>client: openai.AsyncOpenAI, question: str, responses: list[str] | set[str], categories_list: list[str], batch_size: int = 3, max_retries: int = 5, is_multicode: bool = False) ‑> dict[str, str] | dict[str, list[str]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Asynchronously sends batches of survey responses to be categorized using the GPT model,
+and constructs a codeframe from the output (i.e. dictionary of responses to categories)</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>client</code></strong> :&ensp;<code>AsyncOpenAI</code></dt>
+<dd>The client instance used to communicate with the GPT model.</dd>
+<dt><strong><code>question</code></strong> :&ensp;<code>str</code></dt>
+<dd>The survey question related to the responses.</dd>
+<dt>responses (list[str] | set[str]): The responses to categorize.</dt>
+<dt><strong><code>categories_list</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>The list of valid category names.</dd>
+<dt><strong><code>batch_size</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of responses to process in each batch. Defaults to 3.</dd>
+<dt><strong><code>max_retries</code></strong> :&ensp;<code>int</code></dt>
+<dd>The maximum number of retries for the API call. Defaults to 5.</dd>
+<dt><strong><code>is_multicode</code></strong> :&ensp;<code>bool</code></dt>
+<dd>If True, each response can belong to multiple categories. Defaults to False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>dict[str, str] | dict[str, list[str]]: A dictionary mapping each response to its category (if is_multicode if False) or categories (if is_multicode if True).</p>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>Processes the responses in batches for efficiency.</li>
+<li>Retries the API call for a batch up to max_retries times if errors occur.</li>
+</ul></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def gpt_categorize_response_batches_main(
+    client: AsyncOpenAI,
+    question: str,
+    responses: list[str] | set[str],
+    categories_list: list[str],
+    batch_size: int = 3,
+    max_retries: int = 5,
+    is_multicode: bool = False,
+) -&gt; dict[str, str] | dict[str, list[str]]:
+    &#34;&#34;&#34;
+    Asynchronously sends batches of survey responses to be categorized using the GPT model,
+    and constructs a codeframe from the output (i.e. dictionary of responses to categories)
+
+    Args:
+        client (AsyncOpenAI): The client instance used to communicate with the GPT model.
+        question (str): The survey question related to the responses.
+        responses (list[str] | set[str]): The responses to categorize.
+        categories_list (list[str]): The list of valid category names.
+        batch_size (int): The number of responses to process in each batch. Defaults to 3.
+        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
+        is_multicode (bool): If True, each response can belong to multiple categories. Defaults to False.
+
+    Returns:
+        dict[str, str] | dict[str, list[str]]: A dictionary mapping each response to its category (if is_multicode if False) or categories (if is_multicode if True).
+
+    Notes:
+        - Processes the responses in batches for efficiency.
+        - Retries the API call for a batch up to max_retries times if errors occur.
+    &#34;&#34;&#34;
+
+    categorized_dict = {}
+    batches = list(create_batches(list(responses), batch_size))
+    tasks = []
+
+    # Create async gpt tasks
+    for batch in batches:
+        task = gpt_categorize_responses(
+            client, question, batch, categories_list, max_retries, is_multicode
+        )
+        tasks.append(task)
+
+    output_categories = await asyncio.gather(*tasks)
+
+    # Construct codeframe (dict of responses to categories)
+    for i, categories_in_batch in enumerate(output_categories):
+        for response, categories in zip(batches[i], categories_in_batch):
+            categorized_dict[response] = categories
+
+    return categorized_dict</code></pre>
+</details>
+</dd>
+<dt id="gpt_categorizer_utils.gpt_utils.gpt_categorize_responses"><code class="name flex">
+<span>async def <span class="ident">gpt_categorize_responses</span></span>(<span>client: openai.AsyncOpenAI, question: str, responses: list[str], categories_list: list[str], max_retries: int = 5, is_multicode: bool = False) ‑> list[str] | list[list[str]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Asynchronously categorizes a list of responses using the GPT model.
+<code>is_multicode = True</code> allows multiple categories to be associated with each response.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>client</code></strong> :&ensp;<code>AsyncOpenAI</code></dt>
+<dd>The client instance used to communicate with the GPT model.</dd>
+<dt><strong><code>question</code></strong> :&ensp;<code>str</code></dt>
+<dd>The survey question related to the responses.</dd>
+<dt><strong><code>responses</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>The list of responses to categorize.</dd>
+<dt><strong><code>categories_list</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>The list of valid category names.</dd>
+<dt><strong><code>max_retries</code></strong> :&ensp;<code>int</code></dt>
+<dd>The maximum number of retries for the API call. Defaults to 5.</dd>
+<dt><strong><code>is_multicode</code></strong> :&ensp;<code>bool</code></dt>
+<dd>If True, each response can belong to multiple categories. Defaults to False.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>list[str] | list[list[str]]:
+- If 'is_multi' is False, returns a list of categories, where each category is assigned to a single response in the same order they were fed in.
+- If 'is_multi' is True, returns a list of lists of categories, where each inner list contains multiple categories assigned to the corresponding response.</p>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>Retries the API call up to max_retries times if errors occur.</li>
+</ul></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def gpt_categorize_responses(
+    client: AsyncOpenAI,
+    question: str,
+    responses: list[str],
+    categories_list: list[str],
+    max_retries: int = 5,
+    is_multicode: bool = False,
+) -&gt; list[str] | list[list[str]]:
+    &#34;&#34;&#34;
+    Asynchronously categorizes a list of responses using the GPT model.
+    `is_multicode = True` allows multiple categories to be associated with each response.
+
+    Args:
+        client (AsyncOpenAI): The client instance used to communicate with the GPT model.
+        question (str): The survey question related to the responses.
+        responses (list[str]): The list of responses to categorize.
+        categories_list (list[str]): The list of valid category names.
+        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
+        is_multicode (bool): If True, each response can belong to multiple categories. Defaults to False.
+
+    Returns:
+        list[str] | list[list[str]]:
+            - If &#39;is_multi&#39; is False, returns a list of categories, where each category is assigned to a single response in the same order they were fed in.
+            - If &#39;is_multi&#39; is True, returns a list of lists of categories, where each inner list contains multiple categories assigned to the corresponding response.
+
+    Notes:
+        - Retries the API call up to max_retries times if errors occur.
+    &#34;&#34;&#34;
+
+    user_prompt = create_user_prompt_for_gpt_categorization(
+        question, responses, categories_list, is_multicode
+    )
+
+    for attempt in range(max_retries):
+        try:
+            output = await call_gpt(client, user_prompt)
+            output_cleaned = output.strip().replace(&#34;json&#34;, &#34;&#34;).replace(&#34;`&#34;, &#34;&#34;).replace(&#34;\n&#34;, &#34;&#34;)  # type: ignore
+            output_categories = json.loads(output_cleaned)
+
+            validate_gpt_categorized_output(output_categories, categories_list, is_multicode)
+
+            return output_categories
+
+        except Exception as e:
+            print(
+                f&#34;&#34;&#34;\nAn error occurred:\n{e}
+            Responses:\n{responses}
+            Retrying attempt {attempt + 1}/{max_retries}...&#34;&#34;&#34;
+            )
+
+    # Error case
+    print(f&#34;\nMax retries reached for responses:\n{responses}&#34;)
+    if is_multicode:
+        output_categories = [[&#34;Error&#34;]] * len(responses)
+    else:
+        output_categories = [&#34;Error&#34;] * len(responses)
+
+    return output_categories</code></pre>
+</details>
+</dd>
+<dt id="gpt_categorizer_utils.gpt_utils.gpt_generate_categories_list"><code class="name flex">
+<span>async def <span class="ident">gpt_generate_categories_list</span></span>(<span>client: openai.AsyncOpenAI, question: str, responses_sample: list[str], number_of_categories: int = 20, max_retries: int = 5) ‑> list[str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Asynchronously generates a list of thematic categories relevant to a sample of survey responses.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>client</code></strong> :&ensp;<code>AsyncOpenAI</code></dt>
+<dd>The client instance used to communicate with the GPT model.</dd>
+<dt><strong><code>question</code></strong> :&ensp;<code>str</code></dt>
+<dd>The survey question related to the responses.</dd>
+<dt><strong><code>responses_sample</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>A sample of survey responses.</dd>
+<dt><strong><code>number_of_categories</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of categories to generate. Defaults to 20.</dd>
+<dt><strong><code>max_retries</code></strong> :&ensp;<code>int</code></dt>
+<dd>The maximum number of retries for the API call. Defaults to 5.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[str]</code></dt>
+<dd>A list of generated category names.</dd>
+</dl>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>Expects the GPT model to return a JSON list of category names.</li>
+<li>Retries the API call up to max_retries times if errors occur.</li>
+</ul></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def gpt_generate_categories_list(
+    client: AsyncOpenAI,
+    question: str,
+    responses_sample: list[str],
+    number_of_categories: int = 20,
+    max_retries: int = 5,
+) -&gt; list[str]:
+    &#34;&#34;&#34;
+    Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
+
+    Args:
+        client (AsyncOpenAI): The client instance used to communicate with the GPT model.
+        question (str): The survey question related to the responses.
+        responses_sample (list[str]): A sample of survey responses.
+        number_of_categories (int): The number of categories to generate. Defaults to 20.
+        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
+
+    Returns:
+        list[str]: A list of generated category names.
+
+    Notes:
+        - Expects the GPT model to return a JSON list of category names.
+        - Retries the API call up to max_retries times if errors occur.
+    &#34;&#34;&#34;
+
+    user_prompt = f&#34;&#34;&#34;List the {number_of_categories} most relevant thematic categories for this sample of survey responses.
+    Return only a JSON list of category names, in the format: `[&#34;name1&#34;, &#34;name2&#34;, ...]`
+    
+    Question:
+    `{question}`
+    
+    Responses:
+    ```
+    {responses_sample}
+    ```&#34;&#34;&#34;
+    for attempt in range(max_retries):
+        try:
+            output = await call_gpt(client, user_prompt)
+            output_cleaned = output.strip().replace(&#34;json&#34;, &#34;&#34;).replace(&#34;`&#34;, &#34;&#34;).replace(&#34;\n&#34;, &#34;&#34;)  # type: ignore
+            output_categories_list = json.loads(output_cleaned)
+
+            # Check if loaded json is a list
+            if not isinstance(output_categories_list, list):
+                raise ValueError(f&#34;Output format is not as expected:\n{output_categories_list}&#34;)
+
+            return output_categories_list
+
+        except Exception as e:
+            print(
+                f&#34;&#34;&#34;\nAn error occurred:\n{e}
+            Retrying attempt {attempt + 1}/{max_retries}...&#34;&#34;&#34;
+            )
+
+    # Error case
+    print(&#34;\nMax retries reached for responses&#34;)
+    output_categories_list = [&#34;Error&#34;]
+
+    return output_categories_list</code></pre>
+</details>
+</dd>
+<dt id="gpt_categorizer_utils.gpt_utils.validate_gpt_categorized_output"><code class="name flex">
+<span>def <span class="ident">validate_gpt_categorized_output</span></span>(<span>output_categories, categories_list, is_multicode)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Validates the GPT output received by the the categorizer.
+Checks the that the format is correct (i.e. a list, whose elements are strings (is_multicode = False) or a list of strings (is_multicode = True)).
+Checks the categories are valid.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt>output_categories (list[str] | list[list[str]]): The GPT output to validate.</dt>
+<dt><strong><code>categories_list</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>The list of valid category names.</dd>
+<dt><strong><code>is_multicode</code></strong> :&ensp;<code>bool</code></dt>
+<dd>If True, the output should be a list of lists of strings. If False, the output should be a list of strings.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If the output_categories format is incorrect or contains invalid categories.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate_gpt_categorized_output(output_categories, categories_list, is_multicode):
+    &#34;&#34;&#34;
+    Validates the GPT output received by the the categorizer.
+    Checks the that the format is correct (i.e. a list, whose elements are strings (is_multicode = False) or a list of strings (is_multicode = True)).
+    Checks the categories are valid.
+
+    Args:
+        output_categories (list[str] | list[list[str]]): The GPT output to validate.
+        categories_list (list[str]): The list of valid category names.
+        is_multicode (bool): If True, the output should be a list of lists of strings. If False, the output should be a list of strings.
+
+    Raises:
+        ValueError: If the output_categories format is incorrect or contains invalid categories.
+    &#34;&#34;&#34;
+
+    def _check_elements_of_list_are_strings(list_to_check):
+        for element in list_to_check:
+            if not isinstance(element, str):
+                raise ValueError(
+                    f&#34;&#34;&#34;Output format is not a as expected (expected string)
+                    output_categories:\n{list_to_check}
+                    element:\n{element}&#34;&#34;&#34;
+                )
+
+    def _check_categories_are_valid(categories_to_check):
+        for category in categories_to_check:
+            if category not in categories_list:
+                raise ValueError(
+                    f&#34;&#34;&#34;Unexpected category returned in output_categories
+                    output_categories:\n{categories_to_check}
+                    unexpected_category:\n{category}&#34;&#34;&#34;
+                )
+
+    # Check if overall output is a list
+    if not isinstance(output_categories, list):
+        raise ValueError(
+            f&#34;Output format is not a as expected (expected list [..., ...]):\n{output_categories}\n&#34;
+        )
+
+    if is_multicode:
+        # Check if all elements themselvers are lists
+        if not all(isinstance(element, list) for element in output_categories):
+            raise ValueError(
+                f&#34;Output format is not as expected (expected list of lists [[...], [...], ...]):\n{output_categories}&#34;
+            )
+
+        for response_categories in output_categories:
+            _check_elements_of_list_are_strings(response_categories)
+            _check_categories_are_valid(response_categories)
+
+    else:
+        _check_elements_of_list_are_strings(output_categories)
+        _check_categories_are_valid(output_categories)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="gpt_categorizer_utils" href="index.html">gpt_categorizer_utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="gpt_categorizer_utils.gpt_utils.call_gpt" href="#gpt_categorizer_utils.gpt_utils.call_gpt">call_gpt</a></code></li>
+<li><code><a title="gpt_categorizer_utils.gpt_utils.create_user_prompt_for_gpt_categorization" href="#gpt_categorizer_utils.gpt_utils.create_user_prompt_for_gpt_categorization">create_user_prompt_for_gpt_categorization</a></code></li>
+<li><code><a title="gpt_categorizer_utils.gpt_utils.gpt_categorize_response_batches_main" href="#gpt_categorizer_utils.gpt_utils.gpt_categorize_response_batches_main">gpt_categorize_response_batches_main</a></code></li>
+<li><code><a title="gpt_categorizer_utils.gpt_utils.gpt_categorize_responses" href="#gpt_categorizer_utils.gpt_utils.gpt_categorize_responses">gpt_categorize_responses</a></code></li>
+<li><code><a title="gpt_categorizer_utils.gpt_utils.gpt_generate_categories_list" href="#gpt_categorizer_utils.gpt_utils.gpt_generate_categories_list">gpt_generate_categories_list</a></code></li>
+<li><code><a title="gpt_categorizer_utils.gpt_utils.validate_gpt_categorized_output" href="#gpt_categorizer_utils.gpt_utils.validate_gpt_categorized_output">validate_gpt_categorized_output</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
