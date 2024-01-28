@@ -18,7 +18,6 @@ import random
 import ast
 from typing import Any
 from pandas._libs.missing import NAType
-import sys
 
 
 def preprocess_text(text: Any) -> str | NAType:
@@ -101,7 +100,7 @@ def load_csv_to_dict(file_path: Path) -> dict:
 
     except Exception as e:
         print(f"\nError while reading CSV: {e}")
-        sys.exit(1)
+        raise
 
 
 def load_csv_to_dict_of_lists(file_path: Path) -> dict:
@@ -125,8 +124,7 @@ def load_csv_to_dict_of_lists(file_path: Path) -> dict:
         return dict(zip(df["key"], df["value"]))
 
     except Exception as e:
-        print(f"\nError while reading CSV: {e}")
-        sys.exit(1)
+        raise
 
 
 def export_dataframe_to_csv(file_path: Path, export_df: pd.DataFrame, header: bool = True) -> None:
