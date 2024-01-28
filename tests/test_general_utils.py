@@ -1,4 +1,5 @@
 import pytest
+from pathlib import Path
 import pandas as pd
 from gpt_categorizer_utils import general_utils
 
@@ -77,14 +78,12 @@ def test_create_batches(test_data, batch_size, expected_output):
         ("wrong_key,wrong_value\na,x\nb,y\nc,z", None, True),
     ],
 )
-def test_load_csv_to_dict(monkeypatch, tmp_path, csv_content, expected_dict, expect_exception):
-    csv_file = tmp_path / "test.csv"
+def test_load_csv_to_dict(tmp_path, csv_content, expected_dict, expect_exception):
+    csv_file = Path(tmp_path / "test.csv")
     csv_file.write_text(csv_content)
 
     if expect_exception:
-        # Mock sys.exit using monkeypatch
-        monkeypatch.setattr("sys.exit", lambda x: (_ for _ in ()).throw(SystemExit(x)))
-        with pytest.raises(SystemExit):
+        with pytest.raises(KeyError):
             general_utils.load_csv_to_dict(csv_file)
 
     else:
@@ -107,16 +106,12 @@ def test_load_csv_to_dict(monkeypatch, tmp_path, csv_content, expected_dict, exp
         ("wrong_key,wrong_value\na,x\nb,y\nc,z", None, True),
     ],
 )
-def test_load_csv_to_dict_of_lists(
-    monkeypatch, tmp_path, csv_content, expected_dict, expect_exception
-):
-    csv_file = tmp_path / "test.csv"
+def test_load_csv_to_dict_of_lists(tmp_path, csv_content, expected_dict, expect_exception):
+    csv_file = Path(tmp_path / "test.csv")
     csv_file.write_text(csv_content)
 
     if expect_exception:
-        # Mock sys.exit using monkeypatch
-        monkeypatch.setattr("sys.exit", lambda x: (_ for _ in ()).throw(SystemExit(x)))
-        with pytest.raises(SystemExit):
+        with pytest.raises((KeyError, SyntaxError)):
             general_utils.load_csv_to_dict_of_lists(csv_file)
 
     else:
