@@ -26,12 +26,12 @@ Note:
 from pathlib import Path
 
 # File paths (expects foreward slashes)
-open_end_data_file_path_load = Path("Yo mamma/is/ma/biatch")
-categories_file_path_save = Path("Yo mamma/is/ma/biatch")
-categories_file_path_load = Path("Yo mamma/is/ma/biatch")
-codeframe_file_path_save = Path("Yo mamma/is/ma/biatch")
-codeframe_file_path_load = Path("Yo mamma/is/ma/biatch")
-categorized_data_file_path_save = Path("Yo mamma/is/ma/biatch")
+open_end_data_file_path_load = Path("path/to/your/data")
+categories_file_path_save = Path("path/to/save/categories")
+categories_file_path_load = Path("path/to/load/categories")
+codeframe_file_path_save = Path("path/to/save/codeframe")
+codeframe_file_path_load = Path("path/to/load/codeframe")
+categorized_data_file_path_save = Path("path/to/save/categorized/data")
 
 # Global settings
 questionnaire_question = "your_questionnaire_question"
