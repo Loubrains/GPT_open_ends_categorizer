@@ -84,6 +84,19 @@ For more verbose output, use the -v flag:
 pytest -v
 ```
 
+# Contributing
+
+When contributing, make sure to configure Git to use `obfuscator.py` to clean your sensitive data from `config.py`
+
+Run the following commands in the project root directory to set up the Git filters:
+
+```powershell
+git config filter.obfuscate.clean './obfuscator.py'
+git config filter.obfuscate.smudge cat
+```
+
+Any new developments you would like to be obfuscated, make sure to include that file in `.gitattributes` and update the patterns in `obfuscator.py`.
+
 # Future developments
 
 - **General gpt utility function**: Create a more general gpt utility function that isn't locked into the prompts that the other functions are - but does include cleaning, validation, retries, error handling, etc.
