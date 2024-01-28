@@ -5,6 +5,10 @@
 !/README.md
 !/.gitignore
 
+# Include obfuscator for when commiting sensitive data
+!/.gitattributes
+!/obfuscator.py
+
 # Include these source directories and python files within them
 !/gpt_categorizer_utils
 !/gpt_categorizer_utils/**.py

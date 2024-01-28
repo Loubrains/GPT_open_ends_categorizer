@@ -1,0 +1,5 @@
+### Obfuscate sensitive data from config.py when commiting to Git, using whichever obfuscator has been set
+config.py filter=obfuscate
+
+# Make sure `git config filter.obfuscate.clean './obfuscator.py'` and `git config filter.obfuscate.smudge cat` are set
+# This will configure Git to clean config.py with this obfuscator script, but not clean it when checking out code (e.g. switching branches)

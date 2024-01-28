@@ -26,15 +26,15 @@ Note:
 from pathlib import Path
 
 # File paths (expects foreward slashes)
-open_end_data_file_path_load = Path("")
-categories_file_path_save = Path("")
-categories_file_path_load = Path("")
-codeframe_file_path_save = Path("")
-codeframe_file_path_load = Path("")
-categorized_data_file_path_save = Path("")
+open_end_data_file_path_load = Path("path/to/your/data")
+categories_file_path_save = Path("path/to/save/categories")
+categories_file_path_load = Path("path/to/load/categories")
+codeframe_file_path_save = Path("path/to/save/codeframe")
+codeframe_file_path_load = Path("path/to/load/codeframe")
+categorized_data_file_path_save = Path("path/to/save/categorized/data")
 
 # Global settings
-questionnaire_question = ""
+questionnaire_question = "your_questionnaire_question"
 is_multicode = False
 max_retries = 5
 

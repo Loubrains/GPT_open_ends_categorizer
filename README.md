@@ -2,7 +2,7 @@
 
 This project contains scripts and modules for the automatic categorization of open-ended text responses to survey questions using GPT-4.
 
-It costs less than 1$ and takes about 15 seconds to categorize a dataset fo 1500 responses.
+For a dataset of 1500 responses, it costs less than 1$ and takes about 15 seconds to run the categorizer.
 
 # Prerequisites
 
@@ -83,6 +83,19 @@ For more verbose output, use the -v flag:
 ```powershell
 pytest -v
 ```
+
+# Contributing
+
+When contributing, make sure to configure Git to use `obfuscator.py` to clean your sensitive data from `config.py`
+
+Run the following commands in the project root directory to set up the Git filters:
+
+```powershell
+git config filter.obfuscate.clean './obfuscator.py'
+git config filter.obfuscate.smudge cat
+```
+
+Any new developments you would like to be obfuscated, make sure to include that file in `.gitattributes` and update the patterns in `obfuscator.py`.
 
 # Future developments
 
