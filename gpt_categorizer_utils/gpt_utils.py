@@ -3,36 +3,116 @@ Utilities for interacting with the OpenAI GPT model to categorize survey respons
 
 This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
 validation of categorization results, and batch processing of responses for efficient categorization.
+It implements token and request limiting using the `TokenBucket` class, and uses `tiktoken` for accurate token counting.
 
 Functions:
-    `call_gpt`: Asynchronously sends a user prompt to the GPT model and retrieves the completion.
+    `call_gpt`: Asynchronously sends a user prompt to the GPT model and retrieves the completion. It manages token and request rate limiting using the TokenBucket class
     `gpt_generate_categories_list`: Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
     `validate_gpt_categorized_output`: Validates the GPT output received by the categorizer.
     `create_user_prompt_for_gpt_categorization`: Creates a user prompt to send to the GPT model to categorize survey question responses.
     `gpt_categorize_responses`: Asynchronously categorizes a list of responses using the GPT model.
     `gpt_categorize_response_batches_main`: Asynchronously sends batches of survey responses to be categorized using the GPT model.
+    
+Note: A potential future update includes calling the GPT model with JSON mode for structured responses.
 """
-
-from openai import AsyncOpenAI
-import json
-import asyncio
-from .general_utils import create_batches
-import logging
-
-logger = logging.getLogger(__name__)
 
 ### NOTE: potential future update to these utils: call gpt with JSON mode
 ### Put the following in the client.chat.completions.create() arguments:
 ### `response_format={ "type": "json_object" }`
 ### Make sure the prompt specifies the JSON structure, and then parse the output
 
+from openai import AsyncOpenAI
+import json
+import asyncio
+import tiktoken
+from ratelimit import sleep_and_retry
+import time
+from .general_utils import create_batches
+import logging
 
+logger = logging.getLogger(__name__)
+
+#### NOTE: SET USAGE LIMITS HERE
+REQUESTS_PER_MINUTE = 500
+TOKENS_PER_MINUTE = 150000
+
+# For counting tokens
+encoding = tiktoken.encoding_for_model("gpt-4")
+
+
+class TokenBucket:
+    """
+    TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
+    It enforces a maximum capacity of tokens that can be consumed over a specific time period.
+    Extended to handle requests limiting too.
+
+    Attributes:
+        max_capacity (int): The maximum number of tokens in the bucket.
+        refill_rate_per_second (float): The rate at which tokens are added to the bucket per second.
+        current_token_count (float): The current number of tokens in the bucket.
+        timestamp_of_last_refill (float): The timestamp when the bucket was last refilled.
+    """
+
+    def __init__(self, max_capacity: int, refill_rate_per_second: float):
+        self.max_capacity = max_capacity
+        self.refill_rate_per_second = refill_rate_per_second
+        self.current_token_count = max_capacity
+        self.timestamp_of_last_refill = time.time()
+
+    async def consume_tokens(self, tokens_required: int):
+        """
+        Consumes a specified number of tokens from the bucket. If enough tokens are not available, waits asynchronously until they are refilled.
+
+        Args:
+            tokens_required (int): The number of tokens to consume from the bucket.
+
+        Raises:
+            ValueError: If tokens_required exceeds the maximum capacity of the bucket.
+        """
+        if tokens_required > self.max_capacity:
+            raise ValueError(
+                f"Requested tokens ({tokens_required}) exceed the maximum capacity of the bucket ({self.max_capacity})."
+            )
+
+        while True:
+            self.refill()
+            if self.current_token_count >= tokens_required:
+                self.current_token_count -= tokens_required
+                break
+            else:
+                await asyncio.sleep(1)
+
+    async def consume_request(self):
+        """
+        Consumes a token for a request. If no tokens are available for requests, waits asynchronously until they are refilled.
+        """
+        await self.consume_tokens(1)
+
+    def refill(self):
+        """
+        Refills the tokens in the bucket based on the refill rate and the time elapsed since the last refill.
+        """
+        current_time = time.time()
+        time_since_last_refill = current_time - self.timestamp_of_last_refill
+        tokens_to_add = time_since_last_refill * self.refill_rate_per_second
+        # Refill only up to max_capacity
+        self.current_token_count = min(self.max_capacity, self.current_token_count + tokens_to_add)
+        self.timestamp_of_last_refill = current_time
+
+
+# Instantiate TokenBuckets for token and request limiting
+token_bucket = TokenBucket(TOKENS_PER_MINUTE, TOKENS_PER_MINUTE / 60)
+request_bucket = TokenBucket(REQUESTS_PER_MINUTE, REQUESTS_PER_MINUTE / 60)
+
+
+@sleep_and_retry
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
 ) -> str | None:
     """
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
+    Tokens usage is managed with the token bucket algrithm, forcing the call to wait if exceeding limits.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.
@@ -45,11 +125,22 @@ async def call_gpt(
         Raises an exception if the API call fails.
     """
 
+    estimated_tokens = len(encoding.encode(user_prompt)) + 10  # add extra for the system message
+    # Limit tokens and requests per minute
+    await token_bucket.consume_tokens(estimated_tokens)
+    await request_bucket.consume_request()
+
     try:
         completion = await client.chat.completions.create(
             messages=[{"role": "user", "content": user_prompt}], model="gpt-4-1106-preview"
         )
         content = completion.choices[0].message.content
+
+        if content:
+            response_tokens = len(encoding.encode(content))
+            await token_bucket.consume_tokens(response_tokens)
+        else:
+            raise ValueError("No completion returned")
 
     except Exception as e:
         logger.error(f"\nAn error occurred: {e}")
