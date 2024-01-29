@@ -44,10 +44,10 @@ def setup_logging():
     console_handler = logging.StreamHandler()
     console_format = logging.Formatter(&#34;%(levelname)s - %(message)s&#34;)
     console_handler.setFormatter(console_format)
-    console_handler.setLevel(logging.INFO)
+    console_handler.setLevel(logging.ERROR)
     logger.addHandler(console_handler)
 
-    # Reduce noise
+    # Suppress noisey libraries
     logging.getLogger(&#34;chardet&#34;).setLevel(logging.WARNING)
 
     logger.info(&#34;Logging initialized&#34;)
@@ -86,10 +86,10 @@ def setup_logging():
     console_handler = logging.StreamHandler()
     console_format = logging.Formatter(&#34;%(levelname)s - %(message)s&#34;)
     console_handler.setFormatter(console_format)
-    console_handler.setLevel(logging.INFO)
+    console_handler.setLevel(logging.ERROR)
     logger.addHandler(console_handler)
 
-    # Reduce noise
+    # Suppress noisey libraries
     logging.getLogger(&#34;chardet&#34;).setLevel(logging.WARNING)
 
     logger.info(&#34;Logging initialized&#34;)
