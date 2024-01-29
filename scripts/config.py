@@ -29,24 +29,22 @@ from pathlib import Path
 open_end_data_file_path_load = Path(
     "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_open_ends - confidential.csv"
 )
-categories_file_path_save = Path(
-    ""
-)
+categories_file_path_save = Path("path/to/save/categories.csv")
 categories_file_path_load = Path(
-    "C:\Users\LouieAtkins-Turkish\Tapestry Research\BBC - BBC Studios - Need States\Data\AI text coding\C2a\C2a_categories - confidential.csv"
+    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_categories - confidential.csv"
 )
 codeframe_file_path_save = Path(
-    "C:\Users\LouieAtkins-Turkish\Tapestry Research\BBC - BBC Studios - Need States\Data\AI text coding\C2a\C2a_codeframe - confidential.csv"
+    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_codeframe - confidential.csv"
 )
 codeframe_file_path_load = Path(
-    "C:\Users\LouieAtkins-Turkish\Tapestry Research\BBC - BBC Studios - Need States\Data\AI text coding\C2a\C2a_codeframe - confidential.csv"
+    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_codeframe - confidential.csv"
 )
 categorized_data_file_path_save = Path(
-    "C:\Users\LouieAtkins-Turkish\Tapestry Research\BBC - BBC Studios - Need States\Data\AI text coding\C2a\C2a_categorized_data - confidential.csv"
+    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_categorized_data - confidential.csv"
 )
 
 # Global settings
-questionnaire_question = "What best describes the type of media content it is that you consumed?"
+questionnaire_question = "your_questionnaire_question"
 is_multicode = False
 max_retries = 5
 
