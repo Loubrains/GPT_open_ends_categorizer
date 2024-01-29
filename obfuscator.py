@@ -46,7 +46,8 @@ def obfuscate_sensitive_data(content: str) -> str:
     Returns:
     - str: The obfuscated version of the input content with sensitive data replaced by safe placeholders.
     """
-    path_pattern = r'Path\(".*?"\)'
+    # Match any text within Path(), including newlines.
+    path_pattern = r'Path\(\s*"[\s\S]*?"\s*\)'
 
     replacements = {
         rf"open_end_data_file_path_load = {path_pattern}": 'open_end_data_file_path_load = Path("path/to/your/data.csv")',
@@ -55,7 +56,7 @@ def obfuscate_sensitive_data(content: str) -> str:
         rf"codeframe_file_path_save = {path_pattern}": 'codeframe_file_path_save = Path("path/to/save/codeframe.csv")',
         rf"codeframe_file_path_load = {path_pattern}": 'codeframe_file_path_load = Path("path/to/load/codeframe.csv")',
         rf"categorized_data_file_path_save = {path_pattern}": 'categorized_data_file_path_save = Path("path/to/save/categorized/data.csv")',
-        #
+        # Match any text in question
         rf'questionnaire_question = ".*?"': 'questionnaire_question = "your_questionnaire_question?"',
     }
 
