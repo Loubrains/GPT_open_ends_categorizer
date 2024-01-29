@@ -40,7 +40,7 @@ codeframe_file_path_load = Path(
     "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_codeframe - confidential.csv"
 )
 categorized_data_file_path_save = Path(
-    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_categorized_data - confidential.csv"
+    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_categorized_data -confidential.csv"
 )
 
 # Global settings
