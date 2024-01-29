@@ -24,14 +24,16 @@
 <section id="section-intro">
 <p>Utilities for interacting with the OpenAI GPT model to categorize survey responses.</p>
 <p>This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories,
-validation of categorization results, and batch processing of responses for efficient categorization.</p>
+validation of categorization results, and batch processing of responses for efficient categorization.
+It implements token and request limiting using the <code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket" href="#gpt_categorizer_utils.gpt_utils.TokenBucket">TokenBucket</a></code> class, and uses <code>tiktoken</code> for accurate token counting.</p>
 <h2 id="functions">Functions</h2>
-<p><code><a title="gpt_categorizer_utils.gpt_utils.call_gpt" href="#gpt_categorizer_utils.gpt_utils.call_gpt">call_gpt()</a></code>: Asynchronously sends a user prompt to the GPT model and retrieves the completion.
+<p><code><a title="gpt_categorizer_utils.gpt_utils.call_gpt" href="#gpt_categorizer_utils.gpt_utils.call_gpt">call_gpt()</a></code>: Asynchronously sends a user prompt to the GPT model and retrieves the completion. It manages token and request rate limiting using the TokenBucket class
 <code><a title="gpt_categorizer_utils.gpt_utils.gpt_generate_categories_list" href="#gpt_categorizer_utils.gpt_utils.gpt_generate_categories_list">gpt_generate_categories_list()</a></code>: Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
 <code><a title="gpt_categorizer_utils.gpt_utils.validate_gpt_categorized_output" href="#gpt_categorizer_utils.gpt_utils.validate_gpt_categorized_output">validate_gpt_categorized_output()</a></code>: Validates the GPT output received by the categorizer.
 <code><a title="gpt_categorizer_utils.gpt_utils.create_user_prompt_for_gpt_categorization" href="#gpt_categorizer_utils.gpt_utils.create_user_prompt_for_gpt_categorization">create_user_prompt_for_gpt_categorization()</a></code>: Creates a user prompt to send to the GPT model to categorize survey question responses.
 <code><a title="gpt_categorizer_utils.gpt_utils.gpt_categorize_responses" href="#gpt_categorizer_utils.gpt_utils.gpt_categorize_responses">gpt_categorize_responses()</a></code>: Asynchronously categorizes a list of responses using the GPT model.
 <code><a title="gpt_categorizer_utils.gpt_utils.gpt_categorize_response_batches_main" href="#gpt_categorizer_utils.gpt_utils.gpt_categorize_response_batches_main">gpt_categorize_response_batches_main()</a></code>: Asynchronously sends batches of survey responses to be categorized using the GPT model.</p>
+<p>Note: A potential future update includes calling the GPT model with JSON mode for structured responses.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -41,36 +43,117 @@ Utilities for interacting with the OpenAI GPT model to categorize survey respons
 
 This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
 validation of categorization results, and batch processing of responses for efficient categorization.
+It implements token and request limiting using the `TokenBucket` class, and uses `tiktoken` for accurate token counting.
 
 Functions:
-    `call_gpt`: Asynchronously sends a user prompt to the GPT model and retrieves the completion.
+    `call_gpt`: Asynchronously sends a user prompt to the GPT model and retrieves the completion. It manages token and request rate limiting using the TokenBucket class
     `gpt_generate_categories_list`: Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
     `validate_gpt_categorized_output`: Validates the GPT output received by the categorizer.
     `create_user_prompt_for_gpt_categorization`: Creates a user prompt to send to the GPT model to categorize survey question responses.
     `gpt_categorize_responses`: Asynchronously categorizes a list of responses using the GPT model.
     `gpt_categorize_response_batches_main`: Asynchronously sends batches of survey responses to be categorized using the GPT model.
+    
+Note: A potential future update includes calling the GPT model with JSON mode for structured responses.
 &#34;&#34;&#34;
-
-from openai import AsyncOpenAI
-import json
-import asyncio
-from .general_utils import create_batches
-import logging
-
-logger = logging.getLogger(__name__)
 
 ### NOTE: potential future update to these utils: call gpt with JSON mode
 ### Put the following in the client.chat.completions.create() arguments:
 ### `response_format={ &#34;type&#34;: &#34;json_object&#34; }`
 ### Make sure the prompt specifies the JSON structure, and then parse the output
 
+from openai import AsyncOpenAI
+import json
+import asyncio
+import tiktoken
+from ratelimit import sleep_and_retry
+import time
+from .general_utils import create_batches
+import logging
 
+logger = logging.getLogger(__name__)
+
+#### NOTE: SET USAGE LIMITS HERE
+REQUESTS_PER_MINUTE = 500
+TOKENS_PER_MINUTE = 150000
+
+# For counting tokens
+encoding = tiktoken.encoding_for_model(&#34;gpt-4&#34;)
+
+
+class TokenBucket:
+    &#34;&#34;&#34;
+    TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
+    It enforces a maximum capacity of tokens that can be consumed over a specific time period.
+    Extended to handle requests limiting too.
+
+    Attributes:
+        max_capacity (int): The maximum number of tokens in the bucket.
+        refill_rate_per_second (float): The rate at which tokens are added to the bucket per second.
+        current_token_count (float): The current number of tokens in the bucket.
+        timestamp_of_last_refill (float): The timestamp when the bucket was last refilled.
+    &#34;&#34;&#34;
+
+    def __init__(self, max_capacity: int, refill_rate_per_second: float):
+        self.max_capacity = max_capacity
+        self.refill_rate_per_second = refill_rate_per_second
+        self.current_token_count = max_capacity
+        self.timestamp_of_last_refill = time.time()
+
+    async def consume_tokens(self, tokens_required: int):
+        &#34;&#34;&#34;
+        Consumes a specified number of tokens from the bucket. If enough tokens are not available, waits asynchronously until they are refilled.
+
+        Args:
+            tokens_required (int): The number of tokens to consume from the bucket.
+
+        Raises:
+            ValueError: If tokens_required exceeds the maximum capacity of the bucket.
+        &#34;&#34;&#34;
+        if tokens_required &gt; self.max_capacity:
+            raise ValueError(
+                f&#34;Requested tokens ({tokens_required}) exceed the maximum capacity of the bucket ({self.max_capacity}).&#34;
+            )
+
+        while True:
+            self.refill()
+            if self.current_token_count &gt;= tokens_required:
+                self.current_token_count -= tokens_required
+                break
+            else:
+                logger.debug(&#34;Token limit per minute exceeded. Waiting for 1 second&#34;)
+                await asyncio.sleep(1)
+
+    async def consume_request(self):
+        &#34;&#34;&#34;
+        Consumes a token for a request. If no tokens are available for requests, waits asynchronously until they are refilled.
+        &#34;&#34;&#34;
+        await self.consume_tokens(1)
+
+    def refill(self):
+        &#34;&#34;&#34;
+        Refills the tokens in the bucket based on the refill rate and the time elapsed since the last refill.
+        &#34;&#34;&#34;
+        current_time = time.time()
+        time_since_last_refill = current_time - self.timestamp_of_last_refill
+        tokens_to_add = time_since_last_refill * self.refill_rate_per_second
+        # Refill only up to max_capacity
+        self.current_token_count = min(self.max_capacity, self.current_token_count + tokens_to_add)
+        self.timestamp_of_last_refill = current_time
+
+
+# Instantiate TokenBuckets for token and request limiting
+token_bucket = TokenBucket(TOKENS_PER_MINUTE, TOKENS_PER_MINUTE / 60)
+request_bucket = TokenBucket(REQUESTS_PER_MINUTE, REQUESTS_PER_MINUTE / 60)
+
+
+@sleep_and_retry
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
 ) -&gt; str | None:
     &#34;&#34;&#34;
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
+    Tokens usage is managed with the token bucket algrithm, forcing the call to wait if exceeding limits.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.
@@ -83,11 +166,22 @@ async def call_gpt(
         Raises an exception if the API call fails.
     &#34;&#34;&#34;
 
+    estimated_tokens = len(encoding.encode(user_prompt)) + 10  # add extra for the system message
+    # Limit tokens and requests per minute
+    await token_bucket.consume_tokens(estimated_tokens)
+    await request_bucket.consume_request()
+
     try:
         completion = await client.chat.completions.create(
             messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-1106-preview&#34;
         )
         content = completion.choices[0].message.content
+
+        if content:
+            response_tokens = len(encoding.encode(content))
+            await token_bucket.consume_tokens(response_tokens)
+        else:
+            raise ValueError(&#34;No completion returned&#34;)
 
     except Exception as e:
         logger.error(f&#34;\nAn error occurred: {e}&#34;)
@@ -377,7 +471,8 @@ async def gpt_categorize_response_batches_main(
 <span>async def <span class="ident">call_gpt</span></span>(<span>client: openai.AsyncOpenAI, user_prompt: str) ‑> str | None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.</p>
+<div class="desc"><p>Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
+Tokens usage is managed with the token bucket algrithm, forcing the call to wait if exceeding limits.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>client</code></strong> :&ensp;<code>AsyncOpenAI</code></dt>
@@ -393,12 +488,14 @@ async def gpt_categorize_response_batches_main(
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def call_gpt(
+<pre><code class="python">@sleep_and_retry
+async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
 ) -&gt; str | None:
     &#34;&#34;&#34;
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
+    Tokens usage is managed with the token bucket algrithm, forcing the call to wait if exceeding limits.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.
@@ -411,11 +508,22 @@ async def gpt_categorize_response_batches_main(
         Raises an exception if the API call fails.
     &#34;&#34;&#34;
 
+    estimated_tokens = len(encoding.encode(user_prompt)) + 10  # add extra for the system message
+    # Limit tokens and requests per minute
+    await token_bucket.consume_tokens(estimated_tokens)
+    await request_bucket.consume_request()
+
     try:
         completion = await client.chat.completions.create(
             messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-1106-preview&#34;
         )
         content = completion.choices[0].message.content
+
+        if content:
+            response_tokens = len(encoding.encode(content))
+            await token_bucket.consume_tokens(response_tokens)
+        else:
+            raise ValueError(&#34;No completion returned&#34;)
 
     except Exception as e:
         logger.error(f&#34;\nAn error occurred: {e}&#34;)
@@ -844,6 +952,177 @@ Checks the categories are valid.</p>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="gpt_categorizer_utils.gpt_utils.TokenBucket"><code class="flex name class">
+<span>class <span class="ident">TokenBucket</span></span>
+<span>(</span><span>max_capacity: int, refill_rate_per_second: float)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
+It enforces a maximum capacity of tokens that can be consumed over a specific time period.
+Extended to handle requests limiting too.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>max_capacity</code></strong> :&ensp;<code>int</code></dt>
+<dd>The maximum number of tokens in the bucket.</dd>
+<dt><strong><code>refill_rate_per_second</code></strong> :&ensp;<code>float</code></dt>
+<dd>The rate at which tokens are added to the bucket per second.</dd>
+<dt><strong><code>current_token_count</code></strong> :&ensp;<code>float</code></dt>
+<dd>The current number of tokens in the bucket.</dd>
+<dt><strong><code>timestamp_of_last_refill</code></strong> :&ensp;<code>float</code></dt>
+<dd>The timestamp when the bucket was last refilled.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TokenBucket:
+    &#34;&#34;&#34;
+    TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
+    It enforces a maximum capacity of tokens that can be consumed over a specific time period.
+    Extended to handle requests limiting too.
+
+    Attributes:
+        max_capacity (int): The maximum number of tokens in the bucket.
+        refill_rate_per_second (float): The rate at which tokens are added to the bucket per second.
+        current_token_count (float): The current number of tokens in the bucket.
+        timestamp_of_last_refill (float): The timestamp when the bucket was last refilled.
+    &#34;&#34;&#34;
+
+    def __init__(self, max_capacity: int, refill_rate_per_second: float):
+        self.max_capacity = max_capacity
+        self.refill_rate_per_second = refill_rate_per_second
+        self.current_token_count = max_capacity
+        self.timestamp_of_last_refill = time.time()
+
+    async def consume_tokens(self, tokens_required: int):
+        &#34;&#34;&#34;
+        Consumes a specified number of tokens from the bucket. If enough tokens are not available, waits asynchronously until they are refilled.
+
+        Args:
+            tokens_required (int): The number of tokens to consume from the bucket.
+
+        Raises:
+            ValueError: If tokens_required exceeds the maximum capacity of the bucket.
+        &#34;&#34;&#34;
+        if tokens_required &gt; self.max_capacity:
+            raise ValueError(
+                f&#34;Requested tokens ({tokens_required}) exceed the maximum capacity of the bucket ({self.max_capacity}).&#34;
+            )
+
+        while True:
+            self.refill()
+            if self.current_token_count &gt;= tokens_required:
+                self.current_token_count -= tokens_required
+                break
+            else:
+                logger.debug(&#34;Token limit per minute exceeded. Waiting for 1 second&#34;)
+                await asyncio.sleep(1)
+
+    async def consume_request(self):
+        &#34;&#34;&#34;
+        Consumes a token for a request. If no tokens are available for requests, waits asynchronously until they are refilled.
+        &#34;&#34;&#34;
+        await self.consume_tokens(1)
+
+    def refill(self):
+        &#34;&#34;&#34;
+        Refills the tokens in the bucket based on the refill rate and the time elapsed since the last refill.
+        &#34;&#34;&#34;
+        current_time = time.time()
+        time_since_last_refill = current_time - self.timestamp_of_last_refill
+        tokens_to_add = time_since_last_refill * self.refill_rate_per_second
+        # Refill only up to max_capacity
+        self.current_token_count = min(self.max_capacity, self.current_token_count + tokens_to_add)
+        self.timestamp_of_last_refill = current_time</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="gpt_categorizer_utils.gpt_utils.TokenBucket.consume_request"><code class="name flex">
+<span>async def <span class="ident">consume_request</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Consumes a token for a request. If no tokens are available for requests, waits asynchronously until they are refilled.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def consume_request(self):
+    &#34;&#34;&#34;
+    Consumes a token for a request. If no tokens are available for requests, waits asynchronously until they are refilled.
+    &#34;&#34;&#34;
+    await self.consume_tokens(1)</code></pre>
+</details>
+</dd>
+<dt id="gpt_categorizer_utils.gpt_utils.TokenBucket.consume_tokens"><code class="name flex">
+<span>async def <span class="ident">consume_tokens</span></span>(<span>self, tokens_required: int)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Consumes a specified number of tokens from the bucket. If enough tokens are not available, waits asynchronously until they are refilled.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tokens_required</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of tokens to consume from the bucket.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If tokens_required exceeds the maximum capacity of the bucket.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def consume_tokens(self, tokens_required: int):
+    &#34;&#34;&#34;
+    Consumes a specified number of tokens from the bucket. If enough tokens are not available, waits asynchronously until they are refilled.
+
+    Args:
+        tokens_required (int): The number of tokens to consume from the bucket.
+
+    Raises:
+        ValueError: If tokens_required exceeds the maximum capacity of the bucket.
+    &#34;&#34;&#34;
+    if tokens_required &gt; self.max_capacity:
+        raise ValueError(
+            f&#34;Requested tokens ({tokens_required}) exceed the maximum capacity of the bucket ({self.max_capacity}).&#34;
+        )
+
+    while True:
+        self.refill()
+        if self.current_token_count &gt;= tokens_required:
+            self.current_token_count -= tokens_required
+            break
+        else:
+            logger.debug(&#34;Token limit per minute exceeded. Waiting for 1 second&#34;)
+            await asyncio.sleep(1)</code></pre>
+</details>
+</dd>
+<dt id="gpt_categorizer_utils.gpt_utils.TokenBucket.refill"><code class="name flex">
+<span>def <span class="ident">refill</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Refills the tokens in the bucket based on the refill rate and the time elapsed since the last refill.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def refill(self):
+    &#34;&#34;&#34;
+    Refills the tokens in the bucket based on the refill rate and the time elapsed since the last refill.
+    &#34;&#34;&#34;
+    current_time = time.time()
+    time_since_last_refill = current_time - self.timestamp_of_last_refill
+    tokens_to_add = time_since_last_refill * self.refill_rate_per_second
+    # Refill only up to max_capacity
+    self.current_token_count = min(self.max_capacity, self.current_token_count + tokens_to_add)
+    self.timestamp_of_last_refill = current_time</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -865,6 +1144,18 @@ Checks the categories are valid.</p>
 <li><code><a title="gpt_categorizer_utils.gpt_utils.gpt_categorize_responses" href="#gpt_categorizer_utils.gpt_utils.gpt_categorize_responses">gpt_categorize_responses</a></code></li>
 <li><code><a title="gpt_categorizer_utils.gpt_utils.gpt_generate_categories_list" href="#gpt_categorizer_utils.gpt_utils.gpt_generate_categories_list">gpt_generate_categories_list</a></code></li>
 <li><code><a title="gpt_categorizer_utils.gpt_utils.validate_gpt_categorized_output" href="#gpt_categorizer_utils.gpt_utils.validate_gpt_categorized_output">validate_gpt_categorized_output</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket" href="#gpt_categorizer_utils.gpt_utils.TokenBucket">TokenBucket</a></code></h4>
+<ul class="">
+<li><code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket.consume_request" href="#gpt_categorizer_utils.gpt_utils.TokenBucket.consume_request">consume_request</a></code></li>
+<li><code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket.consume_tokens" href="#gpt_categorizer_utils.gpt_utils.TokenBucket.consume_tokens">consume_tokens</a></code></li>
+<li><code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket.refill" href="#gpt_categorizer_utils.gpt_utils.TokenBucket.refill">refill</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
