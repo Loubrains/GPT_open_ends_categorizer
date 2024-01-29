@@ -47,12 +47,12 @@ def obfuscate_sensitive_data(content: str) -> str:
     - str: The obfuscated version of the input content with sensitive data replaced by safe placeholders.
     """
     replacements = {
-        r'open_end_data_file_path_load = Path\(".*?"\)': 'open_end_data_file_path_load = Path("path/to/your/data")',
-        r'categories_file_path_save = Path\(".*?"\)': 'categories_file_path_save = Path("path/to/save/categories")',
-        r'categories_file_path_load = Path\(".*?"\)': 'categories_file_path_load = Path("path/to/load/categories")',
-        r'codeframe_file_path_save = Path\(".*?"\)': 'codeframe_file_path_save = Path("path/to/save/codeframe")',
-        r'codeframe_file_path_load = Path\(".*?"\)': 'codeframe_file_path_load = Path("path/to/load/codeframe")',
-        r'categorized_data_file_path_save = Path\(".*?"\)': 'categorized_data_file_path_save = Path("path/to/save/categorized/data")',
+        r'open_end_data_file_path_load = Path\(".*?"\)': 'open_end_data_file_path_load = Path("path/to/your/data.csv")',
+        r'categories_file_path_save = Path\(".*?"\)': 'categories_file_path_save = Path("path/to/save/categories.csv")',
+        r'categories_file_path_load = Path\(".*?"\)': 'categories_file_path_load = Path("path/to/load/categories.csv")',
+        r'codeframe_file_path_save = Path\(".*?"\)': 'codeframe_file_path_save = Path("path/to/save/codeframe.csv")',
+        r'codeframe_file_path_load = Path\(".*?"\)': 'codeframe_file_path_load = Path("path/to/load/codeframe.csv")',
+        r'categorized_data_file_path_save = Path\(".*?"\)': 'categorized_data_file_path_save = Path("path/to/save/categorized/data.csv")',
         r'questionnaire_question = ".*?"': 'questionnaire_question = "your_questionnaire_question"',
     }
 
