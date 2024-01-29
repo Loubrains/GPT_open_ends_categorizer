@@ -31,26 +31,28 @@
 
 def setup_logging():
     # Set up file logging
-    file_handler = logging.FileHandler(&#34;app.log&#34;, mode=&#34;w&#34;)
-    file_format = logging.Formatter(
-        &#34;%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s&#34;
+    logging.basicConfig(
+        filename=&#34;app.log&#34;,
+        filemode=&#34;w&#34;,
+        level=logging.INFO,
+        format=&#34;%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s&#34;,
     )
-    file_handler.setFormatter(file_format)
-    file_handler.setLevel(logging.DEBUG)
+
+    logger = logging.getLogger()
 
     # Set up console logging
     console_handler = logging.StreamHandler()
     console_format = logging.Formatter(&#34;%(levelname)s - %(message)s&#34;)
     console_handler.setFormatter(console_format)
     console_handler.setLevel(logging.INFO)
-
-    logger = logging.getLogger()
-    logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 
-    logging.getLogger(&#34;chardet&#34;).setLevel(logging.WARNING)  # Noisy library
+    # Reduce noise
+    logging.getLogger(&#34;chardet&#34;).setLevel(logging.WARNING)
 
-    logger.info(&#34;Logging initialized&#34;)</code></pre>
+    logger.info(&#34;Logging initialized&#34;)
+
+    return logger</code></pre>
 </details>
 </section>
 <section>
@@ -71,26 +73,28 @@ def setup_logging():
 </summary>
 <pre><code class="python">def setup_logging():
     # Set up file logging
-    file_handler = logging.FileHandler(&#34;app.log&#34;, mode=&#34;w&#34;)
-    file_format = logging.Formatter(
-        &#34;%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s&#34;
+    logging.basicConfig(
+        filename=&#34;app.log&#34;,
+        filemode=&#34;w&#34;,
+        level=logging.INFO,
+        format=&#34;%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s&#34;,
     )
-    file_handler.setFormatter(file_format)
-    file_handler.setLevel(logging.DEBUG)
+
+    logger = logging.getLogger()
 
     # Set up console logging
     console_handler = logging.StreamHandler()
     console_format = logging.Formatter(&#34;%(levelname)s - %(message)s&#34;)
     console_handler.setFormatter(console_format)
     console_handler.setLevel(logging.INFO)
-
-    logger = logging.getLogger()
-    logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 
-    logging.getLogger(&#34;chardet&#34;).setLevel(logging.WARNING)  # Noisy library
+    # Reduce noise
+    logging.getLogger(&#34;chardet&#34;).setLevel(logging.WARNING)
 
-    logger.info(&#34;Logging initialized&#34;)</code></pre>
+    logger.info(&#34;Logging initialized&#34;)
+
+    return logger</code></pre>
 </details>
 </dd>
 </dl>

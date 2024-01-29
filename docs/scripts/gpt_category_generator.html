@@ -87,8 +87,7 @@ from logging_utils import setup_logging
 
 
 if __name__ == &#34;__main__&#34;:
-    setup_logging()
-    logger = logging.getLogger(__name__)
+    logger = setup_logging()
 
     try:
         client = AsyncOpenAI()

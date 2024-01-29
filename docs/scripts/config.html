@@ -22,7 +22,7 @@
 <h1 class="title">Module <code>scripts.config</code></h1>
 </header>
 <section id="section-intro">
-<h3 id="modify-this-before-running-any-scripts">MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS</h3>
+<h3 id="modify-this-file-before-running-any-scripts">MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS</h3>
 <p>Configuration file for user-defined parameters used in the open-end response categorization process.</p>
 <p>It includes file paths for loading and saving data, the questionnaire question, categorization options, sample sizes, and other settings.</p>
 <p>Configuration Variables:
@@ -72,18 +72,18 @@ Note:
 
 from pathlib import Path
 
-# File paths (expects foreward slashes)
-open_end_data_file_path_load = Path(&#34;path/to/your/data&#34;)
-categories_file_path_save = Path(&#34;path/to/save/categories&#34;)
-categories_file_path_load = Path(&#34;path/to/load/categories&#34;)
-codeframe_file_path_save = Path(&#34;path/to/save/codeframe&#34;)
-codeframe_file_path_load = Path(&#34;path/to/load/codeframe&#34;)
-categorized_data_file_path_save = Path(&#34;path/to/save/categorized/data&#34;)
+# File paths (expects /foreward/slashes/ and file extension .csv)
+open_end_data_file_path_load = Path(&#34;path/to/your/data.csv&#34;)
+categories_file_path_save = Path(&#34;path/to/save/categories.csv&#34;)
+categories_file_path_load = Path(&#34;path/to/load/categories.csv&#34;)
+codeframe_file_path_save = Path(&#34;path/to/save/codeframe.csv&#34;)
+codeframe_file_path_load = Path(&#34;path/to/load/codeframe.csv&#34;)
+categorized_data_file_path_save = Path(&#34;path/to/save/categorized/data.csv&#34;)
 
 # Global settings
-questionnaire_question = &#34;your_questionnaire_question&#34;
+questionnaire_question = &#34;your_questionnaire_question?&#34;
 is_multicode = False
-max_retries = 5
+max_retries = 6
 
 # Category generation settings
 number_of_categories = 20
@@ -106,7 +106,7 @@ batch_size = 3</code></pre>
 <h1>Index</h1>
 <div class="toc">
 <ul>
-<li><a href="#modify-this-before-running-any-scripts">MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS</a></li>
+<li><a href="#modify-this-file-before-running-any-scripts">MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS</a></li>
 </ul>
 </div>
 <ul id="index">
