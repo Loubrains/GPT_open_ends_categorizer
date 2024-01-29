@@ -24,7 +24,3 @@
 # Include docs
 !/docs
 !/docs/**
-
-# Include data directories but not the data within them
-!/data
-!/data/.keep
