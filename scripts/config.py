@@ -1,5 +1,5 @@
 """
-### MODIFY THIS BEFORE RUNNING ANY SCRIPTS ###
+### MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS ###
 
 Configuration file for user-defined parameters used in the open-end response categorization process.
 
@@ -25,16 +25,28 @@ Note:
 
 from pathlib import Path
 
-# File paths (expects foreward slashes)
-open_end_data_file_path_load = Path("path/to/your/data")
-categories_file_path_save = Path("path/to/save/categories")
-categories_file_path_load = Path("path/to/load/categories")
-codeframe_file_path_save = Path("path/to/save/codeframe")
-codeframe_file_path_load = Path("path/to/load/codeframe")
-categorized_data_file_path_save = Path("path/to/save/categorized/data")
+# File paths (expects /foreward/slashes/ and file extension .csv)
+open_end_data_file_path_load = Path(
+    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_open_ends - confidential.csv"
+)
+categories_file_path_save = Path(
+    ""
+)
+categories_file_path_load = Path(
+    "C:\Users\LouieAtkins-Turkish\Tapestry Research\BBC - BBC Studios - Need States\Data\AI text coding\C2a\C2a_categories - confidential.csv"
+)
+codeframe_file_path_save = Path(
+    "C:\Users\LouieAtkins-Turkish\Tapestry Research\BBC - BBC Studios - Need States\Data\AI text coding\C2a\C2a_codeframe - confidential.csv"
+)
+codeframe_file_path_load = Path(
+    "C:\Users\LouieAtkins-Turkish\Tapestry Research\BBC - BBC Studios - Need States\Data\AI text coding\C2a\C2a_codeframe - confidential.csv"
+)
+categorized_data_file_path_save = Path(
+    "C:\Users\LouieAtkins-Turkish\Tapestry Research\BBC - BBC Studios - Need States\Data\AI text coding\C2a\C2a_categorized_data - confidential.csv"
+)
 
 # Global settings
-questionnaire_question = "your_questionnaire_question"
+questionnaire_question = "What best describes the type of media content it is that you consumed?"
 is_multicode = False
 max_retries = 5
 
