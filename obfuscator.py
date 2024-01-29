@@ -46,18 +46,22 @@ def obfuscate_sensitive_data(content: str) -> str:
     Returns:
     - str: The obfuscated version of the input content with sensitive data replaced by safe placeholders.
     """
+    path_pattern = r'Path\(".*?"\)'
+
     replacements = {
-        r'open_end_data_file_path_load = Path\(".*?"\)': 'open_end_data_file_path_load = Path("path/to/your/data.csv")',
-        r'categories_file_path_save = Path\(".*?"\)': 'categories_file_path_save = Path("path/to/save/categories.csv")',
-        r'categories_file_path_load = Path\(".*?"\)': 'categories_file_path_load = Path("path/to/load/categories.csv")',
-        r'codeframe_file_path_save = Path\(".*?"\)': 'codeframe_file_path_save = Path("path/to/save/codeframe.csv")',
-        r'codeframe_file_path_load = Path\(".*?"\)': 'codeframe_file_path_load = Path("path/to/load/codeframe.csv")',
-        r'categorized_data_file_path_save = Path\(".*?"\)': 'categorized_data_file_path_save = Path("path/to/save/categorized/data.csv")',
-        r'questionnaire_question = ".*?"': 'questionnaire_question = "your_questionnaire_question"',
+        rf"open_end_data_file_path_load = {path_pattern}": 'open_end_data_file_path_load = Path("path/to/your/data.csv")',
+        rf"categories_file_path_save = {path_pattern}": 'categories_file_path_save = Path("path/to/save/categories.csv")',
+        rf"categories_file_path_load = {path_pattern}": 'categories_file_path_load = Path("path/to/load/categories.csv")',
+        rf"codeframe_file_path_save = {path_pattern}": 'codeframe_file_path_save = Path("path/to/save/codeframe.csv")',
+        rf"codeframe_file_path_load = {path_pattern}": 'codeframe_file_path_load = Path("path/to/load/codeframe.csv")',
+        rf"categorized_data_file_path_save = {path_pattern}": 'categorized_data_file_path_save = Path("path/to/save/categorized/data.csv")',
+        #
+        rf'questionnaire_question = ".*?"': 'questionnaire_question = "your_questionnaire_question?"',
     }
 
     for pattern, replacement in replacements.items():
-        content = re.sub(pattern, replacement, content)
+        content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+        # re.DOTALL catches multiline strings
 
     return content
 
