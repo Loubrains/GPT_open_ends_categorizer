@@ -16,10 +16,10 @@ def setup_logging():
     console_handler = logging.StreamHandler()
     console_format = logging.Formatter("%(levelname)s - %(message)s")
     console_handler.setFormatter(console_format)
-    console_handler.setLevel(logging.INFO)
+    console_handler.setLevel(logging.ERROR)
     logger.addHandler(console_handler)
 
-    # Reduce noise
+    # Suppress noisey libraries
     logging.getLogger("chardet").setLevel(logging.WARNING)
 
     logger.info("Logging initialized")

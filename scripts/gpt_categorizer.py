@@ -71,6 +71,7 @@ if __name__ == "__main__":
         logger.debug(f"Categories:\n{categories}")
 
         categories_list = categories.iloc[:, 0].tolist()
+        categories_list = [str(x) for x in categories_list if not pd.isna(x)]
         # Uncategorized is a helper category for later, we don't want ChatGPT to use it.
         categories_list.remove("Uncategorized")
 

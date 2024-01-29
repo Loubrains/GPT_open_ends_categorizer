@@ -32,9 +32,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-#### NOTE: SET USAGE LIMITS HERE
-REQUESTS_PER_MINUTE = 500
-TOKENS_PER_MINUTE = 150000
+### NOTE: SET USAGE LIMITS HERE
+REQUESTS_PER_MINUTE = 450  # Actual limit is 500
+TOKENS_PER_MINUTE = 140000  # Actual limit is 150000
 
 # For counting tokens
 encoding = tiktoken.encoding_for_model("gpt-4")
