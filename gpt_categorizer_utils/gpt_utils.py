@@ -80,6 +80,7 @@ class TokenBucket:
                 self.current_token_count -= tokens_required
                 break
             else:
+                logger.debug("Token limit per minute exceeded. Waiting for 1 second")
                 await asyncio.sleep(1)
 
     async def consume_request(self):

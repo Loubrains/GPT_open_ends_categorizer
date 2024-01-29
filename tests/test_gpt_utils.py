@@ -69,13 +69,12 @@ async def test_token_bucket_consume(
 @pytest.mark.asyncio
 async def test_concurrent_token_consumption():
     max_capacity = 100
-    refill_rate = 10  # tokens per second
+    refill_rate = 10
     token_bucket = gpt_utils.TokenBucket(max_capacity, refill_rate)
 
     async def consume_and_wait(bucket: gpt_utils.TokenBucket, tokens_to_consume, wait_time):
         await bucket.consume_tokens(tokens_to_consume)
-        await asyncio.sleep(wait_time)
-        token_bucket.refill()
+        await asyncio.sleep(wait_time)  # Manually trigger refill for testing purposes
         bucket.refill()
 
     test_tokens1, test_wait1 = 20, 1
