@@ -44,9 +44,9 @@ categorized_data_file_path_save = Path(
 )
 
 # Global settings
-questionnaire_question = "your_questionnaire_question"
+questionnaire_question = "your_questionnaire_question?"
 is_multicode = False
-max_retries = 5
+max_retries = 6
 
 # Category generation settings
 number_of_categories = 20
