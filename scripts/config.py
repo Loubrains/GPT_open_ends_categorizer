@@ -26,22 +26,12 @@ Note:
 from pathlib import Path
 
 # File paths (expects /foreward/slashes/ and file extension .csv)
-open_end_data_file_path_load = Path(
-    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_open_ends - confidential.csv"
-)
+open_end_data_file_path_load = Path("path/to/your/data.csv")
 categories_file_path_save = Path("path/to/save/categories.csv")
-categories_file_path_load = Path(
-    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_categories - confidential.csv"
-)
-codeframe_file_path_save = Path(
-    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_codeframe - confidential.csv"
-)
-codeframe_file_path_load = Path(
-    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_codeframe - confidential.csv"
-)
-categorized_data_file_path_save = Path(
-    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_categorized_data -confidential.csv"
-)
+categories_file_path_load = Path("path/to/load/categories.csv")
+codeframe_file_path_save = Path("path/to/save/codeframe.csv")
+codeframe_file_path_load = Path("path/to/load/codeframe.csv")
+categorized_data_file_path_save = Path("path/to/save/categorized/data.csv")
 
 # Global settings
 questionnaire_question = "your_questionnaire_question?"
