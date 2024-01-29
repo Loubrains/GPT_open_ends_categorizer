@@ -33,7 +33,6 @@ from itertools import islice
 import sys
 from gpt_categorizer_utils import general_utils, gpt_utils
 import config as cfg
-import logging
 from logging_utils import setup_logging
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
