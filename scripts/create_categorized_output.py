@@ -36,8 +36,7 @@ from logging_utils import setup_logging
 
 
 if __name__ == "__main__":
-    setup_logging()
-    logger = logging.getLogger(__name__)
+    logger = setup_logging()
 
     try:
         # Load open ends
