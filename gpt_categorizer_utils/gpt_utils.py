@@ -111,7 +111,7 @@ token_bucket = TokenBucket(TOKENS_PER_MINUTE, TOKENS_PER_MINUTE / 60)
 request_bucket = TokenBucket(REQUESTS_PER_MINUTE, REQUESTS_PER_MINUTE / 60)
 
 
-@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError))
+@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter)
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
@@ -119,7 +119,7 @@ async def call_gpt(
     """
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
     Tokens usage is managed with the token bucket algrithm.
-    Failed requests are exponentially backed off using the backoff library.
+    Failed requests are exponentially backed off and jittered using the backoff library.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.

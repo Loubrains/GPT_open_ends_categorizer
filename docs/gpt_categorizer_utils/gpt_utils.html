@@ -155,7 +155,7 @@ token_bucket = TokenBucket(TOKENS_PER_MINUTE, TOKENS_PER_MINUTE / 60)
 request_bucket = TokenBucket(REQUESTS_PER_MINUTE, REQUESTS_PER_MINUTE / 60)
 
 
-@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError))
+@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter)
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
@@ -163,7 +163,7 @@ async def call_gpt(
     &#34;&#34;&#34;
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
     Tokens usage is managed with the token bucket algrithm.
-    Failed requests are exponentially backed off using the backoff library.
+    Failed requests are exponentially backed off and jittered using the backoff library.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.
@@ -488,7 +488,7 @@ async def gpt_categorize_response_batches_main(
 <dd>
 <div class="desc"><p>Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
 Tokens usage is managed with the token bucket algrithm.
-Failed requests are exponentially backed off using the backoff library.</p>
+Failed requests are exponentially backed off and jittered using the backoff library.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>client</code></strong> :&ensp;<code>AsyncOpenAI</code></dt>
@@ -504,7 +504,7 @@ Failed requests are exponentially backed off using the backoff library.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError))
+<pre><code class="python">@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter)
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
@@ -512,7 +512,7 @@ async def call_gpt(
     &#34;&#34;&#34;
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
     Tokens usage is managed with the token bucket algrithm.
-    Failed requests are exponentially backed off using the backoff library.
+    Failed requests are exponentially backed off and jittered using the backoff library.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.
