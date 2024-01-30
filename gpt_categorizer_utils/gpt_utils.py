@@ -85,7 +85,7 @@ class TokenBucket:
                 self.current_token_count -= tokens_required
                 break
             else:
-                logger.debug("Token limit per minute exceeded. Waiting.")
+                logger.debug("Token limit per minute exceeded. Exponential backoff.")
                 raise ValueError("Token limit per minute exceeded. Waiting.")
 
     async def consume_request(self):
