@@ -34,17 +34,18 @@ def setup_logging():
     logging.basicConfig(
         filename=&#34;app.log&#34;,
         filemode=&#34;w&#34;,
-        level=logging.INFO,
+        level=logging.WARNING,  # suppress all loggers from dependencies
         format=&#34;%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s&#34;,
     )
 
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
 
     # Set up console logging
     console_handler = logging.StreamHandler()
-    console_format = logging.Formatter(&#34;%(levelname)s - %(message)s&#34;)
+    console_format = logging.Formatter(&#34;%(message)s&#34;)
     console_handler.setFormatter(console_format)
-    console_handler.setLevel(logging.ERROR)
+    console_handler.setLevel(logging.INFO)
     logger.addHandler(console_handler)
 
     # Suppress noisey libraries
@@ -76,17 +77,18 @@ def setup_logging():
     logging.basicConfig(
         filename=&#34;app.log&#34;,
         filemode=&#34;w&#34;,
-        level=logging.INFO,
+        level=logging.WARNING,  # suppress all loggers from dependencies
         format=&#34;%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s&#34;,
     )
 
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
 
     # Set up console logging
     console_handler = logging.StreamHandler()
-    console_format = logging.Formatter(&#34;%(levelname)s - %(message)s&#34;)
+    console_format = logging.Formatter(&#34;%(message)s&#34;)
     console_handler.setFormatter(console_format)
-    console_handler.setLevel(logging.ERROR)
+    console_handler.setLevel(logging.INFO)
     logger.addHandler(console_handler)
 
     # Suppress noisey libraries
