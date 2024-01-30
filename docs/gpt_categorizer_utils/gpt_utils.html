@@ -25,7 +25,11 @@
 <p>Utilities for interacting with the OpenAI GPT model to categorize survey responses.</p>
 <p>This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories,
 validation of categorization results, and batch processing of responses for efficient categorization.
-It implements token and request limiting using the <code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket" href="#gpt_categorizer_utils.gpt_utils.TokenBucket">TokenBucket</a></code> class, and uses <code>tiktoken</code> for accurate token counting.</p>
+It implements token and request limiting using the <code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket" href="#gpt_categorizer_utils.gpt_utils.TokenBucket">TokenBucket</a></code> class, backoff decorator, and uses <code>tiktoken</code> for accurate token counting.
+<a href="https://cookbook.openai.com/examples/how_to_handle_rate_limits">https://cookbook.openai.com/examples/how_to_handle_rate_limits</a>
+<a href="https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken">https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken</a>
+Another potential option for limiting rate of async tasks:
+<a href="https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio">https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio</a></p>
 <h2 id="functions">Functions</h2>
 <p><code><a title="gpt_categorizer_utils.gpt_utils.call_gpt" href="#gpt_categorizer_utils.gpt_utils.call_gpt">call_gpt()</a></code>: Asynchronously sends a user prompt to the GPT model and retrieves the completion. It manages token and request rate limiting using the TokenBucket class
 <code><a title="gpt_categorizer_utils.gpt_utils.gpt_generate_categories_list" href="#gpt_categorizer_utils.gpt_utils.gpt_generate_categories_list">gpt_generate_categories_list()</a></code>: Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
@@ -43,7 +47,11 @@ Utilities for interacting with the OpenAI GPT model to categorize survey respons
 
 This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
 validation of categorization results, and batch processing of responses for efficient categorization.
-It implements token and request limiting using the `TokenBucket` class, and uses `tiktoken` for accurate token counting.
+It implements token and request limiting using the `TokenBucket` class, backoff decorator, and uses `tiktoken` for accurate token counting.
+https://cookbook.openai.com/examples/how_to_handle_rate_limits
+https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken
+Another potential option for limiting rate of async tasks:
+https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio
 
 Functions:
     `call_gpt`: Asynchronously sends a user prompt to the GPT model and retrieves the completion. It manages token and request rate limiting using the TokenBucket class
@@ -61,11 +69,12 @@ Note: A potential future update includes calling the GPT model with JSON mode fo
 ### `response_format={ &#34;type&#34;: &#34;json_object&#34; }`
 ### Make sure the prompt specifies the JSON structure, and then parse the output
 
+import openai
 from openai import AsyncOpenAI
 import json
 import asyncio
 import tiktoken
-from ratelimit import sleep_and_retry
+import backoff
 import time
 from .general_utils import create_batches
 import logging
@@ -120,8 +129,8 @@ class TokenBucket:
                 self.current_token_count -= tokens_required
                 break
             else:
-                logger.debug(&#34;Token limit per minute exceeded. Waiting for 1 second&#34;)
-                await asyncio.sleep(1)
+                logger.debug(&#34;Token limit per minute exceeded. Exponential backoff.&#34;)
+                raise ValueError(&#34;Token limit per minute exceeded. Waiting.&#34;)
 
     async def consume_request(self):
         &#34;&#34;&#34;
@@ -146,14 +155,15 @@ token_bucket = TokenBucket(TOKENS_PER_MINUTE, TOKENS_PER_MINUTE / 60)
 request_bucket = TokenBucket(REQUESTS_PER_MINUTE, REQUESTS_PER_MINUTE / 60)
 
 
-@sleep_and_retry
+@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError))
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
 ) -&gt; str | None:
     &#34;&#34;&#34;
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
-    Tokens usage is managed with the token bucket algrithm, forcing the call to wait if exceeding limits.
+    Tokens usage is managed with the token bucket algrithm.
+    Failed requests are exponentially backed off using the backoff library.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.
@@ -176,6 +186,8 @@ async def call_gpt(
             messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-turbo-preview&#34;
         )
         content = completion.choices[0].message.content
+        if content:
+            logger.debug(f&#34;Success: {content}&#34;)
 
         if content:
             response_tokens = len(encoding.encode(content))
@@ -382,6 +394,8 @@ async def gpt_categorize_responses(
         question, responses, categories_list, is_multicode
     )
 
+    # logger.debug(user_prompt)
+
     for attempt in range(max_retries):
         try:
             output = await call_gpt(client, user_prompt)
@@ -448,6 +462,7 @@ async def gpt_categorize_response_batches_main(
         task = gpt_categorize_responses(
             client, question, batch, categories_list, max_retries, is_multicode
         )
+        logger.debug(task)
         tasks.append(task)
 
     output_categories = await asyncio.gather(*tasks)
@@ -472,7 +487,8 @@ async def gpt_categorize_response_batches_main(
 </code></dt>
 <dd>
 <div class="desc"><p>Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
-Tokens usage is managed with the token bucket algrithm, forcing the call to wait if exceeding limits.</p>
+Tokens usage is managed with the token bucket algrithm.
+Failed requests are exponentially backed off using the backoff library.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>client</code></strong> :&ensp;<code>AsyncOpenAI</code></dt>
@@ -488,14 +504,15 @@ Tokens usage is managed with the token bucket algrithm, forcing the call to wait
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@sleep_and_retry
+<pre><code class="python">@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError))
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
 ) -&gt; str | None:
     &#34;&#34;&#34;
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
-    Tokens usage is managed with the token bucket algrithm, forcing the call to wait if exceeding limits.
+    Tokens usage is managed with the token bucket algrithm.
+    Failed requests are exponentially backed off using the backoff library.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.
@@ -518,6 +535,8 @@ async def call_gpt(
             messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-turbo-preview&#34;
         )
         content = completion.choices[0].message.content
+        if content:
+            logger.debug(f&#34;Success: {content}&#34;)
 
         if content:
             response_tokens = len(encoding.encode(content))
@@ -673,6 +692,7 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
         task = gpt_categorize_responses(
             client, question, batch, categories_list, max_retries, is_multicode
         )
+        logger.debug(task)
         tasks.append(task)
 
     output_categories = await asyncio.gather(*tasks)
@@ -750,6 +770,8 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
     user_prompt = create_user_prompt_for_gpt_categorization(
         question, responses, categories_list, is_multicode
     )
+
+    # logger.debug(user_prompt)
 
     for attempt in range(max_retries):
         try:
@@ -1017,8 +1039,8 @@ Extended to handle requests limiting too.</p>
                 self.current_token_count -= tokens_required
                 break
             else:
-                logger.debug(&#34;Token limit per minute exceeded. Waiting for 1 second&#34;)
-                await asyncio.sleep(1)
+                logger.debug(&#34;Token limit per minute exceeded. Exponential backoff.&#34;)
+                raise ValueError(&#34;Token limit per minute exceeded. Waiting.&#34;)
 
     async def consume_request(self):
         &#34;&#34;&#34;
@@ -1095,8 +1117,8 @@ Extended to handle requests limiting too.</p>
             self.current_token_count -= tokens_required
             break
         else:
-            logger.debug(&#34;Token limit per minute exceeded. Waiting for 1 second&#34;)
-            await asyncio.sleep(1)</code></pre>
+            logger.debug(&#34;Token limit per minute exceeded. Exponential backoff.&#34;)
+            raise ValueError(&#34;Token limit per minute exceeded. Waiting.&#34;)</code></pre>
 </details>
 </dd>
 <dt id="gpt_categorizer_utils.gpt_utils.TokenBucket.refill"><code class="name flex">
