@@ -173,7 +173,7 @@ async def call_gpt(
 
     try:
         completion = await client.chat.completions.create(
-            messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-1106-preview&#34;
+            messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-turbo-preview&#34;
         )
         content = completion.choices[0].message.content
 
@@ -515,7 +515,7 @@ async def call_gpt(
 
     try:
         completion = await client.chat.completions.create(
-            messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-1106-preview&#34;
+            messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-turbo-preview&#34;
         )
         content = completion.choices[0].message.content
 
