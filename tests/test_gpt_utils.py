@@ -87,7 +87,7 @@ async def test_concurrent_token_consumption():
     ]
 
     await asyncio.gather(*tasks)
-
+    # Maybe also assert that tokens is less than max (so they have been consumed)
     assert token_bucket.current_token_count > max_capacity - sum(
         [test_tokens1, test_tokens2, test_tokens3]
     )
