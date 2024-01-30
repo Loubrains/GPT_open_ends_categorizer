@@ -3,7 +3,8 @@ Utilities for interacting with the OpenAI GPT model to categorize survey respons
 
 This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
 validation of categorization results, and batch processing of responses for efficient categorization.
-It implements token and request limiting using the `TokenBucket` class, backoff decorator, and uses `tiktoken` for accurate token counting.
+It implements token and request limiting using the `backoff` library as well as a `TokenBucket` class. Uses `tiktoken` for accurate token counting
+https://pypi.org/project/backoff/
 https://cookbook.openai.com/examples/how_to_handle_rate_limits
 https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken
 Another potential option for limiting rate of async tasks:

@@ -25,7 +25,8 @@
 <p>Utilities for interacting with the OpenAI GPT model to categorize survey responses.</p>
 <p>This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories,
 validation of categorization results, and batch processing of responses for efficient categorization.
-It implements token and request limiting using the <code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket" href="#gpt_categorizer_utils.gpt_utils.TokenBucket">TokenBucket</a></code> class, backoff decorator, and uses <code>tiktoken</code> for accurate token counting.
+It implements token and request limiting using the <code>backoff</code> library as well as a <code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket" href="#gpt_categorizer_utils.gpt_utils.TokenBucket">TokenBucket</a></code> class. Uses <code>tiktoken</code> for accurate token counting
+<a href="https://pypi.org/project/backoff/">https://pypi.org/project/backoff/</a>
 <a href="https://cookbook.openai.com/examples/how_to_handle_rate_limits">https://cookbook.openai.com/examples/how_to_handle_rate_limits</a>
 <a href="https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken">https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken</a>
 Another potential option for limiting rate of async tasks:
@@ -47,7 +48,8 @@ Utilities for interacting with the OpenAI GPT model to categorize survey respons
 
 This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
 validation of categorization results, and batch processing of responses for efficient categorization.
-It implements token and request limiting using the `TokenBucket` class, backoff decorator, and uses `tiktoken` for accurate token counting.
+It implements token and request limiting using the `backoff` library as well as a `TokenBucket` class. Uses `tiktoken` for accurate token counting
+https://pypi.org/project/backoff/
 https://cookbook.openai.com/examples/how_to_handle_rate_limits
 https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken
 Another potential option for limiting rate of async tasks:
