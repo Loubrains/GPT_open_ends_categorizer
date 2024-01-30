@@ -133,7 +133,7 @@ async def call_gpt(
 
     try:
         completion = await client.chat.completions.create(
-            messages=[{"role": "user", "content": user_prompt}], model="gpt-4-1106-preview"
+            messages=[{"role": "user", "content": user_prompt}], model="gpt-4-turbo-preview"
         )
         content = completion.choices[0].message.content
 
