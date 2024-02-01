@@ -16,6 +16,8 @@ Configuration Variables:
     `CATEGORIZED_DATA_FILE_PATH_SAVE`: File path for saving the final categorized data to CSV.
     `QUESTIONNAIRE_QUESTION`: Text of the questionnaire question associated with the open-ended responses.    
     `IS_MULTICODE`: Boolean flag indicating whether each response can belong to multiple categories.
+    `NUMBER_OF_CATEGORIES`: Number of categories to generate.
+    `RESPONSES_SAMPLE_SIZE`: Number of responses sent to GPT to generate the initial list of categories.
 
 Note:
 - File paths expect foreward slashes.

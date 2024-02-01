@@ -17,6 +17,6 @@ Modules:
         Provides utilities for manipulating DataFrames, with the goal of preparing the categorized data for further analysis.
         It includes functions for initializing categorized DataFrames, handling missing data, and categorizing responses based on a codeframe.
         
-    `gpt_config.py`:
+    `gpt_config`:
         Configuration file containing user-defined parameters for rate limiting
 """
