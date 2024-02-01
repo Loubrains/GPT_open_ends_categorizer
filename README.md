@@ -2,7 +2,9 @@
 
 This project contains scripts and modules for the automatic categorization of open-ended text responses to survey questions using GPT-4.
 
-For a dataset of 1500 responses, it costs less than 1$ and takes about 15 seconds to run the categorizer.
+For a dataset of 1500 responses, and 20 categories, it costs less than 1$ and takes about 20 seconds to run the categorizer.
+
+For a bigger dataset, with many more categories, rate limiting can come into effect and increase the time and cost. See your usage in the [OpenAI usage portal](https://platform.openai.com/usage)
 
 # Prerequisites
 
@@ -14,7 +16,7 @@ For a dataset of 1500 responses, it costs less than 1$ and takes about 15 second
 python -m pip install --upgrade pip
 ```
 
-**OpenAI API key**: Obtain your API key from the [OpenAI API Keys portal](https://platform.openai.com/api-keys). Once you have your key, set it as an environment variable named OPENAI_API_KEY on your system. This will be used for authenticating with OpenAI account and billing to your account.
+**OpenAI API key**: Obtain your API key from the [OpenAI API keys portal](https://platform.openai.com/api-keys). Once you have your key, set it as an environment variable named OPENAI_API_KEY on your system. This will be used for authenticating with OpenAI account and billing to your account.
 
 ```powershell
 setx OPENAI_API_KEY "your_api_key_here"
