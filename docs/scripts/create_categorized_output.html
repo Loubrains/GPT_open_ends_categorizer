@@ -40,7 +40,7 @@ Exports the DataFrame to a CSV file.</p>
 - Categorized data file (<code>categorized_data_file_path</code>): A CSV file where the processed and categorized data is saved.</p>
 <p>Notes:
 - The script utilizes utility functions from <code>general_utils</code> and <code>dataframe_utils</code> modules.
-- User-defined variables such as file paths should be properly set in the <code>config.py</code> file before running this script.
+- User-defined variables such as file paths should be properly set in the <code>config</code> file before running this script.
 - The script supports both single-category and multi-category (<code>is_multicode</code>) response categorization.
 - The script terminates if exceptions are raised at any point.</p>
 <details class="source">
@@ -69,7 +69,7 @@ Output File:
 
 Notes:
 - The script utilizes utility functions from `general_utils` and `dataframe_utils` modules.
-- User-defined variables such as file paths should be properly set in the `config.py` file before running this script.
+- User-defined variables such as file paths should be properly set in the `config` file before running this script.
 - The script supports both single-category and multi-category (`is_multicode`) response categorization.
 - The script terminates if exceptions are raised at any point.
 &#34;&#34;&#34;
@@ -80,7 +80,6 @@ from itertools import islice
 import sys
 from gpt_categorizer_utils import general_utils, dataframe_utils
 import config as cfg
-import logging
 from logging_utils import setup_logging
 
 
@@ -90,9 +89,9 @@ if __name__ == &#34;__main__&#34;:
     try:
         # Load open ends
         logger.info(&#34;Loading data&#34;)
-        with open(cfg.open_end_data_file_path_load, &#34;rb&#34;) as file:
+        with open(cfg.OPEN_END_DATA_FILE_PATH_LOAD, &#34;rb&#34;) as file:
             encoding = chardet.detect(file.read())[&#34;encoding&#34;]  # Detect encoding
-        df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
+        df = pd.read_csv(cfg.OPEN_END_DATA_FILE_PATH_LOAD, encoding=encoding)
         logger.debug(f&#34;\nRaw data (first 20):\n{df.head(20)}&#34;)
 
         # Clean open ends
@@ -102,17 +101,17 @@ if __name__ == &#34;__main__&#34;:
 
         # Load categories
         logger.info(&#34;Loading categories&#34;)
-        with open(cfg.categories_file_path_load, &#34;rb&#34;) as file:
+        with open(cfg.CATEGORIES_FILE_PATH_LOAD, &#34;rb&#34;) as file:
             encoding = chardet.detect(file.read())[&#34;encoding&#34;]  # Detect encoding
-        categories = pd.read_csv(cfg.categories_file_path_load, encoding=encoding, header=None)
+        categories = pd.read_csv(cfg.CATEGORIES_FILE_PATH_LOAD, encoding=encoding, header=None)
         logger.debug(f&#34;Categories:\n{categories}&#34;)
 
         # Load codeframe (dictionary of response-category pairs)
         logger.info(&#34;Loading codeframe...&#34;)
-        if cfg.is_multicode:
-            categorized_dict = general_utils.load_csv_to_dict_of_lists(cfg.codeframe_file_path_load)
+        if cfg.IS_MULTICODE:
+            categorized_dict = general_utils.load_csv_to_dict_of_lists(cfg.CODEFRAME_FILE_PATH_LOAD)
         else:
-            categorized_dict = general_utils.load_csv_to_dict(cfg.codeframe_file_path_load)
+            categorized_dict = general_utils.load_csv_to_dict(cfg.CODEFRAME_FILE_PATH_LOAD)
         logger.debug(
             &#34;Codeframe (first 10):\n&#34;,
             &#34;\n&#34;.join(f&#34;{key}: {value}&#34; for key, value in islice(categorized_dict.items(), 10)),
@@ -136,20 +135,20 @@ if __name__ == &#34;__main__&#34;:
         logger.info(&#34;Preparing output data...&#34;)
         for response_column in response_column_names:
             for response, categories in categorized_dict.items():
-                if cfg.is_multicode and &#34;Error&#34; in categories:
+                if cfg.IS_MULTICODE and &#34;Error&#34; in categories:
                     logger.error(f&#34;\nResponse &#39;{response}&#39; was not categorized.&#34;)
                 elif categories == &#34;Error&#34;:
                     logger.error(f&#34;\nResponse &#39;{response}&#39; was not categorized.&#34;)
 
                 dataframe_utils.categorize_responses_for_response_column(
-                    response, categories, response_column, categorized_data, cfg.is_multicode
+                    response, categories, response_column, categorized_data, cfg.IS_MULTICODE
                 )
 
         logger.debug(f&#34;\nCategorized results (first 10):\n{categorized_data.head(10)}&#34;)
 
         # Save to csv
-        logger.info(f&#34;Saving to {cfg.categorized_data_file_path_save} ...&#34;)
-        general_utils.export_dataframe_to_csv(cfg.categorized_data_file_path_save, categorized_data)
+        logger.info(f&#34;Saving to {cfg.CATEGORIZED_DATA_FILE_PATH_SAVE} ...&#34;)
+        general_utils.export_dataframe_to_csv(cfg.CATEGORIZED_DATA_FILE_PATH_SAVE, categorized_data)
 
         logger.info(&#34;Finished&#34;)
 

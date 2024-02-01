@@ -19,7 +19,7 @@ Output Files:
 Notes:
 - Make sure OPENAI_API_KEY is set up in your system environment variables.
 - The script uses utility functions from the `general_utils` and `gpt_utils` modules.
-- User-defined variables should be properly set in the `config.py` file before running this script.
+- User-defined variables should be properly set in the `config` file before running this script.
 - The script terminates if exceptions are raised at any point.
 """
 
@@ -27,12 +27,10 @@ Notes:
 from openai import AsyncOpenAI
 import asyncio
 import pandas as pd
-from pathlib import Path
 import chardet
 import sys
 from gpt_categorizer_utils import general_utils, gpt_utils
 import config as cfg
-import logging
 from logging_utils import setup_logging
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
@@ -48,9 +46,9 @@ if __name__ == "__main__":
         # Load open ends
         logger.info("Loading data")
 
-        with open(cfg.open_end_data_file_path_load, "rb") as file:
+        with open(cfg.OPEN_END_DATA_FILE_PATH_LOAD, "rb") as file:
             encoding = chardet.detect(file.read())["encoding"]  # Detect encoding
-        df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
+        df = pd.read_csv(cfg.OPEN_END_DATA_FILE_PATH_LOAD, encoding=encoding)
 
         # Clean open ends
         logger.info("Cleaning responses")
@@ -63,17 +61,13 @@ if __name__ == "__main__":
         # Get sample of responses
         logger.info("Fetching sample of responses")
         responses_sample = general_utils.get_random_sample_from_series(unique_responses, cfg.responses_sample_size).to_list()  # type: ignore
-        logger.debug(f"Sample (size {cfg.responses_sample_size}):\n{responses_sample}")
+        logger.debug(f"Sample (size {cfg.RESPONSES_SAMPLE_SIZE}):\n{responses_sample}")
 
         # Generate categories using the GPT API
         logger.info("Generating categories with GPT-4")
         categories = asyncio.run(
             gpt_utils.gpt_generate_categories_list(
-                client,
-                cfg.questionnaire_question,
-                responses_sample,
-                cfg.number_of_categories,
-                cfg.max_retries,
+                client, cfg.QUESTIONNAIRE_QUESTION, responses_sample, cfg.NUMBER_OF_CATEGORIES
             )
         )
         categories.extend(["Other", "Bad response", "Uncategorized"])
@@ -81,9 +75,9 @@ if __name__ == "__main__":
         logger.debug(f"Categories generated:\n{categories}")
 
         # Save results
-        logger.info(f"Saving categories to {cfg.categories_file_path_save}")
+        logger.info(f"Saving categories to {cfg.CATEGORIES_FILE_PATH_SAVE}")
         general_utils.export_dataframe_to_csv(
-            cfg.categories_file_path_save, categories_df, header=False
+            cfg.CATEGORIES_FILE_PATH_SAVE, categories_df, header=False
         )
 
         logger.info("Finished")

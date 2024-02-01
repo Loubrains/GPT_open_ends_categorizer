@@ -4,35 +4,141 @@ Utilities for interacting with the OpenAI GPT model to categorize survey respons
 This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
 validation of categorization results, and batch processing of responses for efficient categorization.
 
+### Set rate limiting parameters in `gpt_config.py` ###
+
+It implements token and request limiting using the `backoff` library as well as a `TokenBucket` class. Uses `tiktoken` for accurate token counting.
+Concurrent tasks are limited with asyncio.Semaphore.
+https://pypi.org/project/backoff/
+https://cookbook.openai.com/examples/how_to_handle_rate_limits
+https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken
+https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio
+
 Functions:
-    `call_gpt`: Asynchronously sends a user prompt to the GPT model and retrieves the completion.
+    `call_gpt`: Asynchronously sends a user prompt to the GPT model and retrieves the completion. It manages token and request rate limiting using the TokenBucket class
     `gpt_generate_categories_list`: Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
     `validate_gpt_categorized_output`: Validates the GPT output received by the categorizer.
     `create_user_prompt_for_gpt_categorization`: Creates a user prompt to send to the GPT model to categorize survey question responses.
     `gpt_categorize_responses`: Asynchronously categorizes a list of responses using the GPT model.
     `gpt_categorize_response_batches_main`: Asynchronously sends batches of survey responses to be categorized using the GPT model.
+    
+Note: A potential future update includes calling the GPT model with JSON mode for structured responses.
 """
-
-from openai import AsyncOpenAI
-import json
-import asyncio
-from .general_utils import create_batches
-import logging
-
-logger = logging.getLogger(__name__)
 
 ### NOTE: potential future update to these utils: call gpt with JSON mode
 ### Put the following in the client.chat.completions.create() arguments:
 ### `response_format={ "type": "json_object" }`
 ### Make sure the prompt specifies the JSON structure, and then parse the output
 
+import openai
+from openai import AsyncOpenAI
+import json
+import asyncio
+import tiktoken
+import backoff
+import time
+from .general_utils import create_batches
+from .gpt_config import (
+    BATCH_SIZE,
+    MAX_RETRIES,
+    REQUESTS_PER_MINUTE,
+    TOKENS_PER_MINUTE,
+    CONCURRENT_TASKS,
+)
+import logging
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# Limit the number of concurrent tasks
+semaphore = asyncio.Semaphore(CONCURRENT_TASKS)
+
+# For counting tokens
+encoding = tiktoken.encoding_for_model("gpt-4")
+
+
+class TokenBucket:
+    """
+    TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
+    It enforces a maximum capacity of tokens that can be consumed over a specific time period.
+    Extended to handle requests limiting too.
+    Raises exceptions when token usage is too high - used in conjunction with a backoff decorator to catch those exceptions.
+
+    Attributes:
+        max_capacity (int): The maximum number of tokens in the bucket.
+        refill_rate_per_second (float): The rate at which tokens are added to the bucket per second.
+        current_token_count (float): The current number of tokens in the bucket.
+        timestamp_of_last_refill (float): The timestamp when the bucket was last refilled.
+    """
+
+    def __init__(self, max_capacity: int, refill_rate_per_second: float):
+        self.max_capacity = max_capacity
+        self.refill_rate_per_second = refill_rate_per_second
+        self.current_token_count = max_capacity
+        self.timestamp_of_last_refill = time.time()
+
+    async def consume_tokens(self, tokens_required: int):
+        """
+        Consumes a specified number of tokens from the bucket. If enough tokens are not available, waits asynchronously until they are refilled.
+
+        Args:
+            tokens_required (int): The number of tokens to consume from the bucket.
+
+        Raises:
+            ValueError: If tokens_required exceeds the maximum capacity of the bucket. Use this in conjunction with a backoff mechanism that catches exceptions.
+        """
+        if tokens_required > self.max_capacity:
+            # This gets caught by the backoff decorator.
+            raise ValueError(
+                f"Requested tokens ({tokens_required}) exceed the maximum capacity of the bucket ({self.max_capacity})."
+            )
+
+        while True:
+            self.refill()
+            if tokens_required <= self.current_token_count:
+                self.current_token_count -= tokens_required
+                break
+            else:
+                logger.debug(
+                    f"Token/request limit per minute exceeded. Exponentially backing off. Tokens/requests requested: {tokens_required}. Tokens remaining: {self.current_token_count}"
+                )
+                raise ValueError("Token limit per minute exceeded. Exponentially backing off.")
+
+    async def consume_request(self):
+        """
+        Consumes a token for a request. If no tokens are available for requests, waits asynchronously until they are refilled.
+        This function should be used by instantiating the TokenBucket class as a request_bucket, passing in the max_capacity_per_minute and refill_rate_per_second.
+        """
+        await self.consume_tokens(1)
+
+    def refill(self):
+        """
+        Refills the tokens in the bucket based on the refill rate and the time elapsed since the last refill.
+        """
+        current_time = time.time()
+        time_since_last_refill = current_time - self.timestamp_of_last_refill
+        tokens_to_add = time_since_last_refill * self.refill_rate_per_second
+        # Refill only up to max_capacity
+        self.current_token_count = min(self.max_capacity, self.current_token_count + tokens_to_add)
+        self.timestamp_of_last_refill = current_time
+
+
+# Instantiate TokenBuckets for token and request limiting
+token_bucket = TokenBucket(TOKENS_PER_MINUTE, TOKENS_PER_MINUTE / 60)
+request_bucket = TokenBucket(REQUESTS_PER_MINUTE, REQUESTS_PER_MINUTE / 60)
+
+
+@backoff.on_exception(
+    backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter, base=2
+)
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
 ) -> str | None:
     """
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
+    Tokens usage is managed with the TokenBucket class.
+    Failed requests are exponentially backed off and jittered using the backoff decorator.
+    Number of concurrent tasks are limited with asyncio.Semaphore.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.
@@ -44,19 +150,34 @@ async def call_gpt(
     Raises:
         Raises an exception if the API call fails.
     """
+    async with semaphore:  # Limit number of concurrent tasks
+        estimated_tokens = (
+            len(encoding.encode(user_prompt)) + 10
+        )  # add extra for the system message
+        # Limit tokens and requests per minute
+        await token_bucket.consume_tokens(estimated_tokens)
+        await request_bucket.consume_request()
 
-    try:
-        completion = await client.chat.completions.create(
-            messages=[{"role": "user", "content": user_prompt}], model="gpt-4-1106-preview"
-        )
-        content = completion.choices[0].message.content
+        try:
+            completion = await client.chat.completions.create(
+                messages=[{"role": "user", "content": user_prompt}], model="gpt-4-turbo-preview"
+            )
+            content = completion.choices[0].message.content
+            if content:
+                logger.debug(f"Successful API call: {content}")
 
-    except Exception as e:
-        logger.error(f"\nAn error occurred: {e}")
-        content = "Error"
-        raise
+            if not content:
+                raise ValueError("No completion returned")
 
-    return content
+            response_tokens = len(encoding.encode(content))
+            await token_bucket.consume_tokens(response_tokens)
+
+        except Exception as e:
+            logger.error(f"\nAn error occurred: {e}")
+            content = "Error"
+            raise
+
+        return content
 
 
 async def gpt_generate_categories_list(
@@ -64,7 +185,6 @@ async def gpt_generate_categories_list(
     question: str,
     responses_sample: list[str],
     number_of_categories: int = 20,
-    max_retries: int = 5,
 ) -> list[str]:
     """
     Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
@@ -74,14 +194,13 @@ async def gpt_generate_categories_list(
         question (str): The survey question related to the responses.
         responses_sample (list[str]): A sample of survey responses.
         number_of_categories (int): The number of categories to generate. Defaults to 20.
-        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
 
     Returns:
         list[str]: A list of generated category names.
 
     Notes:
         - Expects the GPT model to return a JSON list of category names.
-        - Retries the API call up to max_retries times if errors occur.
+        - Retries the API call up to MAX_RETRIES times if errors occur.
     """
 
     user_prompt = f"""List the {number_of_categories} most relevant thematic categories for this sample of survey responses.
@@ -94,7 +213,7 @@ async def gpt_generate_categories_list(
     ```
     {responses_sample}
     ```"""
-    for attempt in range(max_retries):
+    for attempt in range(MAX_RETRIES):
         try:
             output = await call_gpt(client, user_prompt)
             output_cleaned = output.strip().replace("json", "").replace("`", "").replace("\n", "")  # type: ignore
@@ -107,13 +226,13 @@ async def gpt_generate_categories_list(
             return output_categories_list
 
         except Exception as e:
-            logger.info(
+            logger.warning(
                 f"""\nAn error occurred:\n{e}
-            Retrying attempt {attempt + 1}/{max_retries}..."""
+            Retrying attempt {attempt + 1}/{MAX_RETRIES}..."""
             )
 
     # Error case
-    logger.info("\nMax retries reached for responses")
+    logger.warning("\nMax retries reached for responses")
     output_categories_list = ["Error"]
 
     return output_categories_list
@@ -222,7 +341,6 @@ async def gpt_categorize_responses(
     question: str,
     responses: list[str],
     categories_list: list[str],
-    max_retries: int = 5,
     is_multicode: bool = False,
 ) -> list[str] | list[list[str]]:
     """
@@ -234,7 +352,6 @@ async def gpt_categorize_responses(
         question (str): The survey question related to the responses.
         responses (list[str]): The list of responses to categorize.
         categories_list (list[str]): The list of valid category names.
-        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
         is_multicode (bool): If True, each response can belong to multiple categories. Defaults to False.
 
     Returns:
@@ -243,14 +360,14 @@ async def gpt_categorize_responses(
             - If 'is_multi' is True, returns a list of lists of categories, where each inner list contains multiple categories assigned to the corresponding response.
 
     Notes:
-        - Retries the API call up to max_retries times if errors occur.
+        - Retries the API call up to MAX_RETRIES times if errors occur.
     """
 
     user_prompt = create_user_prompt_for_gpt_categorization(
         question, responses, categories_list, is_multicode
     )
 
-    for attempt in range(max_retries):
+    for attempt in range(MAX_RETRIES):
         try:
             output = await call_gpt(client, user_prompt)
             output_cleaned = output.strip().replace("json", "").replace("`", "").replace("\n", "")  # type: ignore
@@ -261,14 +378,14 @@ async def gpt_categorize_responses(
             return output_categories
 
         except Exception as e:
-            logger.info(
+            logger.warning(
                 f"""\nAn error occurred:\n{e}
             Responses:\n{responses}
-            Retrying attempt {attempt + 1}/{max_retries}..."""
+            Retrying attempt {attempt + 1}/{MAX_RETRIES}..."""
             )
 
     # Error case
-    logger.info(f"\nMax retries reached for responses:\n{responses}")
+    logger.warning(f"\nMax retries reached for responses:\n{responses}")
     if is_multicode:
         output_categories = [["Error"]] * len(responses)
     else:
@@ -282,8 +399,6 @@ async def gpt_categorize_response_batches_main(
     question: str,
     responses: list[str] | set[str],
     categories_list: list[str],
-    batch_size: int = 3,
-    max_retries: int = 5,
     is_multicode: bool = False,
 ) -> dict[str, str] | dict[str, list[str]]:
     """
@@ -295,8 +410,6 @@ async def gpt_categorize_response_batches_main(
         question (str): The survey question related to the responses.
         responses (list[str] | set[str]): The responses to categorize.
         categories_list (list[str]): The list of valid category names.
-        batch_size (int): The number of responses to process in each batch. Defaults to 3.
-        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
         is_multicode (bool): If True, each response can belong to multiple categories. Defaults to False.
 
     Returns:
@@ -304,18 +417,16 @@ async def gpt_categorize_response_batches_main(
 
     Notes:
         - Processes the responses in batches for efficiency.
-        - Retries the API call for a batch up to max_retries times if errors occur.
+        - Retries the API call for a batch up to MAX_RETRIES times if errors occur.
     """
-
     categorized_dict = {}
-    batches = list(create_batches(list(responses), batch_size))
+    batches = list(create_batches(list(responses), BATCH_SIZE))
     tasks = []
 
     # Create async gpt tasks
     for batch in batches:
-        task = gpt_categorize_responses(
-            client, question, batch, categories_list, max_retries, is_multicode
-        )
+        task = gpt_categorize_responses(client, question, batch, categories_list, is_multicode)
+        # logger.debug(task)
         tasks.append(task)
 
     output_categories = await asyncio.gather(*tasks)

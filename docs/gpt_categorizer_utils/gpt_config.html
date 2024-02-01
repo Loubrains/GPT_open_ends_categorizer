@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>scripts.config API documentation</title>
-<meta name="description" content="MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS ### …" />
+<title>gpt_categorizer_utils.gpt_config API documentation</title>
+<meta name="description" content="Configuration file containing user-defined parameters for interacting with the OpenAI API, such as rate limiting …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,73 +19,36 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>scripts.config</code></h1>
+<h1 class="title">Module <code>gpt_categorizer_utils.gpt_config</code></h1>
 </header>
 <section id="section-intro">
-<h3 id="modify-this-file-before-running-any-scripts">MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS</h3>
-<p>Configuration file containing user-defined parameters used in the open-end response categorization process.</p>
-<p>It includes file paths for loading and saving data, the questionnaire question, categorization options, sample sizes, and other settings.</p>
-<p>Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in the config file <code><a title="gpt_categorizer_utils.gpt_config" href="../gpt_categorizer_utils/gpt_config.html">gpt_categorizer_utils.gpt_config</a></code>.</p>
+<p>Configuration file containing user-defined parameters for interacting with the OpenAI API, such as rate limiting.</p>
 <p>Configuration Variables:
-<code>OPEN_END_DATA_FILE_PATH_LOAD</code>: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
-<code>CATEGORIES_FILE_PATH_SAVE</code>: File path for saving the GPT generated categories to CSV.
-<code>CATEGORIES_FILE_PATH_LOAD</code>: File path for loading a list of categories from CSV.
-<code>CODEFRAME_FILE_PATH_SAVE</code>: File path for saving the GPT generated codeframe to CSV.
-<code>CODEFRAME_FILE_PATH_LOAD</code>: File path for loading a codeframe from CSV.
-<code>CATEGORIZED_DATA_FILE_PATH_SAVE</code>: File path for saving the final categorized data to CSV.
-<code>QUESTIONNAIRE_QUESTION</code>: Text of the questionnaire question associated with the open-ended responses.
-<br>
-<code>IS_MULTICODE</code>: Boolean flag indicating whether each response can belong to multiple categories.
-<code>NUMBER_OF_CATEGORIES</code>: Number of categories to generate.
-<code>RESPONSES_SAMPLE_SIZE</code>: Number of responses sent to GPT to generate the initial list of categories.</p>
-<p>Note:
-- File paths expect foreward slashes.</p>
+<code>BATCH_SIZE</code>: Number of responses to send to GPT per request.
+<code>MAX_RETRIES</code>: Number of retry attempts for GPT requests upon encountering errors.
+<code>REQUESTS_PER_MINUTE</code>: The maximum number of requests allowed per minute.
+<code>TOKENS_PER_MINUTE</code>: The maximum number of tokens allowed per minute.
+<code>CONCURRENT_TASKS</code>: The maximum number of concurrent tasks calling the GPT model.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
-### MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS ###
-
-Configuration file containing user-defined parameters used in the open-end response categorization process.
-
-It includes file paths for loading and saving data, the questionnaire question, categorization options, sample sizes, and other settings.
-
-Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in the config file `gpt_categorizer_utils.gpt_config`.
+Configuration file containing user-defined parameters for interacting with the OpenAI API, such as rate limiting.
 
 Configuration Variables:
-    `OPEN_END_DATA_FILE_PATH_LOAD`: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
-    `CATEGORIES_FILE_PATH_SAVE`: File path for saving the GPT generated categories to CSV.
-    `CATEGORIES_FILE_PATH_LOAD`: File path for loading a list of categories from CSV.
-    `CODEFRAME_FILE_PATH_SAVE`: File path for saving the GPT generated codeframe to CSV.
-    `CODEFRAME_FILE_PATH_LOAD`: File path for loading a codeframe from CSV.
-    `CATEGORIZED_DATA_FILE_PATH_SAVE`: File path for saving the final categorized data to CSV.
-    `QUESTIONNAIRE_QUESTION`: Text of the questionnaire question associated with the open-ended responses.    
-    `IS_MULTICODE`: Boolean flag indicating whether each response can belong to multiple categories.
-    `NUMBER_OF_CATEGORIES`: Number of categories to generate.
-    `RESPONSES_SAMPLE_SIZE`: Number of responses sent to GPT to generate the initial list of categories.
-
-Note:
-- File paths expect foreward slashes.
+    `BATCH_SIZE`: Number of responses to send to GPT per request.
+    `MAX_RETRIES`: Number of retry attempts for GPT requests upon encountering errors.
+    `REQUESTS_PER_MINUTE`: The maximum number of requests allowed per minute.
+    `TOKENS_PER_MINUTE`: The maximum number of tokens allowed per minute.
+    `CONCURRENT_TASKS`: The maximum number of concurrent tasks calling the GPT model.
 &#34;&#34;&#34;
 
-from pathlib import Path
-
-# File paths (expects /foreward/slashes/ and file extension .csv)
-OPEN_END_DATA_FILE_PATH_LOAD = Path(&#34;path/to/your/data.csv&#34;)
-CATEGORIES_FILE_PATH_SAVE = Path(&#34;path/to/save/categories.csv&#34;)
-CATEGORIES_FILE_PATH_LOAD = Path(&#34;path/to/load/categories.csv&#34;)
-CODEFRAME_FILE_PATH_SAVE = Path(&#34;path/to/save/codeframe.csv&#34;)
-CODEFRAME_FILE_PATH_LOAD = Path(&#34;path/to/load/codeframe.csv&#34;)
-CATEGORIZED_DATA_FILE_PATH_SAVE = Path(&#34;path/to/save/categorized/data.csv&#34;)
-
-# Global settings
-QUESTIONNAIRE_QUESTION = &#34;your_questionnaire_question?&#34;
-IS_MULTICODE = False
-
-# Category generation settings
-NUMBER_OF_CATEGORIES = 20
-RESPONSES_SAMPLE_SIZE = 200</code></pre>
+BATCH_SIZE = 3
+MAX_RETRIES = 6
+REQUESTS_PER_MINUTE = 450  # Actual limit is 500
+TOKENS_PER_MINUTE = 140000  # Actual limit is 150000
+CONCURRENT_TASKS = 6</code></pre>
 </details>
 </section>
 <section>
@@ -100,14 +63,12 @@ RESPONSES_SAMPLE_SIZE = 200</code></pre>
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul>
-<li><a href="#modify-this-file-before-running-any-scripts">MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS</a></li>
-</ul>
+<ul></ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="scripts" href="index.html">scripts</a></code></li>
+<li><code><a title="gpt_categorizer_utils" href="index.html">gpt_categorizer_utils</a></code></li>
 </ul>
 </li>
 </ul>

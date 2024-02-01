@@ -39,7 +39,7 @@ Exports the generated categories to a CSV file.</p>
 <p>Notes:
 - Make sure OPENAI_API_KEY is set up in your system environment variables.
 - The script uses utility functions from the <code>general_utils</code> and <code>gpt_utils</code> modules.
-- User-defined variables should be properly set in the <code>config.py</code> file before running this script.
+- User-defined variables should be properly set in the <code>config</code> file before running this script.
 - The script terminates if exceptions are raised at any point.</p>
 <details class="source">
 <summary>
@@ -66,7 +66,7 @@ Output Files:
 Notes:
 - Make sure OPENAI_API_KEY is set up in your system environment variables.
 - The script uses utility functions from the `general_utils` and `gpt_utils` modules.
-- User-defined variables should be properly set in the `config.py` file before running this script.
+- User-defined variables should be properly set in the `config` file before running this script.
 - The script terminates if exceptions are raised at any point.
 &#34;&#34;&#34;
 
@@ -74,12 +74,10 @@ Notes:
 from openai import AsyncOpenAI
 import asyncio
 import pandas as pd
-from pathlib import Path
 import chardet
 import sys
 from gpt_categorizer_utils import general_utils, gpt_utils
 import config as cfg
-import logging
 from logging_utils import setup_logging
 
 ### NOTE: MAKE SURE TO SET USER DEFINED VARIABLES IN config.py
@@ -95,9 +93,9 @@ if __name__ == &#34;__main__&#34;:
         # Load open ends
         logger.info(&#34;Loading data&#34;)
 
-        with open(cfg.open_end_data_file_path_load, &#34;rb&#34;) as file:
+        with open(cfg.OPEN_END_DATA_FILE_PATH_LOAD, &#34;rb&#34;) as file:
             encoding = chardet.detect(file.read())[&#34;encoding&#34;]  # Detect encoding
-        df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
+        df = pd.read_csv(cfg.OPEN_END_DATA_FILE_PATH_LOAD, encoding=encoding)
 
         # Clean open ends
         logger.info(&#34;Cleaning responses&#34;)
@@ -110,17 +108,13 @@ if __name__ == &#34;__main__&#34;:
         # Get sample of responses
         logger.info(&#34;Fetching sample of responses&#34;)
         responses_sample = general_utils.get_random_sample_from_series(unique_responses, cfg.responses_sample_size).to_list()  # type: ignore
-        logger.debug(f&#34;Sample (size {cfg.responses_sample_size}):\n{responses_sample}&#34;)
+        logger.debug(f&#34;Sample (size {cfg.RESPONSES_SAMPLE_SIZE}):\n{responses_sample}&#34;)
 
         # Generate categories using the GPT API
         logger.info(&#34;Generating categories with GPT-4&#34;)
         categories = asyncio.run(
             gpt_utils.gpt_generate_categories_list(
-                client,
-                cfg.questionnaire_question,
-                responses_sample,
-                cfg.number_of_categories,
-                cfg.max_retries,
+                client, cfg.QUESTIONNAIRE_QUESTION, responses_sample, cfg.NUMBER_OF_CATEGORIES
             )
         )
         categories.extend([&#34;Other&#34;, &#34;Bad response&#34;, &#34;Uncategorized&#34;])
@@ -128,9 +122,9 @@ if __name__ == &#34;__main__&#34;:
         logger.debug(f&#34;Categories generated:\n{categories}&#34;)
 
         # Save results
-        logger.info(f&#34;Saving categories to {cfg.categories_file_path_save}&#34;)
+        logger.info(f&#34;Saving categories to {cfg.CATEGORIES_FILE_PATH_SAVE}&#34;)
         general_utils.export_dataframe_to_csv(
-            cfg.categories_file_path_save, categories_df, header=False
+            cfg.CATEGORIES_FILE_PATH_SAVE, categories_df, header=False
         )
 
         logger.info(&#34;Finished&#34;)

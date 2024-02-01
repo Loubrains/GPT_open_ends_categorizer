@@ -1,23 +1,23 @@
 """
 ### MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS ###
 
-Configuration file for user-defined parameters used in the open-end response categorization process.
+Configuration file containing user-defined parameters used in the open-end response categorization process.
 
 It includes file paths for loading and saving data, the questionnaire question, categorization options, sample sizes, and other settings.
 
+Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in the config file `gpt_categorizer_utils.gpt_config`.
+
 Configuration Variables:
-    `open_end_data_file_path_load`: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
-    `categories_file_path_save`: File path for saving the GPT generated categories to CSV.
-    `categories_file_path_load`: File path for loading a list of categories from CSV.
-    `codeframe_file_path_save`: File path for saving the GPT generated codeframe to CSV.
-    `codeframe_file_path_load`: File path for loading a codeframe from CSV.
-    `categorized_data_file_path_save`: File path for saving the final categorized data to CSV.
-    `questionnaire_question`: Text of the questionnaire question associated with the open-ended responses.    
-    `is_multicode`: Boolean flag indicating whether each response can belong to multiple categories.
-    `max_retries`: Number of retry attempts for GPT requests upon encountering errors.
-    `number_of_categories`: Number of categories to generate.
-    `responses_sample_size`: Number of responses sent to GPT to generate the initial list of categories.
-    `batch_size`: Number of responses to send to GPT per request.
+    `OPEN_END_DATA_FILE_PATH_LOAD`: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
+    `CATEGORIES_FILE_PATH_SAVE`: File path for saving the GPT generated categories to CSV.
+    `CATEGORIES_FILE_PATH_LOAD`: File path for loading a list of categories from CSV.
+    `CODEFRAME_FILE_PATH_SAVE`: File path for saving the GPT generated codeframe to CSV.
+    `CODEFRAME_FILE_PATH_LOAD`: File path for loading a codeframe from CSV.
+    `CATEGORIZED_DATA_FILE_PATH_SAVE`: File path for saving the final categorized data to CSV.
+    `QUESTIONNAIRE_QUESTION`: Text of the questionnaire question associated with the open-ended responses.    
+    `IS_MULTICODE`: Boolean flag indicating whether each response can belong to multiple categories.
+    `NUMBER_OF_CATEGORIES`: Number of categories to generate.
+    `RESPONSES_SAMPLE_SIZE`: Number of responses sent to GPT to generate the initial list of categories.
 
 Note:
 - File paths expect foreward slashes.
@@ -26,21 +26,17 @@ Note:
 from pathlib import Path
 
 # File paths (expects /foreward/slashes/ and file extension .csv)
-open_end_data_file_path_load = Path("path/to/your/data.csv")
-categories_file_path_save = Path("path/to/save/categories.csv")
-categories_file_path_load = Path("path/to/load/categories.csv")
-codeframe_file_path_save = Path("path/to/save/codeframe.csv")
-codeframe_file_path_load = Path("path/to/load/codeframe.csv")
-categorized_data_file_path_save = Path("path/to/save/categorized/data.csv")
+OPEN_END_DATA_FILE_PATH_LOAD = Path("path/to/your/data.csv")
+CATEGORIES_FILE_PATH_SAVE = Path("path/to/save/categories.csv")
+CATEGORIES_FILE_PATH_LOAD = Path("path/to/load/categories.csv")
+CODEFRAME_FILE_PATH_SAVE = Path("path/to/save/codeframe.csv")
+CODEFRAME_FILE_PATH_LOAD = Path("path/to/load/codeframe.csv")
+CATEGORIZED_DATA_FILE_PATH_SAVE = Path("path/to/save/categorized/data.csv")
 
 # Global settings
-questionnaire_question = "your_questionnaire_question?"
-is_multicode = False
-max_retries = 6
+QUESTIONNAIRE_QUESTION = "your_questionnaire_question?"
+IS_MULTICODE = False
 
 # Category generation settings
-number_of_categories = 20
-responses_sample_size = 200
-
-# Codeframe generation settings
-batch_size = 3
+NUMBER_OF_CATEGORIES = 20
+RESPONSES_SAMPLE_SIZE = 200

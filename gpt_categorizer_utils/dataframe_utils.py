@@ -14,6 +14,7 @@ import pandas as pd
 import logging
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def construct_default_categorized_dataframe(
