@@ -97,9 +97,9 @@ if __name__ == &#34;__main__&#34;:
 
         # Load open ends
         logger.info(&#34;Loading data&#34;)
-        with open(cfg.open_end_data_file_path_load, &#34;rb&#34;) as file:
+        with open(cfg.OPEN_END_DATA_FILE_PATH_LOAD, &#34;rb&#34;) as file:
             encoding = chardet.detect(file.read())[&#34;encoding&#34;]  # Detect encoding
-        df = pd.read_csv(cfg.open_end_data_file_path_load, encoding=encoding)
+        df = pd.read_csv(cfg.OPEN_END_DATA_FILE_PATH_LOAD, encoding=encoding)
         logger.debug(f&#34;\nRaw data (first 20):\n{df.head(20)}&#34;)
 
         # Clean open ends
@@ -115,9 +115,9 @@ if __name__ == &#34;__main__&#34;:
 
         # Load categories
         logger.info(&#34;Loading categories&#34;)
-        with open(cfg.categories_file_path_load, &#34;rb&#34;) as file:
+        with open(cfg.CATEGORIES_FILE_PATH_LOAD, &#34;rb&#34;) as file:
             encoding = chardet.detect(file.read())[&#34;encoding&#34;]  # Detect encoding
-        categories = pd.read_csv(cfg.categories_file_path_load, encoding=encoding, header=None)
+        categories = pd.read_csv(cfg.CATEGORIES_FILE_PATH_LOAD, encoding=encoding, header=None)
         logger.debug(f&#34;Categories:\n{categories}&#34;)
 
         categories_list = categories.iloc[:, 0].tolist()
@@ -131,12 +131,10 @@ if __name__ == &#34;__main__&#34;:
         categorized_dict = asyncio.run(
             gpt_utils.gpt_categorize_response_batches_main(
                 client,
-                cfg.questionnaire_question,
+                cfg.QUESTIONNAIRE_QUESTION,
                 unique_responses,
                 categories_list,
-                cfg.batch_size,
-                cfg.max_retries,
-                cfg.is_multicode,
+                cfg.IS_MULTICODE,
             )
         )
         categorized_dict.pop(&#34;&#34;, None)  # removing empty string since it matches against every row
@@ -148,8 +146,8 @@ if __name__ == &#34;__main__&#34;:
         logger.info(&#34;Finished categorizing with GPT-4&#34;)
 
         # Saving codeframe (dictionary of response-category pairs)
-        logger.info(f&#34;Saving codeframe to {cfg.codeframe_file_path_save}&#34;)
-        general_utils.export_dict_to_csv(cfg.codeframe_file_path_save, categorized_dict)
+        logger.info(f&#34;Saving codeframe to {cfg.CODEFRAME_FILE_PATH_SAVE}&#34;)
+        general_utils.export_dict_to_csv(cfg.CODEFRAME_FILE_PATH_SAVE, categorized_dict)
 
         logger.info(&#34;Finished&#34;)
 

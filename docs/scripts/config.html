@@ -23,22 +23,21 @@
 </header>
 <section id="section-intro">
 <h3 id="modify-this-file-before-running-any-scripts">MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS</h3>
-<p>Configuration file for user-defined parameters used in the open-end response categorization process.</p>
+<p>Configuration file containing user-defined parameters used in the open-end response categorization process.</p>
 <p>It includes file paths for loading and saving data, the questionnaire question, categorization options, sample sizes, and other settings.</p>
+<p>Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in <code>gpt_config.py</code> in the <code><a title="gpt_categorizer_utils" href="../gpt_categorizer_utils/index.html">gpt_categorizer_utils</a></code> package.</p>
 <p>Configuration Variables:
-<code>open_end_data_file_path_load</code>: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
-<code>categories_file_path_save</code>: File path for saving the GPT generated categories to CSV.
-<code>categories_file_path_load</code>: File path for loading a list of categories from CSV.
-<code>codeframe_file_path_save</code>: File path for saving the GPT generated codeframe to CSV.
-<code>codeframe_file_path_load</code>: File path for loading a codeframe from CSV.
-<code>categorized_data_file_path_save</code>: File path for saving the final categorized data to CSV.
-<code>questionnaire_question</code>: Text of the questionnaire question associated with the open-ended responses.
+<code>OPEN_END_DATA_FILE_PATH_LOAD</code>: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
+<code>CATEGORIES_FILE_PATH_SAVE</code>: File path for saving the GPT generated categories to CSV.
+<code>CATEGORIES_FILE_PATH_LOAD</code>: File path for loading a list of categories from CSV.
+<code>CODEFRAME_FILE_PATH_SAVE</code>: File path for saving the GPT generated codeframe to CSV.
+<code>CODEFRAME_FILE_PATH_LOAD</code>: File path for loading a codeframe from CSV.
+<code>CATEGORIZED_DATA_FILE_PATH_SAVE</code>: File path for saving the final categorized data to CSV.
+<code>QUESTIONNAIRE_QUESTION</code>: Text of the questionnaire question associated with the open-ended responses.
 <br>
-<code>is_multicode</code>: Boolean flag indicating whether each response can belong to multiple categories.
-<code>max_retries</code>: Number of retry attempts for GPT requests upon encountering errors.
-<code>number_of_categories</code>: Number of categories to generate.
-<code>responses_sample_size</code>: Number of responses sent to GPT to generate the initial list of categories.
-<code>batch_size</code>: Number of responses to send to GPT per request.</p>
+<code>IS_MULTICODE</code>: Boolean flag indicating whether each response can belong to multiple categories.
+<code>NUMBER_OF_CATEGORIES</code>: Number of categories to generate.
+<code>RESPONSES_SAMPLE_SIZE</code>: Number of responses sent to GPT to generate the initial list of categories.</p>
 <p>Note:
 - File paths expect foreward slashes.</p>
 <details class="source">
@@ -48,23 +47,23 @@
 <pre><code class="python">&#34;&#34;&#34;
 ### MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS ###
 
-Configuration file for user-defined parameters used in the open-end response categorization process.
+Configuration file containing user-defined parameters used in the open-end response categorization process.
 
 It includes file paths for loading and saving data, the questionnaire question, categorization options, sample sizes, and other settings.
 
+Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in `gpt_config.py` in the `gpt_categorizer_utils` package.
+
 Configuration Variables:
-    `open_end_data_file_path_load`: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
-    `categories_file_path_save`: File path for saving the GPT generated categories to CSV.
-    `categories_file_path_load`: File path for loading a list of categories from CSV.
-    `codeframe_file_path_save`: File path for saving the GPT generated codeframe to CSV.
-    `codeframe_file_path_load`: File path for loading a codeframe from CSV.
-    `categorized_data_file_path_save`: File path for saving the final categorized data to CSV.
-    `questionnaire_question`: Text of the questionnaire question associated with the open-ended responses.    
-    `is_multicode`: Boolean flag indicating whether each response can belong to multiple categories.
-    `max_retries`: Number of retry attempts for GPT requests upon encountering errors.
-    `number_of_categories`: Number of categories to generate.
-    `responses_sample_size`: Number of responses sent to GPT to generate the initial list of categories.
-    `batch_size`: Number of responses to send to GPT per request.
+    `OPEN_END_DATA_FILE_PATH_LOAD`: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
+    `CATEGORIES_FILE_PATH_SAVE`: File path for saving the GPT generated categories to CSV.
+    `CATEGORIES_FILE_PATH_LOAD`: File path for loading a list of categories from CSV.
+    `CODEFRAME_FILE_PATH_SAVE`: File path for saving the GPT generated codeframe to CSV.
+    `CODEFRAME_FILE_PATH_LOAD`: File path for loading a codeframe from CSV.
+    `CATEGORIZED_DATA_FILE_PATH_SAVE`: File path for saving the final categorized data to CSV.
+    `QUESTIONNAIRE_QUESTION`: Text of the questionnaire question associated with the open-ended responses.    
+    `IS_MULTICODE`: Boolean flag indicating whether each response can belong to multiple categories.
+    `NUMBER_OF_CATEGORIES`: Number of categories to generate.
+    `RESPONSES_SAMPLE_SIZE`: Number of responses sent to GPT to generate the initial list of categories.
 
 Note:
 - File paths expect foreward slashes.
@@ -73,36 +72,20 @@ Note:
 from pathlib import Path
 
 # File paths (expects /foreward/slashes/ and file extension .csv)
-open_end_data_file_path_load = Path(
-    &#34;path/to/your/data.csv&#34;
-)
-categories_file_path_save = Path(
-    &#34;path/to/save/categories.csv&#34;
-)
-categories_file_path_load = Path(
-    &#34;path/to/load/categories.csv&#34;
-)
-codeframe_file_path_save = Path(
-    &#34;path/to/save/codeframe.csv&#34;
-)
-codeframe_file_path_load = Path(
-    &#34;path/to/load/codeframe.csv&#34;
-)
-categorized_data_file_path_save = Path(
-    &#34;path/to/save/categorized/data.csv&#34;
-)
+OPEN_END_DATA_FILE_PATH_LOAD = Path(&#34;path/to/your/data.csv&#34;)
+CATEGORIES_FILE_PATH_SAVE = Path(&#34;path/to/save/categories.csv&#34;)
+CATEGORIES_FILE_PATH_LOAD = Path(&#34;path/to/load/categories.csv&#34;)
+CODEFRAME_FILE_PATH_SAVE = Path(&#34;path/to/save/codeframe.csv&#34;)
+CODEFRAME_FILE_PATH_LOAD = Path(&#34;path/to/load/codeframe.csv&#34;)
+CATEGORIZED_DATA_FILE_PATH_SAVE = Path(&#34;path/to/save/categorized/data.csv&#34;)
 
 # Global settings
-questionnaire_question = &#34;your_questionnaire_question?&#34;
-is_multicode = False
-max_retries = 6
+QUESTIONNAIRE_QUESTION = &#34;your_questionnaire_question?&#34;
+IS_MULTICODE = False
 
 # Category generation settings
-number_of_categories = 20
-responses_sample_size = 200
-
-# Codeframe generation settings
-batch_size = 3</code></pre>
+NUMBER_OF_CATEGORIES = 20
+RESPONSES_SAMPLE_SIZE = 200</code></pre>
 </details>
 </section>
 <section>

@@ -24,12 +24,13 @@
 <section id="section-intro">
 <p>Utilities for interacting with the OpenAI GPT model to categorize survey responses.</p>
 <p>This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories,
-validation of categorization results, and batch processing of responses for efficient categorization.
-It implements token and request limiting using the <code>backoff</code> library as well as a <code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket" href="#gpt_categorizer_utils.gpt_utils.TokenBucket">TokenBucket</a></code> class. Uses <code>tiktoken</code> for accurate token counting.
+validation of categorization results, and batch processing of responses for efficient categorization.</p>
+<h3 id="set-rate-limiting-parameters-in-gpt_configpy">Set rate limiting parameters in <code>gpt_config.py</code></h3>
+<p>It implements token and request limiting using the <code>backoff</code> library as well as a <code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket" href="#gpt_categorizer_utils.gpt_utils.TokenBucket">TokenBucket</a></code> class. Uses <code>tiktoken</code> for accurate token counting.
+Concurrent tasks are limited with asyncio.Semaphore.
 <a href="https://pypi.org/project/backoff/">https://pypi.org/project/backoff/</a>
 <a href="https://cookbook.openai.com/examples/how_to_handle_rate_limits">https://cookbook.openai.com/examples/how_to_handle_rate_limits</a>
 <a href="https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken">https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken</a>
-Another potential option for limiting rate of async tasks:
 <a href="https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio">https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio</a></p>
 <h2 id="functions">Functions</h2>
 <p><code><a title="gpt_categorizer_utils.gpt_utils.call_gpt" href="#gpt_categorizer_utils.gpt_utils.call_gpt">call_gpt()</a></code>: Asynchronously sends a user prompt to the GPT model and retrieves the completion. It manages token and request rate limiting using the TokenBucket class
@@ -48,11 +49,14 @@ Utilities for interacting with the OpenAI GPT model to categorize survey respons
 
 This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
 validation of categorization results, and batch processing of responses for efficient categorization.
+
+### Set rate limiting parameters in `gpt_config.py` ###
+
 It implements token and request limiting using the `backoff` library as well as a `TokenBucket` class. Uses `tiktoken` for accurate token counting.
+Concurrent tasks are limited with asyncio.Semaphore.
 https://pypi.org/project/backoff/
 https://cookbook.openai.com/examples/how_to_handle_rate_limits
 https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken
-Another potential option for limiting rate of async tasks:
 https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio
 
 Functions:
@@ -79,13 +83,20 @@ import tiktoken
 import backoff
 import time
 from .general_utils import create_batches
+from .gpt_config import (
+    BATCH_SIZE,
+    MAX_RETRIES,
+    REQUESTS_PER_MINUTE,
+    TOKENS_PER_MINUTE,
+    CONCURRENT_TASKS,
+)
 import logging
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
-### NOTE: SET USAGE LIMITS HERE
-REQUESTS_PER_MINUTE = 450  # Actual limit is 500
-TOKENS_PER_MINUTE = 140000  # Actual limit is 150000
+# Limit the number of concurrent tasks
+semaphore = asyncio.Semaphore(CONCURRENT_TASKS)
 
 # For counting tokens
 encoding = tiktoken.encoding_for_model(&#34;gpt-4&#34;)
@@ -96,6 +107,7 @@ class TokenBucket:
     TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
     It enforces a maximum capacity of tokens that can be consumed over a specific time period.
     Extended to handle requests limiting too.
+    Raises exceptions when token usage is too high - used in conjunction with a backoff decorator to catch those exceptions.
 
     Attributes:
         max_capacity (int): The maximum number of tokens in the bucket.
@@ -118,25 +130,29 @@ class TokenBucket:
             tokens_required (int): The number of tokens to consume from the bucket.
 
         Raises:
-            ValueError: If tokens_required exceeds the maximum capacity of the bucket.
+            ValueError: If tokens_required exceeds the maximum capacity of the bucket. Use this in conjunction with a backoff mechanism that catches exceptions.
         &#34;&#34;&#34;
         if tokens_required &gt; self.max_capacity:
+            # This gets caught by the backoff decorator.
             raise ValueError(
                 f&#34;Requested tokens ({tokens_required}) exceed the maximum capacity of the bucket ({self.max_capacity}).&#34;
             )
 
         while True:
             self.refill()
-            if self.current_token_count &gt;= tokens_required:
+            if tokens_required &lt;= self.current_token_count:
                 self.current_token_count -= tokens_required
                 break
             else:
-                logger.debug(&#34;Token limit per minute exceeded. Exponential backoff.&#34;)
-                raise ValueError(&#34;Token limit per minute exceeded. Waiting.&#34;)
+                logger.debug(
+                    f&#34;Token/request limit per minute exceeded. Exponentially backing off. Tokens/requests requested: {tokens_required}. Tokens remaining: {self.current_token_count}&#34;
+                )
+                raise ValueError(&#34;Token limit per minute exceeded. Exponentially backing off.&#34;)
 
     async def consume_request(self):
         &#34;&#34;&#34;
         Consumes a token for a request. If no tokens are available for requests, waits asynchronously until they are refilled.
+        This function should be used by instantiating the TokenBucket class as a request_bucket, passing in the max_capacity_per_minute and refill_rate_per_second.
         &#34;&#34;&#34;
         await self.consume_tokens(1)
 
@@ -157,7 +173,9 @@ token_bucket = TokenBucket(TOKENS_PER_MINUTE, TOKENS_PER_MINUTE / 60)
 request_bucket = TokenBucket(REQUESTS_PER_MINUTE, REQUESTS_PER_MINUTE / 60)
 
 
-@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter)
+@backoff.on_exception(
+    backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter, base=2
+)
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
@@ -177,32 +195,34 @@ async def call_gpt(
     Raises:
         Raises an exception if the API call fails.
     &#34;&#34;&#34;
+    async with semaphore:  # Limit number of concurrent tasks
+        estimated_tokens = (
+            len(encoding.encode(user_prompt)) + 10
+        )  # add extra for the system message
+        # Limit tokens and requests per minute
+        await token_bucket.consume_tokens(estimated_tokens)
+        await request_bucket.consume_request()
 
-    estimated_tokens = len(encoding.encode(user_prompt)) + 10  # add extra for the system message
-    # Limit tokens and requests per minute
-    await token_bucket.consume_tokens(estimated_tokens)
-    await request_bucket.consume_request()
+        try:
+            completion = await client.chat.completions.create(
+                messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-turbo-preview&#34;
+            )
+            content = completion.choices[0].message.content
+            if content:
+                logger.debug(f&#34;Successful API call: {content}&#34;)
 
-    try:
-        completion = await client.chat.completions.create(
-            messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-turbo-preview&#34;
-        )
-        content = completion.choices[0].message.content
-        if content:
-            logger.debug(f&#34;Success: {content}&#34;)
+            if not content:
+                raise ValueError(&#34;No completion returned&#34;)
 
-        if content:
             response_tokens = len(encoding.encode(content))
             await token_bucket.consume_tokens(response_tokens)
-        else:
-            raise ValueError(&#34;No completion returned&#34;)
 
-    except Exception as e:
-        logger.error(f&#34;\nAn error occurred: {e}&#34;)
-        content = &#34;Error&#34;
-        raise
+        except Exception as e:
+            logger.error(f&#34;\nAn error occurred: {e}&#34;)
+            content = &#34;Error&#34;
+            raise
 
-    return content
+        return content
 
 
 async def gpt_generate_categories_list(
@@ -210,7 +230,6 @@ async def gpt_generate_categories_list(
     question: str,
     responses_sample: list[str],
     number_of_categories: int = 20,
-    max_retries: int = 5,
 ) -&gt; list[str]:
     &#34;&#34;&#34;
     Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
@@ -220,14 +239,13 @@ async def gpt_generate_categories_list(
         question (str): The survey question related to the responses.
         responses_sample (list[str]): A sample of survey responses.
         number_of_categories (int): The number of categories to generate. Defaults to 20.
-        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
 
     Returns:
         list[str]: A list of generated category names.
 
     Notes:
         - Expects the GPT model to return a JSON list of category names.
-        - Retries the API call up to max_retries times if errors occur.
+        - Retries the API call up to MAX_RETRIES times if errors occur.
     &#34;&#34;&#34;
 
     user_prompt = f&#34;&#34;&#34;List the {number_of_categories} most relevant thematic categories for this sample of survey responses.
@@ -240,7 +258,7 @@ async def gpt_generate_categories_list(
     ```
     {responses_sample}
     ```&#34;&#34;&#34;
-    for attempt in range(max_retries):
+    for attempt in range(MAX_RETRIES):
         try:
             output = await call_gpt(client, user_prompt)
             output_cleaned = output.strip().replace(&#34;json&#34;, &#34;&#34;).replace(&#34;`&#34;, &#34;&#34;).replace(&#34;\n&#34;, &#34;&#34;)  # type: ignore
@@ -253,13 +271,13 @@ async def gpt_generate_categories_list(
             return output_categories_list
 
         except Exception as e:
-            logger.info(
+            logger.warning(
                 f&#34;&#34;&#34;\nAn error occurred:\n{e}
-            Retrying attempt {attempt + 1}/{max_retries}...&#34;&#34;&#34;
+            Retrying attempt {attempt + 1}/{MAX_RETRIES}...&#34;&#34;&#34;
             )
 
     # Error case
-    logger.info(&#34;\nMax retries reached for responses&#34;)
+    logger.warning(&#34;\nMax retries reached for responses&#34;)
     output_categories_list = [&#34;Error&#34;]
 
     return output_categories_list
@@ -368,7 +386,6 @@ async def gpt_categorize_responses(
     question: str,
     responses: list[str],
     categories_list: list[str],
-    max_retries: int = 5,
     is_multicode: bool = False,
 ) -&gt; list[str] | list[list[str]]:
     &#34;&#34;&#34;
@@ -380,7 +397,6 @@ async def gpt_categorize_responses(
         question (str): The survey question related to the responses.
         responses (list[str]): The list of responses to categorize.
         categories_list (list[str]): The list of valid category names.
-        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
         is_multicode (bool): If True, each response can belong to multiple categories. Defaults to False.
 
     Returns:
@@ -389,16 +405,14 @@ async def gpt_categorize_responses(
             - If &#39;is_multi&#39; is True, returns a list of lists of categories, where each inner list contains multiple categories assigned to the corresponding response.
 
     Notes:
-        - Retries the API call up to max_retries times if errors occur.
+        - Retries the API call up to MAX_RETRIES times if errors occur.
     &#34;&#34;&#34;
 
     user_prompt = create_user_prompt_for_gpt_categorization(
         question, responses, categories_list, is_multicode
     )
 
-    # logger.debug(user_prompt)
-
-    for attempt in range(max_retries):
+    for attempt in range(MAX_RETRIES):
         try:
             output = await call_gpt(client, user_prompt)
             output_cleaned = output.strip().replace(&#34;json&#34;, &#34;&#34;).replace(&#34;`&#34;, &#34;&#34;).replace(&#34;\n&#34;, &#34;&#34;)  # type: ignore
@@ -409,14 +423,14 @@ async def gpt_categorize_responses(
             return output_categories
 
         except Exception as e:
-            logger.info(
+            logger.warning(
                 f&#34;&#34;&#34;\nAn error occurred:\n{e}
             Responses:\n{responses}
-            Retrying attempt {attempt + 1}/{max_retries}...&#34;&#34;&#34;
+            Retrying attempt {attempt + 1}/{MAX_RETRIES}...&#34;&#34;&#34;
             )
 
     # Error case
-    logger.info(f&#34;\nMax retries reached for responses:\n{responses}&#34;)
+    logger.warning(f&#34;\nMax retries reached for responses:\n{responses}&#34;)
     if is_multicode:
         output_categories = [[&#34;Error&#34;]] * len(responses)
     else:
@@ -430,8 +444,6 @@ async def gpt_categorize_response_batches_main(
     question: str,
     responses: list[str] | set[str],
     categories_list: list[str],
-    batch_size: int = 3,
-    max_retries: int = 5,
     is_multicode: bool = False,
 ) -&gt; dict[str, str] | dict[str, list[str]]:
     &#34;&#34;&#34;
@@ -443,8 +455,6 @@ async def gpt_categorize_response_batches_main(
         question (str): The survey question related to the responses.
         responses (list[str] | set[str]): The responses to categorize.
         categories_list (list[str]): The list of valid category names.
-        batch_size (int): The number of responses to process in each batch. Defaults to 3.
-        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
         is_multicode (bool): If True, each response can belong to multiple categories. Defaults to False.
 
     Returns:
@@ -452,19 +462,16 @@ async def gpt_categorize_response_batches_main(
 
     Notes:
         - Processes the responses in batches for efficiency.
-        - Retries the API call for a batch up to max_retries times if errors occur.
+        - Retries the API call for a batch up to MAX_RETRIES times if errors occur.
     &#34;&#34;&#34;
-
     categorized_dict = {}
-    batches = list(create_batches(list(responses), batch_size))
+    batches = list(create_batches(list(responses), BATCH_SIZE))
     tasks = []
 
     # Create async gpt tasks
     for batch in batches:
-        task = gpt_categorize_responses(
-            client, question, batch, categories_list, max_retries, is_multicode
-        )
-        logger.debug(task)
+        task = gpt_categorize_responses(client, question, batch, categories_list, is_multicode)
+        # logger.debug(task)
         tasks.append(task)
 
     output_categories = await asyncio.gather(*tasks)
@@ -506,7 +513,9 @@ Failed requests are exponentially backed off and jittered using the backoff libr
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter)
+<pre><code class="python">@backoff.on_exception(
+    backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter, base=2
+)
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
@@ -526,32 +535,34 @@ async def call_gpt(
     Raises:
         Raises an exception if the API call fails.
     &#34;&#34;&#34;
+    async with semaphore:  # Limit number of concurrent tasks
+        estimated_tokens = (
+            len(encoding.encode(user_prompt)) + 10
+        )  # add extra for the system message
+        # Limit tokens and requests per minute
+        await token_bucket.consume_tokens(estimated_tokens)
+        await request_bucket.consume_request()
 
-    estimated_tokens = len(encoding.encode(user_prompt)) + 10  # add extra for the system message
-    # Limit tokens and requests per minute
-    await token_bucket.consume_tokens(estimated_tokens)
-    await request_bucket.consume_request()
+        try:
+            completion = await client.chat.completions.create(
+                messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-turbo-preview&#34;
+            )
+            content = completion.choices[0].message.content
+            if content:
+                logger.debug(f&#34;Successful API call: {content}&#34;)
 
-    try:
-        completion = await client.chat.completions.create(
-            messages=[{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_prompt}], model=&#34;gpt-4-turbo-preview&#34;
-        )
-        content = completion.choices[0].message.content
-        if content:
-            logger.debug(f&#34;Success: {content}&#34;)
+            if not content:
+                raise ValueError(&#34;No completion returned&#34;)
 
-        if content:
             response_tokens = len(encoding.encode(content))
             await token_bucket.consume_tokens(response_tokens)
-        else:
-            raise ValueError(&#34;No completion returned&#34;)
 
-    except Exception as e:
-        logger.error(f&#34;\nAn error occurred: {e}&#34;)
-        content = &#34;Error&#34;
-        raise
+        except Exception as e:
+            logger.error(f&#34;\nAn error occurred: {e}&#34;)
+            content = &#34;Error&#34;
+            raise
 
-    return content</code></pre>
+        return content</code></pre>
 </details>
 </dd>
 <dt id="gpt_categorizer_utils.gpt_utils.create_user_prompt_for_gpt_categorization"><code class="name flex">
@@ -623,7 +634,7 @@ async def call_gpt(
 </details>
 </dd>
 <dt id="gpt_categorizer_utils.gpt_utils.gpt_categorize_response_batches_main"><code class="name flex">
-<span>async def <span class="ident">gpt_categorize_response_batches_main</span></span>(<span>client: openai.AsyncOpenAI, question: str, responses: list[str] | set[str], categories_list: list[str], batch_size: int = 3, max_retries: int = 5, is_multicode: bool = False) ‑> dict[str, str] | dict[str, list[str]]</span>
+<span>async def <span class="ident">gpt_categorize_response_batches_main</span></span>(<span>client: openai.AsyncOpenAI, question: str, responses: list[str] | set[str], categories_list: list[str], is_multicode: bool = False) ‑> dict[str, str] | dict[str, list[str]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Asynchronously sends batches of survey responses to be categorized using the GPT model,
@@ -637,10 +648,6 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
 <dt>responses (list[str] | set[str]): The responses to categorize.</dt>
 <dt><strong><code>categories_list</code></strong> :&ensp;<code>list[str]</code></dt>
 <dd>The list of valid category names.</dd>
-<dt><strong><code>batch_size</code></strong> :&ensp;<code>int</code></dt>
-<dd>The number of responses to process in each batch. Defaults to 3.</dd>
-<dt><strong><code>max_retries</code></strong> :&ensp;<code>int</code></dt>
-<dd>The maximum number of retries for the API call. Defaults to 5.</dd>
 <dt><strong><code>is_multicode</code></strong> :&ensp;<code>bool</code></dt>
 <dd>If True, each response can belong to multiple categories. Defaults to False.</dd>
 </dl>
@@ -649,7 +656,7 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
 <h2 id="notes">Notes</h2>
 <ul>
 <li>Processes the responses in batches for efficiency.</li>
-<li>Retries the API call for a batch up to max_retries times if errors occur.</li>
+<li>Retries the API call for a batch up to MAX_RETRIES times if errors occur.</li>
 </ul></div>
 <details class="source">
 <summary>
@@ -660,8 +667,6 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
     question: str,
     responses: list[str] | set[str],
     categories_list: list[str],
-    batch_size: int = 3,
-    max_retries: int = 5,
     is_multicode: bool = False,
 ) -&gt; dict[str, str] | dict[str, list[str]]:
     &#34;&#34;&#34;
@@ -673,8 +678,6 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
         question (str): The survey question related to the responses.
         responses (list[str] | set[str]): The responses to categorize.
         categories_list (list[str]): The list of valid category names.
-        batch_size (int): The number of responses to process in each batch. Defaults to 3.
-        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
         is_multicode (bool): If True, each response can belong to multiple categories. Defaults to False.
 
     Returns:
@@ -682,19 +685,16 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
 
     Notes:
         - Processes the responses in batches for efficiency.
-        - Retries the API call for a batch up to max_retries times if errors occur.
+        - Retries the API call for a batch up to MAX_RETRIES times if errors occur.
     &#34;&#34;&#34;
-
     categorized_dict = {}
-    batches = list(create_batches(list(responses), batch_size))
+    batches = list(create_batches(list(responses), BATCH_SIZE))
     tasks = []
 
     # Create async gpt tasks
     for batch in batches:
-        task = gpt_categorize_responses(
-            client, question, batch, categories_list, max_retries, is_multicode
-        )
-        logger.debug(task)
+        task = gpt_categorize_responses(client, question, batch, categories_list, is_multicode)
+        # logger.debug(task)
         tasks.append(task)
 
     output_categories = await asyncio.gather(*tasks)
@@ -708,7 +708,7 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
 </details>
 </dd>
 <dt id="gpt_categorizer_utils.gpt_utils.gpt_categorize_responses"><code class="name flex">
-<span>async def <span class="ident">gpt_categorize_responses</span></span>(<span>client: openai.AsyncOpenAI, question: str, responses: list[str], categories_list: list[str], max_retries: int = 5, is_multicode: bool = False) ‑> list[str] | list[list[str]]</span>
+<span>async def <span class="ident">gpt_categorize_responses</span></span>(<span>client: openai.AsyncOpenAI, question: str, responses: list[str], categories_list: list[str], is_multicode: bool = False) ‑> list[str] | list[list[str]]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Asynchronously categorizes a list of responses using the GPT model.
@@ -723,8 +723,6 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
 <dd>The list of responses to categorize.</dd>
 <dt><strong><code>categories_list</code></strong> :&ensp;<code>list[str]</code></dt>
 <dd>The list of valid category names.</dd>
-<dt><strong><code>max_retries</code></strong> :&ensp;<code>int</code></dt>
-<dd>The maximum number of retries for the API call. Defaults to 5.</dd>
 <dt><strong><code>is_multicode</code></strong> :&ensp;<code>bool</code></dt>
 <dd>If True, each response can belong to multiple categories. Defaults to False.</dd>
 </dl>
@@ -734,7 +732,7 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
 - If 'is_multi' is True, returns a list of lists of categories, where each inner list contains multiple categories assigned to the corresponding response.</p>
 <h2 id="notes">Notes</h2>
 <ul>
-<li>Retries the API call up to max_retries times if errors occur.</li>
+<li>Retries the API call up to MAX_RETRIES times if errors occur.</li>
 </ul></div>
 <details class="source">
 <summary>
@@ -745,7 +743,6 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
     question: str,
     responses: list[str],
     categories_list: list[str],
-    max_retries: int = 5,
     is_multicode: bool = False,
 ) -&gt; list[str] | list[list[str]]:
     &#34;&#34;&#34;
@@ -757,7 +754,6 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
         question (str): The survey question related to the responses.
         responses (list[str]): The list of responses to categorize.
         categories_list (list[str]): The list of valid category names.
-        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
         is_multicode (bool): If True, each response can belong to multiple categories. Defaults to False.
 
     Returns:
@@ -766,16 +762,14 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
             - If &#39;is_multi&#39; is True, returns a list of lists of categories, where each inner list contains multiple categories assigned to the corresponding response.
 
     Notes:
-        - Retries the API call up to max_retries times if errors occur.
+        - Retries the API call up to MAX_RETRIES times if errors occur.
     &#34;&#34;&#34;
 
     user_prompt = create_user_prompt_for_gpt_categorization(
         question, responses, categories_list, is_multicode
     )
 
-    # logger.debug(user_prompt)
-
-    for attempt in range(max_retries):
+    for attempt in range(MAX_RETRIES):
         try:
             output = await call_gpt(client, user_prompt)
             output_cleaned = output.strip().replace(&#34;json&#34;, &#34;&#34;).replace(&#34;`&#34;, &#34;&#34;).replace(&#34;\n&#34;, &#34;&#34;)  # type: ignore
@@ -786,14 +780,14 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
             return output_categories
 
         except Exception as e:
-            logger.info(
+            logger.warning(
                 f&#34;&#34;&#34;\nAn error occurred:\n{e}
             Responses:\n{responses}
-            Retrying attempt {attempt + 1}/{max_retries}...&#34;&#34;&#34;
+            Retrying attempt {attempt + 1}/{MAX_RETRIES}...&#34;&#34;&#34;
             )
 
     # Error case
-    logger.info(f&#34;\nMax retries reached for responses:\n{responses}&#34;)
+    logger.warning(f&#34;\nMax retries reached for responses:\n{responses}&#34;)
     if is_multicode:
         output_categories = [[&#34;Error&#34;]] * len(responses)
     else:
@@ -803,7 +797,7 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
 </details>
 </dd>
 <dt id="gpt_categorizer_utils.gpt_utils.gpt_generate_categories_list"><code class="name flex">
-<span>async def <span class="ident">gpt_generate_categories_list</span></span>(<span>client: openai.AsyncOpenAI, question: str, responses_sample: list[str], number_of_categories: int = 20, max_retries: int = 5) ‑> list[str]</span>
+<span>async def <span class="ident">gpt_generate_categories_list</span></span>(<span>client: openai.AsyncOpenAI, question: str, responses_sample: list[str], number_of_categories: int = 20) ‑> list[str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Asynchronously generates a list of thematic categories relevant to a sample of survey responses.</p>
@@ -817,8 +811,6 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
 <dd>A sample of survey responses.</dd>
 <dt><strong><code>number_of_categories</code></strong> :&ensp;<code>int</code></dt>
 <dd>The number of categories to generate. Defaults to 20.</dd>
-<dt><strong><code>max_retries</code></strong> :&ensp;<code>int</code></dt>
-<dd>The maximum number of retries for the API call. Defaults to 5.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -828,7 +820,7 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
 <h2 id="notes">Notes</h2>
 <ul>
 <li>Expects the GPT model to return a JSON list of category names.</li>
-<li>Retries the API call up to max_retries times if errors occur.</li>
+<li>Retries the API call up to MAX_RETRIES times if errors occur.</li>
 </ul></div>
 <details class="source">
 <summary>
@@ -839,7 +831,6 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
     question: str,
     responses_sample: list[str],
     number_of_categories: int = 20,
-    max_retries: int = 5,
 ) -&gt; list[str]:
     &#34;&#34;&#34;
     Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
@@ -849,14 +840,13 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
         question (str): The survey question related to the responses.
         responses_sample (list[str]): A sample of survey responses.
         number_of_categories (int): The number of categories to generate. Defaults to 20.
-        max_retries (int): The maximum number of retries for the API call. Defaults to 5.
 
     Returns:
         list[str]: A list of generated category names.
 
     Notes:
         - Expects the GPT model to return a JSON list of category names.
-        - Retries the API call up to max_retries times if errors occur.
+        - Retries the API call up to MAX_RETRIES times if errors occur.
     &#34;&#34;&#34;
 
     user_prompt = f&#34;&#34;&#34;List the {number_of_categories} most relevant thematic categories for this sample of survey responses.
@@ -869,7 +859,7 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
     ```
     {responses_sample}
     ```&#34;&#34;&#34;
-    for attempt in range(max_retries):
+    for attempt in range(MAX_RETRIES):
         try:
             output = await call_gpt(client, user_prompt)
             output_cleaned = output.strip().replace(&#34;json&#34;, &#34;&#34;).replace(&#34;`&#34;, &#34;&#34;).replace(&#34;\n&#34;, &#34;&#34;)  # type: ignore
@@ -882,13 +872,13 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
             return output_categories_list
 
         except Exception as e:
-            logger.info(
+            logger.warning(
                 f&#34;&#34;&#34;\nAn error occurred:\n{e}
-            Retrying attempt {attempt + 1}/{max_retries}...&#34;&#34;&#34;
+            Retrying attempt {attempt + 1}/{MAX_RETRIES}...&#34;&#34;&#34;
             )
 
     # Error case
-    logger.info(&#34;\nMax retries reached for responses&#34;)
+    logger.warning(&#34;\nMax retries reached for responses&#34;)
     output_categories_list = [&#34;Error&#34;]
 
     return output_categories_list</code></pre>
@@ -985,7 +975,8 @@ Checks the categories are valid.</p>
 <dd>
 <div class="desc"><p>TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
 It enforces a maximum capacity of tokens that can be consumed over a specific time period.
-Extended to handle requests limiting too.</p>
+Extended to handle requests limiting too.
+Raises exceptions when token usage is too high - used in conjunction with a backoff decorator to catch those exceptions.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
 <dt><strong><code>max_capacity</code></strong> :&ensp;<code>int</code></dt>
@@ -1006,6 +997,7 @@ Extended to handle requests limiting too.</p>
     TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
     It enforces a maximum capacity of tokens that can be consumed over a specific time period.
     Extended to handle requests limiting too.
+    Raises exceptions when token usage is too high - used in conjunction with a backoff decorator to catch those exceptions.
 
     Attributes:
         max_capacity (int): The maximum number of tokens in the bucket.
@@ -1028,25 +1020,29 @@ Extended to handle requests limiting too.</p>
             tokens_required (int): The number of tokens to consume from the bucket.
 
         Raises:
-            ValueError: If tokens_required exceeds the maximum capacity of the bucket.
+            ValueError: If tokens_required exceeds the maximum capacity of the bucket. Use this in conjunction with a backoff mechanism that catches exceptions.
         &#34;&#34;&#34;
         if tokens_required &gt; self.max_capacity:
+            # This gets caught by the backoff decorator.
             raise ValueError(
                 f&#34;Requested tokens ({tokens_required}) exceed the maximum capacity of the bucket ({self.max_capacity}).&#34;
             )
 
         while True:
             self.refill()
-            if self.current_token_count &gt;= tokens_required:
+            if tokens_required &lt;= self.current_token_count:
                 self.current_token_count -= tokens_required
                 break
             else:
-                logger.debug(&#34;Token limit per minute exceeded. Exponential backoff.&#34;)
-                raise ValueError(&#34;Token limit per minute exceeded. Waiting.&#34;)
+                logger.debug(
+                    f&#34;Token/request limit per minute exceeded. Exponentially backing off. Tokens/requests requested: {tokens_required}. Tokens remaining: {self.current_token_count}&#34;
+                )
+                raise ValueError(&#34;Token limit per minute exceeded. Exponentially backing off.&#34;)
 
     async def consume_request(self):
         &#34;&#34;&#34;
         Consumes a token for a request. If no tokens are available for requests, waits asynchronously until they are refilled.
+        This function should be used by instantiating the TokenBucket class as a request_bucket, passing in the max_capacity_per_minute and refill_rate_per_second.
         &#34;&#34;&#34;
         await self.consume_tokens(1)
 
@@ -1067,7 +1063,8 @@ Extended to handle requests limiting too.</p>
 <span>async def <span class="ident">consume_request</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Consumes a token for a request. If no tokens are available for requests, waits asynchronously until they are refilled.</p></div>
+<div class="desc"><p>Consumes a token for a request. If no tokens are available for requests, waits asynchronously until they are refilled.
+This function should be used by instantiating the TokenBucket class as a request_bucket, passing in the max_capacity_per_minute and refill_rate_per_second.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1075,6 +1072,7 @@ Extended to handle requests limiting too.</p>
 <pre><code class="python">async def consume_request(self):
     &#34;&#34;&#34;
     Consumes a token for a request. If no tokens are available for requests, waits asynchronously until they are refilled.
+    This function should be used by instantiating the TokenBucket class as a request_bucket, passing in the max_capacity_per_minute and refill_rate_per_second.
     &#34;&#34;&#34;
     await self.consume_tokens(1)</code></pre>
 </details>
@@ -1092,7 +1090,7 @@ Extended to handle requests limiting too.</p>
 <h2 id="raises">Raises</h2>
 <dl>
 <dt><code>ValueError</code></dt>
-<dd>If tokens_required exceeds the maximum capacity of the bucket.</dd>
+<dd>If tokens_required exceeds the maximum capacity of the bucket. Use this in conjunction with a backoff mechanism that catches exceptions.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -1106,21 +1104,24 @@ Extended to handle requests limiting too.</p>
         tokens_required (int): The number of tokens to consume from the bucket.
 
     Raises:
-        ValueError: If tokens_required exceeds the maximum capacity of the bucket.
+        ValueError: If tokens_required exceeds the maximum capacity of the bucket. Use this in conjunction with a backoff mechanism that catches exceptions.
     &#34;&#34;&#34;
     if tokens_required &gt; self.max_capacity:
+        # This gets caught by the backoff decorator.
         raise ValueError(
             f&#34;Requested tokens ({tokens_required}) exceed the maximum capacity of the bucket ({self.max_capacity}).&#34;
         )
 
     while True:
         self.refill()
-        if self.current_token_count &gt;= tokens_required:
+        if tokens_required &lt;= self.current_token_count:
             self.current_token_count -= tokens_required
             break
         else:
-            logger.debug(&#34;Token limit per minute exceeded. Exponential backoff.&#34;)
-            raise ValueError(&#34;Token limit per minute exceeded. Waiting.&#34;)</code></pre>
+            logger.debug(
+                f&#34;Token/request limit per minute exceeded. Exponentially backing off. Tokens/requests requested: {tokens_required}. Tokens remaining: {self.current_token_count}&#34;
+            )
+            raise ValueError(&#34;Token limit per minute exceeded. Exponentially backing off.&#34;)</code></pre>
 </details>
 </dd>
 <dt id="gpt_categorizer_utils.gpt_utils.TokenBucket.refill"><code class="name flex">
@@ -1152,7 +1153,9 @@ Extended to handle requests limiting too.</p>
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#set-rate-limiting-parameters-in-gpt_configpy">Set rate limiting parameters in gpt_config.py</a></li>
+</ul>
 </div>
 <ul id="index">
 <li><h3>Super-module</h3>
