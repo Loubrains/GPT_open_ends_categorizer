@@ -19,7 +19,7 @@ Output Files:
 Notes:
 - Make sure OPENAI_API_KEY is set up in your system environment variables.
 - The script uses utility functions from the `general_utils` and `gpt_utils` modules.
-- User-defined variables should be properly set in the `config.py` file before running this script.
+- User-defined variables should be properly set in the `config` file before running this script.
 - The script terminates if exceptions are raised at any point.
 """
 

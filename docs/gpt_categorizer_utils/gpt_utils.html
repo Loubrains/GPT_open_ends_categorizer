@@ -182,8 +182,9 @@ async def call_gpt(
 ) -&gt; str | None:
     &#34;&#34;&#34;
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
-    Tokens usage is managed with the token bucket algrithm.
-    Failed requests are exponentially backed off and jittered using the backoff library.
+    Tokens usage is managed with the TokenBucket class.
+    Failed requests are exponentially backed off and jittered using the backoff decorator.
+    Number of concurrent tasks are limited with asyncio.Semaphore.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.
@@ -496,8 +497,9 @@ async def gpt_categorize_response_batches_main(
 </code></dt>
 <dd>
 <div class="desc"><p>Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
-Tokens usage is managed with the token bucket algrithm.
-Failed requests are exponentially backed off and jittered using the backoff library.</p>
+Tokens usage is managed with the TokenBucket class.
+Failed requests are exponentially backed off and jittered using the backoff decorator.
+Number of concurrent tasks are limited with asyncio.Semaphore.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>client</code></strong> :&ensp;<code>AsyncOpenAI</code></dt>
@@ -522,8 +524,9 @@ async def call_gpt(
 ) -&gt; str | None:
     &#34;&#34;&#34;
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
-    Tokens usage is managed with the token bucket algrithm.
-    Failed requests are exponentially backed off and jittered using the backoff library.
+    Tokens usage is managed with the TokenBucket class.
+    Failed requests are exponentially backed off and jittered using the backoff decorator.
+    Number of concurrent tasks are limited with asyncio.Semaphore.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.

@@ -136,8 +136,9 @@ async def call_gpt(
 ) -> str | None:
     """
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
-    Tokens usage is managed with the token bucket algrithm.
-    Failed requests are exponentially backed off and jittered using the backoff library.
+    Tokens usage is managed with the TokenBucket class.
+    Failed requests are exponentially backed off and jittered using the backoff decorator.
+    Number of concurrent tasks are limited with asyncio.Semaphore.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.

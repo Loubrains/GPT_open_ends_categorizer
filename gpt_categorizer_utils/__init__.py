@@ -11,7 +11,7 @@ Modules:
     `gpt_utils`:
         Provides utilities for interacting with the OpenAI GPT model asyncronously. It includes functions for sending prompts to the GPT model, 
         generating lists of thematic categories, generating codeframes for responses, validating categorized outputs, and batch processing.
-        It imports config parameters from `gpt_config.py`.
+        It imports config parameters from `gpt_config`.
 
     `dataframe_utils`:
         Provides utilities for manipulating DataFrames, with the goal of preparing the categorized data for further analysis.

@@ -20,7 +20,7 @@ Output File:
 
 Notes:
 - The script utilizes utility functions from `general_utils` and `dataframe_utils` modules.
-- User-defined variables such as file paths should be properly set in the `config.py` file before running this script.
+- User-defined variables such as file paths should be properly set in the `config` file before running this script.
 - The script supports both single-category and multi-category (`is_multicode`) response categorization.
 - The script terminates if exceptions are raised at any point.
 """

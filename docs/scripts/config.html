@@ -25,7 +25,7 @@
 <h3 id="modify-this-file-before-running-any-scripts">MODIFY THIS FILE BEFORE RUNNING ANY SCRIPTS</h3>
 <p>Configuration file containing user-defined parameters used in the open-end response categorization process.</p>
 <p>It includes file paths for loading and saving data, the questionnaire question, categorization options, sample sizes, and other settings.</p>
-<p>Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in <code>gpt_config.py</code> in the <code><a title="gpt_categorizer_utils" href="../gpt_categorizer_utils/index.html">gpt_categorizer_utils</a></code> package.</p>
+<p>Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in <code>gpt_config</code> in the <code><a title="gpt_categorizer_utils" href="../gpt_categorizer_utils/index.html">gpt_categorizer_utils</a></code> package.</p>
 <p>Configuration Variables:
 <code>OPEN_END_DATA_FILE_PATH_LOAD</code>: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
 <code>CATEGORIES_FILE_PATH_SAVE</code>: File path for saving the GPT generated categories to CSV.
@@ -51,7 +51,7 @@ Configuration file containing user-defined parameters used in the open-end respo
 
 It includes file paths for loading and saving data, the questionnaire question, categorization options, sample sizes, and other settings.
 
-Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in `gpt_config.py` in the `gpt_categorizer_utils` package.
+Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in `gpt_config` in the `gpt_categorizer_utils` package.
 
 Configuration Variables:
     `OPEN_END_DATA_FILE_PATH_LOAD`: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
