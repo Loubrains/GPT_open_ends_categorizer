@@ -5,7 +5,7 @@ Configuration file containing user-defined parameters used in the open-end respo
 
 It includes file paths for loading and saving data, the questionnaire question, categorization options, sample sizes, and other settings.
 
-Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in `gpt_config` in the `gpt_categorizer_utils` package.
+Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in the config file `gpt_categorizer_utils.gpt_config`.
 
 Configuration Variables:
     `OPEN_END_DATA_FILE_PATH_LOAD`: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
