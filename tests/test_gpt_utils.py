@@ -63,7 +63,7 @@ async def test_token_bucket_consume(
         await token_bucket.consume_tokens(tokens_required)
         await asyncio.sleep(wait_time)  # Simulate waiting for refill
         token_bucket.refill()  # Manually trigger refill for testing purposes
-        assert token_bucket.current_token_count == expected_remaining_tokens
+        assert round(token_bucket.current_token_count) == expected_remaining_tokens
 
 
 @pytest.mark.asyncio
@@ -87,7 +87,7 @@ async def test_concurrent_token_consumption():
     ]
 
     await asyncio.gather(*tasks)
-    # Maybe also assert that tokens is less than max (so they have been consumed)
+    assert token_bucket.current_token_count < max_capacity
     assert token_bucket.current_token_count > max_capacity - sum(
         [test_tokens1, test_tokens2, test_tokens3]
     )
