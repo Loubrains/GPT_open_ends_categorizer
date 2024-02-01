@@ -37,10 +37,15 @@ from .general_utils import create_batches
 import logging
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 ### NOTE: SET USAGE LIMITS HERE
 REQUESTS_PER_MINUTE = 450  # Actual limit is 500
 TOKENS_PER_MINUTE = 140000  # Actual limit is 150000
+
+# Limit number of concurrent tasks
+CONCURRENT_TASKS = 10
+semaphore = asyncio.Semaphore(CONCURRENT_TASKS)
 
 # For counting tokens
 encoding = tiktoken.encoding_for_model("gpt-4")
@@ -65,29 +70,31 @@ class TokenBucket:
         self.current_token_count = max_capacity
         self.timestamp_of_last_refill = time.time()
 
-    async def consume_tokens(self, tokens_required: int):
+    async def consume_tokens(self, tokens_requested: int):
         """
         Consumes a specified number of tokens from the bucket. If enough tokens are not available, waits asynchronously until they are refilled.
 
         Args:
-            tokens_required (int): The number of tokens to consume from the bucket.
+            tokens_requested (int): The number of tokens to consume from the bucket.
 
         Raises:
-            ValueError: If tokens_required exceeds the maximum capacity of the bucket.
+            ValueError: If tokens_requested exceeds the maximum capacity of the bucket.
         """
-        if tokens_required > self.max_capacity:
+        if tokens_requested > self.max_capacity:
             raise ValueError(
-                f"Requested tokens ({tokens_required}) exceed the maximum capacity of the bucket ({self.max_capacity})."
+                f"Requested tokens ({tokens_requested}) exceed the maximum capacity of the bucket ({self.max_capacity})."
             )
 
         while True:
             self.refill()
-            if self.current_token_count >= tokens_required:
-                self.current_token_count -= tokens_required
+            if tokens_requested <= self.current_token_count:
+                self.current_token_count -= tokens_requested
                 break
             else:
-                logger.debug("Token limit per minute exceeded. Exponential backoff.")
-                raise ValueError("Token limit per minute exceeded. Waiting.")
+                logger.debug(
+                    f"Token limit per minute exceeded. Exponentially backing off. Tokens requested: {tokens_requested}. Tokens remaining: {self.current_token_count}"
+                )
+                raise ValueError("Token limit per minute exceeded. Exponentially backing off.")
 
     async def consume_request(self):
         """
@@ -132,32 +139,34 @@ async def call_gpt(
     Raises:
         Raises an exception if the API call fails.
     """
+    async with semaphore:  # Limit number of concurrent tasks
+        estimated_tokens = (
+            len(encoding.encode(user_prompt)) + 10
+        )  # add extra for the system message
+        # Limit tokens and requests per minute
+        await token_bucket.consume_tokens(estimated_tokens)
+        await request_bucket.consume_request()
 
-    estimated_tokens = len(encoding.encode(user_prompt)) + 10  # add extra for the system message
-    # Limit tokens and requests per minute
-    await token_bucket.consume_tokens(estimated_tokens)
-    await request_bucket.consume_request()
+        try:
+            completion = await client.chat.completions.create(
+                messages=[{"role": "user", "content": user_prompt}], model="gpt-4-turbo-preview"
+            )
+            content = completion.choices[0].message.content
+            if content:
+                logger.debug(f"Successful API call: {content}")
 
-    try:
-        completion = await client.chat.completions.create(
-            messages=[{"role": "user", "content": user_prompt}], model="gpt-4-turbo-preview"
-        )
-        content = completion.choices[0].message.content
-        if content:
-            logger.debug(f"Success: {content}")
+            if not content:
+                raise ValueError("No completion returned")
 
-        if content:
             response_tokens = len(encoding.encode(content))
             await token_bucket.consume_tokens(response_tokens)
-        else:
-            raise ValueError("No completion returned")
 
-    except Exception as e:
-        logger.error(f"\nAn error occurred: {e}")
-        content = "Error"
-        raise
+        except Exception as e:
+            logger.error(f"\nAn error occurred: {e}")
+            content = "Error"
+            raise
 
-    return content
+        return content
 
 
 async def gpt_generate_categories_list(
@@ -364,7 +373,7 @@ async def gpt_categorize_responses(
             return output_categories
 
         except Exception as e:
-            logger.info(
+            logger.warning(
                 f"""\nAn error occurred:\n{e}
             Responses:\n{responses}
             Retrying attempt {attempt + 1}/{max_retries}..."""
@@ -409,7 +418,6 @@ async def gpt_categorize_response_batches_main(
         - Processes the responses in batches for efficiency.
         - Retries the API call for a batch up to max_retries times if errors occur.
     """
-
     categorized_dict = {}
     batches = list(create_batches(list(responses), batch_size))
     tasks = []
