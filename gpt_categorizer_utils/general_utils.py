@@ -21,6 +21,7 @@ from pandas._libs.missing import NAType
 import logging
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def preprocess_text(text: Any) -> str | NAType:

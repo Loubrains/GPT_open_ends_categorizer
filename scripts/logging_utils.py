@@ -1,5 +1,7 @@
 import logging
 
+# NOTE: The logging level for each module in the gpt_categorizer_utils package is set within that module.
+
 
 def setup_logging():
     # Set up file logging
