@@ -4,7 +4,7 @@ Utilities for interacting with the OpenAI GPT model to categorize survey respons
 This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
 validation of categorization results, and batch processing of responses for efficient categorization.
 
-### Set rate limiting parameters in `gpt_config.py` ###
+### Set rate limiting parameters in `gpt_config` ###
 
 It implements token and request limiting using the `backoff` library as well as a `TokenBucket` class. Uses `tiktoken` for accurate token counting.
 Concurrent tasks are limited with asyncio.Semaphore.
@@ -61,7 +61,7 @@ class TokenBucket:
     TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
     It enforces a maximum capacity of tokens that can be consumed over a specific time period.
     Extended to handle requests limiting too.
-    Raises exceptions when token usage is too high - used in conjunction with a backoff decorator to catch those exceptions.
+    Raises exceptions when token usage is too high, to be caught by a backoff mechanism.
 
     Attributes:
         max_capacity (int): The maximum number of tokens in the bucket.
@@ -78,13 +78,14 @@ class TokenBucket:
 
     async def consume_tokens(self, tokens_required: int):
         """
-        Consumes a specified number of tokens from the bucket. If enough tokens are not available, waits asynchronously until they are refilled.
+        Consumes a specified number of tokens from the bucket.
+        If enough tokens are not available, raises an error to be caught by a backoff mechanism.
 
         Args:
             tokens_required (int): The number of tokens to consume from the bucket.
 
         Raises:
-            ValueError: If tokens_required exceeds the maximum capacity of the bucket. Use this in conjunction with a backoff mechanism that catches exceptions.
+            ValueError: If tokens_required exceeds the maximum capacity of the bucket.
         """
         if tokens_required > self.max_capacity:
             # This gets caught by the backoff decorator.
@@ -127,18 +128,16 @@ token_bucket = TokenBucket(TOKENS_PER_MINUTE, TOKENS_PER_MINUTE / 60)
 request_bucket = TokenBucket(REQUESTS_PER_MINUTE, REQUESTS_PER_MINUTE / 60)
 
 
-@backoff.on_exception(
-    backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter, base=2
-)
+@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter)
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
 ) -> str | None:
     """
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
-    Tokens usage is managed with the TokenBucket class.
+    Tokens usage is managed with the `TokenBucket` class.
     Failed requests are exponentially backed off and jittered using the backoff decorator.
-    Number of concurrent tasks are limited with asyncio.Semaphore.
+    Number of concurrent tasks are limited with `asyncio.Semaphore`.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.
@@ -429,7 +428,7 @@ async def gpt_categorize_response_batches_main(
         # logger.debug(task)
         tasks.append(task)
 
-    output_categories = await asyncio.gather(*tasks)
+    output_categories = await asyncio.gather(*tasks)  # concurrency limited by asyncio.Semaphore
 
     # Construct codeframe (dict of responses to categories)
     for i, categories_in_batch in enumerate(output_categories):

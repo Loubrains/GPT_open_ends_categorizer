@@ -25,7 +25,7 @@
 <p>Utilities for interacting with the OpenAI GPT model to categorize survey responses.</p>
 <p>This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories,
 validation of categorization results, and batch processing of responses for efficient categorization.</p>
-<h3 id="set-rate-limiting-parameters-in-gpt_configpy">Set rate limiting parameters in <code>gpt_config.py</code></h3>
+<h3 id="set-rate-limiting-parameters-in-gpt_config">Set rate limiting parameters in <code>gpt_config</code></h3>
 <p>It implements token and request limiting using the <code>backoff</code> library as well as a <code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket" href="#gpt_categorizer_utils.gpt_utils.TokenBucket">TokenBucket</a></code> class. Uses <code>tiktoken</code> for accurate token counting.
 Concurrent tasks are limited with asyncio.Semaphore.
 <a href="https://pypi.org/project/backoff/">https://pypi.org/project/backoff/</a>
@@ -50,7 +50,7 @@ Utilities for interacting with the OpenAI GPT model to categorize survey respons
 This module allows for the asynchronous sending of prompts to the GPT model, categorization of survey responses into thematic categories, 
 validation of categorization results, and batch processing of responses for efficient categorization.
 
-### Set rate limiting parameters in `gpt_config.py` ###
+### Set rate limiting parameters in `gpt_config` ###
 
 It implements token and request limiting using the `backoff` library as well as a `TokenBucket` class. Uses `tiktoken` for accurate token counting.
 Concurrent tasks are limited with asyncio.Semaphore.
@@ -107,7 +107,7 @@ class TokenBucket:
     TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
     It enforces a maximum capacity of tokens that can be consumed over a specific time period.
     Extended to handle requests limiting too.
-    Raises exceptions when token usage is too high - used in conjunction with a backoff decorator to catch those exceptions.
+    Raises exceptions when token usage is too high, to be caught by a backoff mechanism.
 
     Attributes:
         max_capacity (int): The maximum number of tokens in the bucket.
@@ -124,13 +124,14 @@ class TokenBucket:
 
     async def consume_tokens(self, tokens_required: int):
         &#34;&#34;&#34;
-        Consumes a specified number of tokens from the bucket. If enough tokens are not available, waits asynchronously until they are refilled.
+        Consumes a specified number of tokens from the bucket.
+        If enough tokens are not available, raises an error to be caught by a backoff mechanism.
 
         Args:
             tokens_required (int): The number of tokens to consume from the bucket.
 
         Raises:
-            ValueError: If tokens_required exceeds the maximum capacity of the bucket. Use this in conjunction with a backoff mechanism that catches exceptions.
+            ValueError: If tokens_required exceeds the maximum capacity of the bucket.
         &#34;&#34;&#34;
         if tokens_required &gt; self.max_capacity:
             # This gets caught by the backoff decorator.
@@ -173,18 +174,16 @@ token_bucket = TokenBucket(TOKENS_PER_MINUTE, TOKENS_PER_MINUTE / 60)
 request_bucket = TokenBucket(REQUESTS_PER_MINUTE, REQUESTS_PER_MINUTE / 60)
 
 
-@backoff.on_exception(
-    backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter, base=2
-)
+@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter)
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
 ) -&gt; str | None:
     &#34;&#34;&#34;
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
-    Tokens usage is managed with the TokenBucket class.
+    Tokens usage is managed with the `TokenBucket` class.
     Failed requests are exponentially backed off and jittered using the backoff decorator.
-    Number of concurrent tasks are limited with asyncio.Semaphore.
+    Number of concurrent tasks are limited with `asyncio.Semaphore`.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.
@@ -475,7 +474,7 @@ async def gpt_categorize_response_batches_main(
         # logger.debug(task)
         tasks.append(task)
 
-    output_categories = await asyncio.gather(*tasks)
+    output_categories = await asyncio.gather(*tasks)  # concurrency limited by asyncio.Semaphore
 
     # Construct codeframe (dict of responses to categories)
     for i, categories_in_batch in enumerate(output_categories):
@@ -497,9 +496,9 @@ async def gpt_categorize_response_batches_main(
 </code></dt>
 <dd>
 <div class="desc"><p>Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
-Tokens usage is managed with the TokenBucket class.
+Tokens usage is managed with the <code><a title="gpt_categorizer_utils.gpt_utils.TokenBucket" href="#gpt_categorizer_utils.gpt_utils.TokenBucket">TokenBucket</a></code> class.
 Failed requests are exponentially backed off and jittered using the backoff decorator.
-Number of concurrent tasks are limited with asyncio.Semaphore.</p>
+Number of concurrent tasks are limited with <code>asyncio.Semaphore</code>.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>client</code></strong> :&ensp;<code>AsyncOpenAI</code></dt>
@@ -515,18 +514,16 @@ Number of concurrent tasks are limited with asyncio.Semaphore.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@backoff.on_exception(
-    backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter, base=2
-)
+<pre><code class="python">@backoff.on_exception(backoff.expo, (openai.RateLimitError, ValueError), jitter=backoff.full_jitter)
 async def call_gpt(
     client: AsyncOpenAI,
     user_prompt: str,
 ) -&gt; str | None:
     &#34;&#34;&#34;
     Asynchronously sends a user prompt to the GPT-4 model and retrieves the completion.
-    Tokens usage is managed with the TokenBucket class.
+    Tokens usage is managed with the `TokenBucket` class.
     Failed requests are exponentially backed off and jittered using the backoff decorator.
-    Number of concurrent tasks are limited with asyncio.Semaphore.
+    Number of concurrent tasks are limited with `asyncio.Semaphore`.
 
     Args:
         client (AsyncOpenAI): The client instance used to communicate with the GPT model.
@@ -700,7 +697,7 @@ and constructs a codeframe from the output (i.e. dictionary of responses to cate
         # logger.debug(task)
         tasks.append(task)
 
-    output_categories = await asyncio.gather(*tasks)
+    output_categories = await asyncio.gather(*tasks)  # concurrency limited by asyncio.Semaphore
 
     # Construct codeframe (dict of responses to categories)
     for i, categories_in_batch in enumerate(output_categories):
@@ -979,7 +976,7 @@ Checks the categories are valid.</p>
 <div class="desc"><p>TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
 It enforces a maximum capacity of tokens that can be consumed over a specific time period.
 Extended to handle requests limiting too.
-Raises exceptions when token usage is too high - used in conjunction with a backoff decorator to catch those exceptions.</p>
+Raises exceptions when token usage is too high, to be caught by a backoff mechanism.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
 <dt><strong><code>max_capacity</code></strong> :&ensp;<code>int</code></dt>
@@ -1000,7 +997,7 @@ Raises exceptions when token usage is too high - used in conjunction with a back
     TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
     It enforces a maximum capacity of tokens that can be consumed over a specific time period.
     Extended to handle requests limiting too.
-    Raises exceptions when token usage is too high - used in conjunction with a backoff decorator to catch those exceptions.
+    Raises exceptions when token usage is too high, to be caught by a backoff mechanism.
 
     Attributes:
         max_capacity (int): The maximum number of tokens in the bucket.
@@ -1017,13 +1014,14 @@ Raises exceptions when token usage is too high - used in conjunction with a back
 
     async def consume_tokens(self, tokens_required: int):
         &#34;&#34;&#34;
-        Consumes a specified number of tokens from the bucket. If enough tokens are not available, waits asynchronously until they are refilled.
+        Consumes a specified number of tokens from the bucket.
+        If enough tokens are not available, raises an error to be caught by a backoff mechanism.
 
         Args:
             tokens_required (int): The number of tokens to consume from the bucket.
 
         Raises:
-            ValueError: If tokens_required exceeds the maximum capacity of the bucket. Use this in conjunction with a backoff mechanism that catches exceptions.
+            ValueError: If tokens_required exceeds the maximum capacity of the bucket.
         &#34;&#34;&#34;
         if tokens_required &gt; self.max_capacity:
             # This gets caught by the backoff decorator.
@@ -1084,7 +1082,8 @@ This function should be used by instantiating the TokenBucket class as a request
 <span>async def <span class="ident">consume_tokens</span></span>(<span>self, tokens_required: int)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Consumes a specified number of tokens from the bucket. If enough tokens are not available, waits asynchronously until they are refilled.</p>
+<div class="desc"><p>Consumes a specified number of tokens from the bucket.
+If enough tokens are not available, raises an error to be caught by a backoff mechanism.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>tokens_required</code></strong> :&ensp;<code>int</code></dt>
@@ -1093,7 +1092,7 @@ This function should be used by instantiating the TokenBucket class as a request
 <h2 id="raises">Raises</h2>
 <dl>
 <dt><code>ValueError</code></dt>
-<dd>If tokens_required exceeds the maximum capacity of the bucket. Use this in conjunction with a backoff mechanism that catches exceptions.</dd>
+<dd>If tokens_required exceeds the maximum capacity of the bucket.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -1101,13 +1100,14 @@ This function should be used by instantiating the TokenBucket class as a request
 </summary>
 <pre><code class="python">async def consume_tokens(self, tokens_required: int):
     &#34;&#34;&#34;
-    Consumes a specified number of tokens from the bucket. If enough tokens are not available, waits asynchronously until they are refilled.
+    Consumes a specified number of tokens from the bucket.
+    If enough tokens are not available, raises an error to be caught by a backoff mechanism.
 
     Args:
         tokens_required (int): The number of tokens to consume from the bucket.
 
     Raises:
-        ValueError: If tokens_required exceeds the maximum capacity of the bucket. Use this in conjunction with a backoff mechanism that catches exceptions.
+        ValueError: If tokens_required exceeds the maximum capacity of the bucket.
     &#34;&#34;&#34;
     if tokens_required &gt; self.max_capacity:
         # This gets caught by the backoff decorator.
@@ -1157,7 +1157,7 @@ This function should be used by instantiating the TokenBucket class as a request
 <h1>Index</h1>
 <div class="toc">
 <ul>
-<li><a href="#set-rate-limiting-parameters-in-gpt_configpy">Set rate limiting parameters in gpt_config.py</a></li>
+<li><a href="#set-rate-limiting-parameters-in-gpt_config">Set rate limiting parameters in gpt_config</a></li>
 </ul>
 </div>
 <ul id="index">
