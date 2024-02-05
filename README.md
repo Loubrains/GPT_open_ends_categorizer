@@ -118,6 +118,8 @@ Any new developments you would like to be obfuscated, make sure to include that 
 - **General gpt utility function**: Create a more general gpt utility function that isn't locked into the prompts that the other functions are - but does include cleaning, validation, retries, error handling, etc.
 - **Automation script**: Create a script that sequentially runs all the necessary scripts for a full automation (use with caution)
 - **User experience**: Create a smoother experience for new users to dive right in without modifying files, running multiple scripts, etc.
+- **JSON Mode**: Make GPT calls in JSON mode for more outputs that can be more reliably parsed.
+- **Tokens Per Day limiting**: Implement a Tokens Per Day limiter (can probably just reuse the TokenBucket).
 
 # Author
 
