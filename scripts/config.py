@@ -20,7 +20,7 @@ Configuration Variables:
     - `RESPONSES_SAMPLE_SIZE`: Number of responses sent to GPT to generate the initial list of categories.
 
 Note:
-    - File paths expect foreward slashes.
+    - File paths expect /foreward/slashes/.
 
 Author: Louie Atkins-Turkish (louie@tapestryresearch.com)
 """
