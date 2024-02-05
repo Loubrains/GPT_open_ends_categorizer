@@ -10,6 +10,7 @@ It implements token and request limiting using the `backoff` library as well as 
 Concurrent tasks are limited with asyncio.Semaphore.
 https://pypi.org/project/backoff/
 https://cookbook.openai.com/examples/how_to_handle_rate_limits
+https://pypi.org/project/tiktoken/
 https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken
 https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio
 
@@ -20,11 +21,17 @@ Functions:
     `create_user_prompt_for_gpt_categorization`: Creates a user prompt to send to the GPT model to categorize survey question responses.
     `gpt_categorize_responses`: Asynchronously categorizes a list of responses using the GPT model.
     `gpt_categorize_response_batches_main`: Asynchronously sends batches of survey responses to be categorized using the GPT model.
-    
+
+For more on coding with the openai library:
+https://platform.openai.com/docs/api-reference/
+https://github.com/openai/openai-cookbook/
+
 Note: A potential future update includes calling the GPT model with JSON mode for structured responses.
+https://platform.openai.com/docs/guides/text-generation/json-mode
+
 """
 
-### NOTE: potential future update to these utils: call gpt with JSON mode
+### TODO: potential future update to these utils: call gpt with JSON mode
 ### Put the following in the client.chat.completions.create() arguments:
 ### `response_format={ "type": "json_object" }`
 ### Make sure the prompt specifies the JSON structure, and then parse the output

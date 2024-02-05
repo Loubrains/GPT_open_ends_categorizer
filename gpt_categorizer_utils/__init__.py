@@ -1,7 +1,7 @@
 """
 Package of modules for categorizing open-ended survey responses with GPT-4.
 
-This package provides utilities designed for the processing of open-ended survey responses, categorizating them using GPT-4, and formatting the results for data analysis. 
+This package provides utilities designed for the processing of open-ended survey responses, categorizating them using GPT-4, and formatting the results for data analysis.
 
 Modules:
     `general_utils`:
