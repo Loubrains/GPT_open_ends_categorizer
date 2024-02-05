@@ -36,6 +36,8 @@ https://platform.openai.com/docs/guides/text-generation/json-mode
 ### `response_format={ "type": "json_object" }`
 ### Make sure the prompt specifies the JSON structure, and then parse the output
 
+### TODO: need to implement Tokens Per Day limiter as well (can probably just reuse the same TokenBucket)
+
 import openai
 from openai import AsyncOpenAI
 import json
