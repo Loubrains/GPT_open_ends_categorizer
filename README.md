@@ -4,7 +4,7 @@ This project contains scripts and modules for the automatic categorization of op
 
 For a dataset of 1500 responses, and 20 categories, it costs less than 1$ and takes about 20 seconds to run the categorizer.
 
-For a bigger dataset, with many more categories, rate limiting can come into effect and increase the time and cost. See your usage in the [OpenAI usage portal](https://platform.openai.com/usage)
+For a bigger dataset, with many more categories, rate limiting can come into effect and increase the time and cost. See your usage in the [OpenAI usage portal](https://platform.openai.com/usage). See more about rate limit tiers in the [OpenAI rate limits](https://platform.openai.com/docs/guides/rate-limits?context=tier-free) page.
 
 # Prerequisites
 
