@@ -25,24 +25,29 @@ Exports the DataFrame to a CSV file …" />
 <section id="section-intro">
 <p>Script that generates a dataframe of categorized open-ended survey responses based on a pre-defined codeframe.
 Exports the DataFrame to a CSV file.</p>
-<p>Steps:
-1. Load the raw response data from a specified CSV file.
-2. Clean the responses using preprocessing functions.
-3. Load the categories and codeframe (response-category pairs) from specified CSV files.
-4. Prepare a DataFrame to hold the categorized responses.
-5. Populate the DataFrame by mapping responses to categories according to the codeframe.
-6. Save the categorized data to a CSV file.</p>
+<h2 id="steps">Steps</h2>
+<ol>
+<li>Load the raw response data from a specified CSV file.</li>
+<li>Clean the responses using preprocessing functions.</li>
+<li>Load the categories and codeframe (response-category pairs) from specified CSV files.</li>
+<li>Prepare a DataFrame to hold the categorized responses.</li>
+<li>Populate the DataFrame by mapping responses to categories according to the codeframe.</li>
+<li>Save the categorized data to a CSV file.</li>
+</ol>
 <p>Input Files:
 - Open-ended response data file (<code>open_end_data_file_path</code>): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
 - Categories file (<code>categories_file_path</code>): A CSV file containing the list of categories. Expects no header.
 - Codeframe file (<code>codeframe_file_path</code>): A CSV file containing the predefined response-category pairs. Expects two columns, with headers <code>key</code> and <code>value</code>. Supports single or multiple categories per response based on the <code>is_multicode</code> flag.</p>
 <p>Output File:
 - Categorized data file (<code>categorized_data_file_path</code>): A CSV file where the processed and categorized data is saved.</p>
-<p>Notes:
-- The script utilizes utility functions from <code>general_utils</code> and <code>dataframe_utils</code> modules.
-- User-defined variables such as file paths should be properly set in the <code>config</code> file before running this script.
-- The script supports both single-category and multi-category (<code>is_multicode</code>) response categorization.
-- The script terminates if exceptions are raised at any point.</p>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>The script utilizes utility functions from <code>general_utils</code> and <code>dataframe_utils</code> modules.</li>
+<li>User-defined variables such as file paths should be properly set in the <code>config</code> file before running this script.</li>
+<li>The script supports both single-category and multi-category (<code>is_multicode</code>) response categorization.</li>
+<li>The script terminates if exceptions are raised at any point.</li>
+</ul>
+<p>Author: Louie Atkins-Turkish (louie@tapestryresearch.com)</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -52,26 +57,28 @@ Script that generates a dataframe of categorized open-ended survey responses bas
 Exports the DataFrame to a CSV file.
 
 Steps:
-1. Load the raw response data from a specified CSV file.
-2. Clean the responses using preprocessing functions.
-3. Load the categories and codeframe (response-category pairs) from specified CSV files.
-4. Prepare a DataFrame to hold the categorized responses.
-5. Populate the DataFrame by mapping responses to categories according to the codeframe.
-6. Save the categorized data to a CSV file.
+    1. Load the raw response data from a specified CSV file.
+    2. Clean the responses using preprocessing functions.
+    3. Load the categories and codeframe (response-category pairs) from specified CSV files.
+    4. Prepare a DataFrame to hold the categorized responses.
+    5. Populate the DataFrame by mapping responses to categories according to the codeframe.
+    6. Save the categorized data to a CSV file.
 
 Input Files:
-- Open-ended response data file (`open_end_data_file_path`): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
-- Categories file (`categories_file_path`): A CSV file containing the list of categories. Expects no header.
-- Codeframe file (`codeframe_file_path`): A CSV file containing the predefined response-category pairs. Expects two columns, with headers `key` and `value`. Supports single or multiple categories per response based on the `is_multicode` flag.
+    - Open-ended response data file (`open_end_data_file_path`): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
+    - Categories file (`categories_file_path`): A CSV file containing the list of categories. Expects no header.
+    - Codeframe file (`codeframe_file_path`): A CSV file containing the predefined response-category pairs. Expects two columns, with headers `key` and `value`. Supports single or multiple categories per response based on the `is_multicode` flag.
 
 Output File:
-- Categorized data file (`categorized_data_file_path`): A CSV file where the processed and categorized data is saved.
+    - Categorized data file (`categorized_data_file_path`): A CSV file where the processed and categorized data is saved.
 
 Notes:
-- The script utilizes utility functions from `general_utils` and `dataframe_utils` modules.
-- User-defined variables such as file paths should be properly set in the `config` file before running this script.
-- The script supports both single-category and multi-category (`is_multicode`) response categorization.
-- The script terminates if exceptions are raised at any point.
+    - The script utilizes utility functions from `general_utils` and `dataframe_utils` modules.
+    - User-defined variables such as file paths should be properly set in the `config` file before running this script.
+    - The script supports both single-category and multi-category (`is_multicode`) response categorization.
+    - The script terminates if exceptions are raised at any point.
+
+Author: Louie Atkins-Turkish (louie@tapestryresearch.com)
 &#34;&#34;&#34;
 
 import pandas as pd

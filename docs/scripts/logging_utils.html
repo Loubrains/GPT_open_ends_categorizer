@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
 <title>scripts.logging_utils API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="This module provides utility functions for configuring and managing logging …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,21 +22,55 @@
 <h1 class="title">Module <code>scripts.logging_utils</code></h1>
 </header>
 <section id="section-intro">
+<p>This module provides utility functions for configuring and managing logging.</p>
+<h2 id="functions">Functions</h2>
+<ul>
+<li>setup_logging(): Initializes and configures logging for the application.
+It sets up logging to a file and the console, with specified formatting and log levels.</li>
+</ul>
+<p>Note: The logging level for each module in the gpt_categorizer_utils package is set within that module.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import logging
+<pre><code class="python">&#34;&#34;&#34;
+This module provides utility functions for configuring and managing logging.
+
+Functions:
+    - setup_logging(): Initializes and configures logging for the application.
+        It sets up logging to a file and the console, with specified formatting and log levels.
+        
+Note: The logging level for each module in the gpt_categorizer_utils package is set within that module.
+&#34;&#34;&#34;
+
+import logging
 
 # NOTE: The logging level for each module in the gpt_categorizer_utils package is set within that module.
 
 
 def setup_logging():
+    &#34;&#34;&#34;
+    Configures logging to output to a file named &#39;app.log&#39;, and less verbose logging to the console.
+
+    File logging:
+        - Outputs to &#39;app.log&#39;, overwriting the file each time the application is started.
+        - Log level is set to DEBUG by default.
+        - Log format includes the timestamp, file name, line number, log level, and message.
+
+    Console logging:
+        - Outputs log messages to the console.
+        - Log level is set to INFO.
+        - Log format is simplified to show only the message.
+
+    Returns:
+        logger (Logger): A configured Logger object which can be used to log messages in the application.
+    &#34;&#34;&#34;
+
     # Set up file logging
     logging.basicConfig(
         filename=&#34;app.log&#34;,
         filemode=&#34;w&#34;,
-        level=logging.WARNING,  # suppress all loggers from dependencies
+        level=logging.DEBUG,  # suppress all loggers from dependencies
         format=&#34;%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s&#34;,
     )
 
@@ -69,17 +103,44 @@ def setup_logging():
 <span>def <span class="ident">setup_logging</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Configures logging to output to a file named 'app.log', and less verbose logging to the console.</p>
+<p>File logging:
+- Outputs to 'app.log', overwriting the file each time the application is started.
+- Log level is set to DEBUG by default.
+- Log format includes the timestamp, file name, line number, log level, and message.</p>
+<p>Console logging:
+- Outputs log messages to the console.
+- Log level is set to INFO.
+- Log format is simplified to show only the message.</p>
+<h2 id="returns">Returns</h2>
+<p>logger (Logger): A configured Logger object which can be used to log messages in the application.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def setup_logging():
+    &#34;&#34;&#34;
+    Configures logging to output to a file named &#39;app.log&#39;, and less verbose logging to the console.
+
+    File logging:
+        - Outputs to &#39;app.log&#39;, overwriting the file each time the application is started.
+        - Log level is set to DEBUG by default.
+        - Log format includes the timestamp, file name, line number, log level, and message.
+
+    Console logging:
+        - Outputs log messages to the console.
+        - Log level is set to INFO.
+        - Log format is simplified to show only the message.
+
+    Returns:
+        logger (Logger): A configured Logger object which can be used to log messages in the application.
+    &#34;&#34;&#34;
+
     # Set up file logging
     logging.basicConfig(
         filename=&#34;app.log&#34;,
         filemode=&#34;w&#34;,
-        level=logging.WARNING,  # suppress all loggers from dependencies
+        level=logging.DEBUG,  # suppress all loggers from dependencies
         format=&#34;%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s&#34;,
     )
 

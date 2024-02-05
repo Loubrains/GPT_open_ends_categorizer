@@ -15,12 +15,12 @@ https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken
 https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio
 
 Functions:
-    `call_gpt`: Asynchronously sends a user prompt to the GPT model and retrieves the completion. It manages token and request rate limiting using the TokenBucket class
-    `gpt_generate_categories_list`: Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
-    `validate_gpt_categorized_output`: Validates the GPT output received by the categorizer.
-    `create_user_prompt_for_gpt_categorization`: Creates a user prompt to send to the GPT model to categorize survey question responses.
-    `gpt_categorize_responses`: Asynchronously categorizes a list of responses using the GPT model.
-    `gpt_categorize_response_batches_main`: Asynchronously sends batches of survey responses to be categorized using the GPT model.
+    - `call_gpt`: Asynchronously sends a user prompt to the GPT model and retrieves the completion. It manages token and request rate limiting using the TokenBucket class
+    - `gpt_generate_categories_list`: Asynchronously generates a list of thematic categories relevant to a sample of survey responses.
+    - `validate_gpt_categorized_output`: Validates the GPT output received by the categorizer.
+    - `create_user_prompt_for_gpt_categorization`: Creates a user prompt to send to the GPT model to categorize survey question responses.
+    - `gpt_categorize_responses`: Asynchronously categorizes a list of responses using the GPT model.
+    - `gpt_categorize_response_batches_main`: Asynchronously sends batches of survey responses to be categorized using the GPT model.
 
 For more on coding with the openai library:
 https://platform.openai.com/docs/api-reference/
@@ -29,6 +29,7 @@ https://github.com/openai/openai-cookbook/
 Note: A potential future update includes calling the GPT model with JSON mode for structured responses.
 https://platform.openai.com/docs/guides/text-generation/json-mode
 
+Author: Louie Atkins-Turkish (louie@tapestryresearch.com)
 """
 
 ### TODO: potential future update to these utils: call gpt with JSON mode
@@ -67,16 +68,16 @@ encoding = tiktoken.encoding_for_model("gpt-4")
 
 class TokenBucket:
     """
-    TokenBucket is a rate-limiting mechanism using the token bucket algorithm.
+    A rate-limiting mechanism using the token bucket algorithm.
     It enforces a maximum capacity of tokens that can be consumed over a specific time period.
     Extended to handle requests limiting too.
     Raises exceptions when token usage is too high, to be caught by a backoff mechanism.
 
     Attributes:
-        max_capacity (int): The maximum number of tokens in the bucket.
-        refill_rate_per_second (float): The rate at which tokens are added to the bucket per second.
-        current_token_count (float): The current number of tokens in the bucket.
-        timestamp_of_last_refill (float): The timestamp when the bucket was last refilled.
+        - `max_capacity` (int): The maximum number of tokens in the bucket.
+        - `refill_rate_per_second` (float): The rate at which tokens are added to the bucket per second.
+        - `current_token_count` (float): The current number of tokens in the bucket.
+        - `timestamp_of_last_refill` (float): The timestamp when the bucket was last refilled.
     """
 
     def __init__(self, max_capacity: int, refill_rate_per_second: float):
@@ -116,7 +117,7 @@ class TokenBucket:
     async def consume_request(self):
         """
         Consumes a token for a request. If no tokens are available for requests, waits asynchronously until they are refilled.
-        This function should be used by instantiating the TokenBucket class as a request_bucket, passing in the max_capacity_per_minute and refill_rate_per_second.
+        This function should be used by instantiating the `TokenBucket` class as a request_bucket, passing in the max_capacity_per_minute and refill_rate_per_second.
         """
         await self.consume_tokens(1)
 

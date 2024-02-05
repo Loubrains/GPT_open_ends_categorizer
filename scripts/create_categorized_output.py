@@ -3,26 +3,28 @@ Script that generates a dataframe of categorized open-ended survey responses bas
 Exports the DataFrame to a CSV file.
 
 Steps:
-1. Load the raw response data from a specified CSV file.
-2. Clean the responses using preprocessing functions.
-3. Load the categories and codeframe (response-category pairs) from specified CSV files.
-4. Prepare a DataFrame to hold the categorized responses.
-5. Populate the DataFrame by mapping responses to categories according to the codeframe.
-6. Save the categorized data to a CSV file.
+    1. Load the raw response data from a specified CSV file.
+    2. Clean the responses using preprocessing functions.
+    3. Load the categories and codeframe (response-category pairs) from specified CSV files.
+    4. Prepare a DataFrame to hold the categorized responses.
+    5. Populate the DataFrame by mapping responses to categories according to the codeframe.
+    6. Save the categorized data to a CSV file.
 
 Input Files:
-- Open-ended response data file (`open_end_data_file_path`): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
-- Categories file (`categories_file_path`): A CSV file containing the list of categories. Expects no header.
-- Codeframe file (`codeframe_file_path`): A CSV file containing the predefined response-category pairs. Expects two columns, with headers `key` and `value`. Supports single or multiple categories per response based on the `is_multicode` flag.
+    - Open-ended response data file (`open_end_data_file_path`): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
+    - Categories file (`categories_file_path`): A CSV file containing the list of categories. Expects no header.
+    - Codeframe file (`codeframe_file_path`): A CSV file containing the predefined response-category pairs. Expects two columns, with headers `key` and `value`. Supports single or multiple categories per response based on the `is_multicode` flag.
 
 Output File:
-- Categorized data file (`categorized_data_file_path`): A CSV file where the processed and categorized data is saved.
+    - Categorized data file (`categorized_data_file_path`): A CSV file where the processed and categorized data is saved.
 
 Notes:
-- The script utilizes utility functions from `general_utils` and `dataframe_utils` modules.
-- User-defined variables such as file paths should be properly set in the `config` file before running this script.
-- The script supports both single-category and multi-category (`is_multicode`) response categorization.
-- The script terminates if exceptions are raised at any point.
+    - The script utilizes utility functions from `general_utils` and `dataframe_utils` modules.
+    - User-defined variables such as file paths should be properly set in the `config` file before running this script.
+    - The script supports both single-category and multi-category (`is_multicode`) response categorization.
+    - The script terminates if exceptions are raised at any point.
+
+Author: Louie Atkins-Turkish (louie@tapestryresearch.com)
 """
 
 import pandas as pd

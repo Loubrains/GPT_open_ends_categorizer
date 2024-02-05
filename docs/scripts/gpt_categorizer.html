@@ -27,23 +27,28 @@ Exports …" />
 <p>Script that generates a thematic codeframe for survey responses using the GPT-4 API.
 The codeframe is a dictionary of responses to categories.
 Exports the codeframe to a CSV file.</p>
-<p>Steps:
-1. Load the raw response data from a specified CSV file.
-2. Clean the responses by preprocessing the text.
-3. Extract a unique set of cleaned responses, excluding any empty strings.
-4. Load the predefined categories from a specified CSV file (excluding the 'Uncategorized' category).
-5. Use the GPT-4 API to categorize each unique response according to the predefined categories.
-6. Export the categorized responses (codeframe) to a CSV file.</p>
+<h2 id="steps">Steps</h2>
+<ol>
+<li>Load the raw response data from a specified CSV file.</li>
+<li>Clean the responses by preprocessing the text.</li>
+<li>Extract a unique set of cleaned responses, excluding any empty strings.</li>
+<li>Load the predefined categories from a specified CSV file (excluding the 'Uncategorized' category).</li>
+<li>Use the GPT-4 API to categorize each unique response according to the predefined categories.</li>
+<li>Export the categorized responses (codeframe) to a CSV file.</li>
+</ol>
 <p>Input Files:
 - Open-ended response data file (<code>open_end_data_file_path</code>): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
 - Categories file (<code>categories_file_path</code>): A CSV file containing the list of predefined categories. Expects no header.</p>
 <p>Output File:
 - Codeframe file (<code>codeframe_file_path</code>): A CSV file where the response-category pairs (codeframe) are saved.</p>
-<p>Notes:
-- Make sure OPENAI_API_KEY is set up in your system environment variables.
-- The script uses utility functions from the <code>general_utils</code> and <code>gpt_utils</code> modules.
-- User-defined variables should be properly set in the <code>config</code> file before running this script.
-- The script terminates if exceptions are raised at any point.</p>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>Make sure OPENAI_API_KEY is set up in your system environment variables.</li>
+<li>The script uses utility functions from the <code>general_utils</code> and <code>gpt_utils</code> modules.</li>
+<li>User-defined variables should be properly set in the <code>config</code> file before running this script.</li>
+<li>The script terminates if exceptions are raised at any point.</li>
+</ul>
+<p>Author: Louie Atkins-Turkish (louie@tapestryresearch.com)</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -54,25 +59,27 @@ The codeframe is a dictionary of responses to categories.
 Exports the codeframe to a CSV file.
 
 Steps:
-1. Load the raw response data from a specified CSV file.
-2. Clean the responses by preprocessing the text.
-3. Extract a unique set of cleaned responses, excluding any empty strings.
-4. Load the predefined categories from a specified CSV file (excluding the &#39;Uncategorized&#39; category).
-5. Use the GPT-4 API to categorize each unique response according to the predefined categories.
-6. Export the categorized responses (codeframe) to a CSV file.
+    1. Load the raw response data from a specified CSV file.
+    2. Clean the responses by preprocessing the text.
+    3. Extract a unique set of cleaned responses, excluding any empty strings.
+    4. Load the predefined categories from a specified CSV file (excluding the &#39;Uncategorized&#39; category).
+    5. Use the GPT-4 API to categorize each unique response according to the predefined categories.
+    6. Export the categorized responses (codeframe) to a CSV file.
 
 Input Files:
-- Open-ended response data file (`open_end_data_file_path`): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
-- Categories file (`categories_file_path`): A CSV file containing the list of predefined categories. Expects no header.
+    - Open-ended response data file (`open_end_data_file_path`): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
+    - Categories file (`categories_file_path`): A CSV file containing the list of predefined categories. Expects no header.
 
 Output File:
-- Codeframe file (`codeframe_file_path`): A CSV file where the response-category pairs (codeframe) are saved.
+    - Codeframe file (`codeframe_file_path`): A CSV file where the response-category pairs (codeframe) are saved.
 
 Notes:
-- Make sure OPENAI_API_KEY is set up in your system environment variables.
-- The script uses utility functions from the `general_utils` and `gpt_utils` modules.
-- User-defined variables should be properly set in the `config` file before running this script.
-- The script terminates if exceptions are raised at any point.
+    - Make sure OPENAI_API_KEY is set up in your system environment variables.
+    - The script uses utility functions from the `general_utils` and `gpt_utils` modules.
+    - User-defined variables should be properly set in the `config` file before running this script.
+    - The script terminates if exceptions are raised at any point.
+
+Author: Louie Atkins-Turkish (louie@tapestryresearch.com)
 &#34;&#34;&#34;
 
 from openai import AsyncOpenAI

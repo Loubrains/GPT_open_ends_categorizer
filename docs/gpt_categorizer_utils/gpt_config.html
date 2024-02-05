@@ -24,11 +24,12 @@
 <section id="section-intro">
 <p>Configuration file containing user-defined parameters for interacting with the OpenAI API, such as rate limiting.</p>
 <p>Configuration Variables:
-<code>BATCH_SIZE</code>: Number of responses to send to GPT per request.
-<code>MAX_RETRIES</code>: Number of retry attempts for GPT requests upon encountering errors.
-<code>REQUESTS_PER_MINUTE</code>: The maximum number of requests allowed per minute.
-<code>TOKENS_PER_MINUTE</code>: The maximum number of tokens allowed per minute.
-<code>CONCURRENT_TASKS</code>: The maximum number of concurrent tasks calling the GPT model.</p>
+- <code>BATCH_SIZE</code>: Number of responses to send to GPT per request.
+- <code>MAX_RETRIES</code>: Number of retry attempts for GPT requests upon encountering errors.
+- <code>REQUESTS_PER_MINUTE</code>: The maximum number of requests allowed per minute.
+- <code>TOKENS_PER_MINUTE</code>: The maximum number of tokens allowed per minute.
+- <code>CONCURRENT_TASKS</code>: The maximum number of concurrent tasks calling the GPT model.</p>
+<p>Author: Louie Atkins-Turkish (louie@tapestryresearch.com)</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -37,11 +38,13 @@
 Configuration file containing user-defined parameters for interacting with the OpenAI API, such as rate limiting.
 
 Configuration Variables:
-    `BATCH_SIZE`: Number of responses to send to GPT per request.
-    `MAX_RETRIES`: Number of retry attempts for GPT requests upon encountering errors.
-    `REQUESTS_PER_MINUTE`: The maximum number of requests allowed per minute.
-    `TOKENS_PER_MINUTE`: The maximum number of tokens allowed per minute.
-    `CONCURRENT_TASKS`: The maximum number of concurrent tasks calling the GPT model.
+    - `BATCH_SIZE`: Number of responses to send to GPT per request.
+    - `MAX_RETRIES`: Number of retry attempts for GPT requests upon encountering errors.
+    - `REQUESTS_PER_MINUTE`: The maximum number of requests allowed per minute.
+    - `TOKENS_PER_MINUTE`: The maximum number of tokens allowed per minute.
+    - `CONCURRENT_TASKS`: The maximum number of concurrent tasks calling the GPT model.
+
+Author: Louie Atkins-Turkish (louie@tapestryresearch.com)
 &#34;&#34;&#34;
 
 BATCH_SIZE = 3

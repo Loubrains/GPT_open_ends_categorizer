@@ -3,26 +3,27 @@ Script that generates a list of thematic categories based on a sample of open-en
 Exports the generated categories to a CSV file.
 
 Steps:
-1. Load raw response data from a specified CSV file.
-2. Clean the responses by preprocessing the text.
-3. Extract a unique set of responses and fetch a random sample from these unique responses.
-4. Use the GPT-4 API to generate a list of categories based on the sample of responses.
-5. Append additional default categories such as "Other", "Bad response", and "Uncategorized".
-6. Export the generated categories to a CSV file.
+    1. Load raw response data from a specified CSV file.
+    2. Clean the responses by preprocessing the text.
+    3. Extract a unique set of responses and fetch a random sample from these unique responses.
+    4. Use the GPT-4 API to generate a list of categories based on the sample of responses.
+    5. Append additional default categories such as "Other", "Bad response", and "Uncategorized".
+    6. Export the generated categories to a CSV file.
 
 Input Files:
-- Open-ended response data file (`open_end_data_file_path`): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
+    - Open-ended response data file (`open_end_data_file_path`): A CSV file containing the raw survey responses. Expects the first column to be uuids, and the following columns to be response columns.
 
 Output Files:
-- Categories file (`categories_file_path`): A CSV file where the generated categories are saved.
+    - Categories file (`categories_file_path`): A CSV file where the generated categories are saved.
 
 Notes:
-- Make sure OPENAI_API_KEY is set up in your system environment variables.
-- The script uses utility functions from the `general_utils` and `gpt_utils` modules.
-- User-defined variables should be properly set in the `config` file before running this script.
-- The script terminates if exceptions are raised at any point.
-"""
+    - Make sure OPENAI_API_KEY is set up in your system environment variables.
+    - The script uses utility functions from the `general_utils` and `gpt_utils` modules.
+    - User-defined variables should be properly set in the `config` file before running this script.
+    - The script terminates if exceptions are raised at any point.
 
+Author: Louie Atkins-Turkish (louie@tapestryresearch.com)
+"""
 
 from openai import AsyncOpenAI
 import asyncio

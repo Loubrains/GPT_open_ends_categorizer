@@ -26,9 +26,12 @@
 <p>It is designed with an output format in mind that is suitable for data analysis.
 It expects the input data to have a column for uuids, and then subsequent columns for responses.</p>
 <h2 id="functions">Functions</h2>
-<p><code><a title="gpt_categorizer_utils.dataframe_utils.construct_default_categorized_dataframe" href="#gpt_categorizer_utils.dataframe_utils.construct_default_categorized_dataframe">construct_default_categorized_dataframe()</a></code>: Initializes a DataFrame with category columns for each specified response column, setting all entries to 0 except for "Uncategorized" which are set to 1.
-<code><a title="gpt_categorizer_utils.dataframe_utils.categorize_missing_data_for_response_column" href="#gpt_categorizer_utils.dataframe_utils.categorize_missing_data_for_response_column">categorize_missing_data_for_response_column()</a></code>: Marks category columns as missing (pd.NA) for rows where the corresponding response column has missing data. Expects the category columns to be Int64 type to support pd.NA.
-<code><a title="gpt_categorizer_utils.dataframe_utils.categorize_responses_for_response_column" href="#gpt_categorizer_utils.dataframe_utils.categorize_responses_for_response_column">categorize_responses_for_response_column()</a></code>: Categorizes responses in a response column by setting the corresponding category columns to 1 and the 'Uncategorized' column to 0 for matched responses.</p>
+<ul>
+<li><code><a title="gpt_categorizer_utils.dataframe_utils.construct_default_categorized_dataframe" href="#gpt_categorizer_utils.dataframe_utils.construct_default_categorized_dataframe">construct_default_categorized_dataframe()</a></code>: Initializes a DataFrame with category columns for each specified response column, setting all entries to 0 except for "Uncategorized" which are set to 1.</li>
+<li><code><a title="gpt_categorizer_utils.dataframe_utils.categorize_missing_data_for_response_column" href="#gpt_categorizer_utils.dataframe_utils.categorize_missing_data_for_response_column">categorize_missing_data_for_response_column()</a></code>: Marks category columns as missing (pd.NA) for rows where the corresponding response column has missing data. Expects the category columns to be Int64 type to support pd.NA.</li>
+<li><code><a title="gpt_categorizer_utils.dataframe_utils.categorize_responses_for_response_column" href="#gpt_categorizer_utils.dataframe_utils.categorize_responses_for_response_column">categorize_responses_for_response_column()</a></code>: Categorizes responses in a response column by setting the corresponding category columns to 1 and the 'Uncategorized' column to 0 for matched responses.</li>
+</ul>
+<p>Author: Louie Atkins-Turkish (louie@tapestryresearch.com)</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -40,9 +43,11 @@ It is designed with an output format in mind that is suitable for data analysis.
 It expects the input data to have a column for uuids, and then subsequent columns for responses.
 
 Functions:
-    `construct_default_categorized_dataframe`: Initializes a DataFrame with category columns for each specified response column, setting all entries to 0 except for &#34;Uncategorized&#34; which are set to 1.
-    `categorize_missing_data_for_response_column`: Marks category columns as missing (pd.NA) for rows where the corresponding response column has missing data. Expects the category columns to be Int64 type to support pd.NA.
-    `categorize_responses_for_response_column`: Categorizes responses in a response column by setting the corresponding category columns to 1 and the &#39;Uncategorized&#39; column to 0 for matched responses.
+    - `construct_default_categorized_dataframe`: Initializes a DataFrame with category columns for each specified response column, setting all entries to 0 except for &#34;Uncategorized&#34; which are set to 1.
+    - `categorize_missing_data_for_response_column`: Marks category columns as missing (pd.NA) for rows where the corresponding response column has missing data. Expects the category columns to be Int64 type to support pd.NA.
+    - `categorize_responses_for_response_column`: Categorizes responses in a response column by setting the corresponding category columns to 1 and the &#39;Uncategorized&#39; column to 0 for matched responses.
+    
+Author: Louie Atkins-Turkish (louie@tapestryresearch.com)
 &#34;&#34;&#34;
 
 import pandas as pd

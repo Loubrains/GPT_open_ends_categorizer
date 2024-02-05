@@ -24,13 +24,16 @@
 <section id="section-intro">
 <p>Utilities for handling and processing text data.</p>
 <h2 id="functions">Functions</h2>
-<p><code><a title="gpt_categorizer_utils.general_utils.preprocess_text" href="#gpt_categorizer_utils.general_utils.preprocess_text">preprocess_text()</a></code>: Preprocesses input text by converting to lowercase, normalizing whitespace, and removing special characters.
-<code><a title="gpt_categorizer_utils.general_utils.get_random_sample_from_series" href="#gpt_categorizer_utils.general_utils.get_random_sample_from_series">get_random_sample_from_series()</a></code>: Retrieves a random sample of specified size from a pandas Series.
-<code><a title="gpt_categorizer_utils.general_utils.create_batches" href="#gpt_categorizer_utils.general_utils.create_batches">create_batches()</a></code>: Yields consecutive batches of data from a list.
-<code><a title="gpt_categorizer_utils.general_utils.load_csv_to_dict" href="#gpt_categorizer_utils.general_utils.load_csv_to_dict">load_csv_to_dict()</a></code>: Loads a CSV file with 'key' and 'value' columns into a dictionary.
-<code><a title="gpt_categorizer_utils.general_utils.load_csv_to_dict_of_lists" href="#gpt_categorizer_utils.general_utils.load_csv_to_dict_of_lists">load_csv_to_dict_of_lists()</a></code>: Loads a CSV file with 'key' and 'value' columns into a dictionary, where the 'value' column contains lists in string representation.
-<code><a title="gpt_categorizer_utils.general_utils.export_dataframe_to_csv" href="#gpt_categorizer_utils.general_utils.export_dataframe_to_csv">export_dataframe_to_csv()</a></code>: Exports a pandas DataFrame to a CSV file.
-<code><a title="gpt_categorizer_utils.general_utils.export_dict_to_csv" href="#gpt_categorizer_utils.general_utils.export_dict_to_csv">export_dict_to_csv()</a></code>: Exports a dictionary to a CSV file with 'key' and 'value' columns.</p>
+<ul>
+<li><code><a title="gpt_categorizer_utils.general_utils.preprocess_text" href="#gpt_categorizer_utils.general_utils.preprocess_text">preprocess_text()</a></code>: Preprocesses input text by converting to lowercase, normalizing whitespace, and removing special characters.</li>
+<li><code><a title="gpt_categorizer_utils.general_utils.get_random_sample_from_series" href="#gpt_categorizer_utils.general_utils.get_random_sample_from_series">get_random_sample_from_series()</a></code>: Retrieves a random sample of specified size from a pandas Series.</li>
+<li><code><a title="gpt_categorizer_utils.general_utils.create_batches" href="#gpt_categorizer_utils.general_utils.create_batches">create_batches()</a></code>: Yields consecutive batches of data from a list.</li>
+<li><code><a title="gpt_categorizer_utils.general_utils.load_csv_to_dict" href="#gpt_categorizer_utils.general_utils.load_csv_to_dict">load_csv_to_dict()</a></code>: Loads a CSV file with 'key' and 'value' columns into a dictionary.</li>
+<li><code><a title="gpt_categorizer_utils.general_utils.load_csv_to_dict_of_lists" href="#gpt_categorizer_utils.general_utils.load_csv_to_dict_of_lists">load_csv_to_dict_of_lists()</a></code>: Loads a CSV file with 'key' and 'value' columns into a dictionary, where the 'value' column contains lists in string representation.</li>
+<li><code><a title="gpt_categorizer_utils.general_utils.export_dataframe_to_csv" href="#gpt_categorizer_utils.general_utils.export_dataframe_to_csv">export_dataframe_to_csv()</a></code>: Exports a pandas DataFrame to a CSV file.</li>
+<li><code><a title="gpt_categorizer_utils.general_utils.export_dict_to_csv" href="#gpt_categorizer_utils.general_utils.export_dict_to_csv">export_dict_to_csv()</a></code>: Exports a dictionary to a CSV file with 'key' and 'value' columns.</li>
+</ul>
+<p>Author: Louie Atkins-Turkish (louie@tapestryresearch.com)</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -39,13 +42,15 @@
 Utilities for handling and processing text data.
 
 Functions:
-    `preprocess_text`: Preprocesses input text by converting to lowercase, normalizing whitespace, and removing special characters.
-    `get_random_sample_from_series`: Retrieves a random sample of specified size from a pandas Series.
-    `create_batches`: Yields consecutive batches of data from a list.
-    `load_csv_to_dict`: Loads a CSV file with &#39;key&#39; and &#39;value&#39; columns into a dictionary.
-    `load_csv_to_dict_of_lists`: Loads a CSV file with &#39;key&#39; and &#39;value&#39; columns into a dictionary, where the &#39;value&#39; column contains lists in string representation.
-    `export_dataframe_to_csv`: Exports a pandas DataFrame to a CSV file.
-    `export_dict_to_csv`: Exports a dictionary to a CSV file with &#39;key&#39; and &#39;value&#39; columns.
+    - `preprocess_text`: Preprocesses input text by converting to lowercase, normalizing whitespace, and removing special characters.
+    - `get_random_sample_from_series`: Retrieves a random sample of specified size from a pandas Series.
+    - `create_batches`: Yields consecutive batches of data from a list.
+    - `load_csv_to_dict`: Loads a CSV file with &#39;key&#39; and &#39;value&#39; columns into a dictionary.
+    - `load_csv_to_dict_of_lists`: Loads a CSV file with &#39;key&#39; and &#39;value&#39; columns into a dictionary, where the &#39;value&#39; column contains lists in string representation.
+    - `export_dataframe_to_csv`: Exports a pandas DataFrame to a CSV file.
+    - `export_dict_to_csv`: Exports a dictionary to a CSV file with &#39;key&#39; and &#39;value&#39; columns.
+    
+Author: Louie Atkins-Turkish (louie@tapestryresearch.com)
 &#34;&#34;&#34;
 
 from pathlib import Path

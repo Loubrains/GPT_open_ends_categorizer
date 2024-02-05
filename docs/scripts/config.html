@@ -27,19 +27,22 @@
 <p>It includes file paths for loading and saving data, the questionnaire question, categorization options, sample sizes, and other settings.</p>
 <p>Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in the config file <code><a title="gpt_categorizer_utils.gpt_config" href="../gpt_categorizer_utils/gpt_config.html">gpt_categorizer_utils.gpt_config</a></code>.</p>
 <p>Configuration Variables:
-<code>OPEN_END_DATA_FILE_PATH_LOAD</code>: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
-<code>CATEGORIES_FILE_PATH_SAVE</code>: File path for saving the GPT generated categories to CSV.
-<code>CATEGORIES_FILE_PATH_LOAD</code>: File path for loading a list of categories from CSV.
-<code>CODEFRAME_FILE_PATH_SAVE</code>: File path for saving the GPT generated codeframe to CSV.
-<code>CODEFRAME_FILE_PATH_LOAD</code>: File path for loading a codeframe from CSV.
-<code>CATEGORIZED_DATA_FILE_PATH_SAVE</code>: File path for saving the final categorized data to CSV.
-<code>QUESTIONNAIRE_QUESTION</code>: Text of the questionnaire question associated with the open-ended responses.
+- <code>OPEN_END_DATA_FILE_PATH_LOAD</code>: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
+- <code>CATEGORIES_FILE_PATH_SAVE</code>: File path for saving the GPT generated categories to CSV.
+- <code>CATEGORIES_FILE_PATH_LOAD</code>: File path for loading a list of categories from CSV.
+- <code>CODEFRAME_FILE_PATH_SAVE</code>: File path for saving the GPT generated codeframe to CSV.
+- <code>CODEFRAME_FILE_PATH_LOAD</code>: File path for loading a codeframe from CSV.
+- <code>CATEGORIZED_DATA_FILE_PATH_SAVE</code>: File path for saving the final categorized data to CSV.
+- <code>QUESTIONNAIRE_QUESTION</code>: Text of the questionnaire question associated with the open-ended responses.
 <br>
-<code>IS_MULTICODE</code>: Boolean flag indicating whether each response can belong to multiple categories.
-<code>NUMBER_OF_CATEGORIES</code>: Number of categories to generate.
-<code>RESPONSES_SAMPLE_SIZE</code>: Number of responses sent to GPT to generate the initial list of categories.</p>
-<p>Note:
-- File paths expect foreward slashes.</p>
+- <code>IS_MULTICODE</code>: Boolean flag indicating whether each response can belong to multiple categories.
+- <code>NUMBER_OF_CATEGORIES</code>: Number of categories to generate.
+- <code>RESPONSES_SAMPLE_SIZE</code>: Number of responses sent to GPT to generate the initial list of categories.</p>
+<h2 id="note">Note</h2>
+<ul>
+<li>File paths expect foreward slashes.</li>
+</ul>
+<p>Author: Louie Atkins-Turkish (louie@tapestryresearch.com)</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -54,33 +57,45 @@ It includes file paths for loading and saving data, the questionnaire question, 
 Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in the config file `gpt_categorizer_utils.gpt_config`.
 
 Configuration Variables:
-    `OPEN_END_DATA_FILE_PATH_LOAD`: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
-    `CATEGORIES_FILE_PATH_SAVE`: File path for saving the GPT generated categories to CSV.
-    `CATEGORIES_FILE_PATH_LOAD`: File path for loading a list of categories from CSV.
-    `CODEFRAME_FILE_PATH_SAVE`: File path for saving the GPT generated codeframe to CSV.
-    `CODEFRAME_FILE_PATH_LOAD`: File path for loading a codeframe from CSV.
-    `CATEGORIZED_DATA_FILE_PATH_SAVE`: File path for saving the final categorized data to CSV.
-    `QUESTIONNAIRE_QUESTION`: Text of the questionnaire question associated with the open-ended responses.    
-    `IS_MULTICODE`: Boolean flag indicating whether each response can belong to multiple categories.
-    `NUMBER_OF_CATEGORIES`: Number of categories to generate.
-    `RESPONSES_SAMPLE_SIZE`: Number of responses sent to GPT to generate the initial list of categories.
+    - `OPEN_END_DATA_FILE_PATH_LOAD`: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
+    - `CATEGORIES_FILE_PATH_SAVE`: File path for saving the GPT generated categories to CSV.
+    - `CATEGORIES_FILE_PATH_LOAD`: File path for loading a list of categories from CSV.
+    - `CODEFRAME_FILE_PATH_SAVE`: File path for saving the GPT generated codeframe to CSV.
+    - `CODEFRAME_FILE_PATH_LOAD`: File path for loading a codeframe from CSV.
+    - `CATEGORIZED_DATA_FILE_PATH_SAVE`: File path for saving the final categorized data to CSV.
+    - `QUESTIONNAIRE_QUESTION`: Text of the questionnaire question associated with the open-ended responses.    
+    - `IS_MULTICODE`: Boolean flag indicating whether each response can belong to multiple categories.
+    - `NUMBER_OF_CATEGORIES`: Number of categories to generate.
+    - `RESPONSES_SAMPLE_SIZE`: Number of responses sent to GPT to generate the initial list of categories.
 
 Note:
-- File paths expect foreward slashes.
+    - File paths expect foreward slashes.
+
+Author: Louie Atkins-Turkish (louie@tapestryresearch.com)
 &#34;&#34;&#34;
 
 from pathlib import Path
 
 # File paths (expects /foreward/slashes/ and file extension .csv)
-OPEN_END_DATA_FILE_PATH_LOAD = Path(&#34;path/to/your/data.csv&#34;)
-CATEGORIES_FILE_PATH_SAVE = Path(&#34;path/to/save/categories.csv&#34;)
-CATEGORIES_FILE_PATH_LOAD = Path(&#34;path/to/load/categories.csv&#34;)
-CODEFRAME_FILE_PATH_SAVE = Path(&#34;path/to/save/codeframe.csv&#34;)
-CODEFRAME_FILE_PATH_LOAD = Path(&#34;path/to/load/codeframe.csv&#34;)
-CATEGORIZED_DATA_FILE_PATH_SAVE = Path(&#34;path/to/save/categorized/data.csv&#34;)
+OPEN_END_DATA_FILE_PATH_LOAD = Path(
+    &#34;C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_open_ends - confidential.csv&#34;
+)
+CATEGORIES_FILE_PATH_SAVE = Path(&#34;&#34;)
+CATEGORIES_FILE_PATH_LOAD = Path(
+    &#34;C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_categories_to_use - confidential.csv&#34;
+)
+CODEFRAME_FILE_PATH_SAVE = Path(
+    &#34;C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_code_frame_test_2 - confidential.csv&#34;
+)
+CODEFRAME_FILE_PATH_LOAD = Path(
+    &#34;C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_code_frame_test_2 - confidential.csv&#34;
+)
+CATEGORIZED_DATA_FILE_PATH_SAVE = Path(
+    &#34;C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_categorized_data_test_2 - confidential.csv&#34;
+)
 
 # Global settings
-QUESTIONNAIRE_QUESTION = &#34;your_questionnaire_question?&#34;
+QUESTIONNAIRE_QUESTION = &#34;What best describes the type of media content it is that you consumed?&#34;
 IS_MULTICODE = False
 
 # Category generation settings
