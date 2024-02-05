@@ -5,7 +5,7 @@ Configuration file containing user-defined parameters used in the open-end respo
 
 It includes file paths for loading and saving data, the questionnaire question, categorization options, sample sizes, and other settings.
 
-Settings for interacting with the OpenAI API (for example, parameters for handling rate limits) can be found in the config file `gpt_categorizer_utils.gpt_config`.
+Settings for interacting with the OpenAI API (e.g. parameters for handling rate limits) can be found in the config file `gpt_categorizer_utils.gpt_config`.
 
 Configuration Variables:
     - `OPEN_END_DATA_FILE_PATH_LOAD`: File path to the CSV containing open-ended responses. Expects the first column to contain uuids, and subsequent columns to contain responses. Expects column headers.
@@ -28,25 +28,15 @@ Author: Louie Atkins-Turkish (louie@tapestryresearch.com)
 from pathlib import Path
 
 # File paths (expects /foreward/slashes/ and file extension .csv)
-OPEN_END_DATA_FILE_PATH_LOAD = Path(
-    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_open_ends - confidential.csv"
-)
-CATEGORIES_FILE_PATH_SAVE = Path("")
-CATEGORIES_FILE_PATH_LOAD = Path(
-    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_categories_to_use - confidential.csv"
-)
-CODEFRAME_FILE_PATH_SAVE = Path(
-    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_code_frame_test_2 - confidential.csv"
-)
-CODEFRAME_FILE_PATH_LOAD = Path(
-    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_code_frame_test_2 - confidential.csv"
-)
-CATEGORIZED_DATA_FILE_PATH_SAVE = Path(
-    "C:/Users/LouieAtkins-Turkish/Tapestry Research/BBC - BBC Studios - Need States/Data/AI text coding/C2a/C2a_categorized_data_test_2 - confidential.csv"
-)
+OPEN_END_DATA_FILE_PATH_LOAD = Path("path/to/your/data.csv")
+CATEGORIES_FILE_PATH_SAVE = Path("path/to/save/categories.csv")
+CATEGORIES_FILE_PATH_LOAD = Path("path/to/load/categories.csv")
+CODEFRAME_FILE_PATH_SAVE = Path("path/to/save/codeframe.csv")
+CODEFRAME_FILE_PATH_LOAD = Path("path/to/load/codeframe.csv")
+CATEGORIZED_DATA_FILE_PATH_SAVE = Path("path/to/save/categorized/data.csv")
 
 # Global settings
-QUESTIONNAIRE_QUESTION = "What best describes the type of media content it is that you consumed?"
+QUESTIONNAIRE_QUESTION = "your_questionnaire_question?"
 IS_MULTICODE = False
 
 # Category generation settings

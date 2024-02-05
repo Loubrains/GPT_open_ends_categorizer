@@ -50,14 +50,14 @@ def obfuscate_sensitive_data(content: str) -> str:
     path_pattern = r'Path\(\s*"[\s\S]*?"\s*\)'
 
     replacements = {
-        rf"open_end_data_file_path_load = {path_pattern}": 'open_end_data_file_path_load = Path("path/to/your/data.csv")',
-        rf"categories_file_path_save = {path_pattern}": 'categories_file_path_save = Path("path/to/save/categories.csv")',
-        rf"categories_file_path_load = {path_pattern}": 'categories_file_path_load = Path("path/to/load/categories.csv")',
-        rf"codeframe_file_path_save = {path_pattern}": 'codeframe_file_path_save = Path("path/to/save/codeframe.csv")',
-        rf"codeframe_file_path_load = {path_pattern}": 'codeframe_file_path_load = Path("path/to/load/codeframe.csv")',
-        rf"categorized_data_file_path_save = {path_pattern}": 'categorized_data_file_path_save = Path("path/to/save/categorized/data.csv")',
+        rf"OPEN_END_DATA_FILE_PATH_LOAD = {path_pattern}": 'OPEN_END_DATA_FILE_PATH_LOAD = Path("path/to/your/data.csv")',
+        rf"CATEGORIES_FILE_PATH_SAVE = {path_pattern}": 'CATEGORIES_FILE_PATH_SAVE = Path("path/to/save/categories.csv")',
+        rf"CATEGORIES_FILE_PATH_LOAD = {path_pattern}": 'CATEGORIES_FILE_PATH_LOAD = Path("path/to/load/categories.csv")',
+        rf"CODEFRAME_FILE_PATH_SAVE = {path_pattern}": 'CODEFRAME_FILE_PATH_SAVE = Path("path/to/save/codeframe.csv")',
+        rf"CODEFRAME_FILE_PATH_LOAD = {path_pattern}": 'CODEFRAME_FILE_PATH_LOAD = Path("path/to/load/codeframe.csv")',
+        rf"CATEGORIZED_DATA_FILE_PATH_SAVE = {path_pattern}": 'CATEGORIZED_DATA_FILE_PATH_SAVE = Path("path/to/save/categorized/data.csv")',
         # Match any text in question
-        rf'questionnaire_question = ".*?"': 'questionnaire_question = "your_questionnaire_question?"',
+        rf'QUESTIONNAIRE_QUESTION = ".*?"': 'QUESTIONNAIRE_QUESTION = "your_questionnaire_question?"',
     }
 
     for pattern, replacement in replacements.items():
