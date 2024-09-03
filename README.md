@@ -124,6 +124,5 @@ Any new developments you would like to be obfuscated, make sure to include that 
 # Author
 
 Louie Atkins-Turkish  
-Data Analyst at Tapestry Research  
-Email: louie@tapestryresearch.com  
+Email: louie.atk@gmail.com  
 Created on: December 26, 2023
